@@ -27,14 +27,38 @@ Read from the root `.env`. Real environment variables win over the file.
 
 Turns a Crunchyroll episode list into a readable text file. Standard library only, no `.env` needed.
 
-1. Open the season on Crunchyroll with DevTools on the **Network** tab.
-2. Find the request to `.../seasons/<season_id>/episodes` and copy the response.
-3. Paste it into `tools/public/crunchyroll-importer/data/input.json`.
-4. Run:
+1. Get the season's episode list into `data/input.json`, see [Getting input.json](#getting-inputjson) below.
+2. Run:
 
    ```bash
    python tools/public/crunchyroll-importer/format_episodes.py
    ```
+
+#### Getting input.json
+
+Crunchyroll's site loads each season's episodes from its own API, and that response is exactly what the formatter reads. Grab it from the browser:
+
+1. Open the anime's page on Crunchyroll, logged in. If it has more than one season, pick the one you want from the season dropdown.
+2. Open DevTools (`F12`) and go to the **Network** tab.
+3. Paste this into the filter box at the top left of the Network tab:
+
+   ```
+   https://www.crunchyroll.com/content/v2/cms/seasons
+   ```
+
+4. Refresh the page (`F5`). One request shows up, named `episodes?preferred_audio_language=...`:
+
+   ![Network tab filtered to the season episodes request](assets/network-tab.png)
+
+5. Click it, then open the **Response** tab on the right.
+6. Click anywhere inside the response text, press `Ctrl + A` to select all of it, then `Ctrl + C`.
+7. Paste it into `tools/public/crunchyroll-importer/data/input.json` (create the file if it's not there) and save.
+
+The file should start with `{"data":[` (or `{` followed by `"data": [` if DevTools pretty printed it). If it starts with anything else, the wrong request or the wrong tab got copied.
+
+- More than one `episodes?...` row usually means the page loaded a second season too. The `Request URL` under **Headers** has the season id (`/seasons/GRVDN2M0R/episodes`), and the right one is whichever matches the season picked in step 1.
+- Use **Response**, not **Preview**. Preview shows a collapsible tree and `Ctrl + A` there doesn't copy the JSON.
+- The episode titles come back in the language the Crunchyroll account is set to, so keep it on English.
 
 Output lands in `tools/public/crunchyroll-importer/data/output.txt`:
 
