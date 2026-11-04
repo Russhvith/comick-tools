@@ -40,6 +40,8 @@ cp .env.example .env
 | Variable | Required | Notes |
 | --- | --- | --- |
 | `COMICK_SESSION_TOKEN` | yes | Session cookie value. See [auth.md](auth.md). |
+| `COMICK_UPLOADS_PER_SECOND` | no | Cap on ComicK API requests per second. Defaults to 5. |
+| `COMICK_API_BASE` | no | ComicK API origin. Defaults to `https://api.comick.dev`, only change it for testing. |
 
 `.env` is gitignored. Only `.env.example` gets committed, so any new variable goes in there too, empty, with a short comment.
 

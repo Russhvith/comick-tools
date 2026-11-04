@@ -1,24 +1,25 @@
 # crunchyroll-importer
 
-Pulls a Crunchyroll list into ComicK.
+Pulls a Crunchyroll season into ComicK in two steps:
+
+1. `format_episodes.py` turns Crunchyroll's episode list into `data/output.txt` plus preview images.
+2. `upload_episodes.py` sends that file to an anime on ComicK.
+
+Between the two, open `output.txt` and fix anything that needs a human, mostly the `(main)` / `(recap)` / `(filler)` tags.
 
 ## Setup
 
-Do the repo wide [setup](../../../docs/setup.md) first, then:
-
-```bash
-pip install -r tools/public/crunchyroll-importer/requirements.txt
-```
+Do the repo wide [setup](../../../docs/setup.md) first. Both scripts only use the standard library, so there's nothing to `pip install`.
 
 ## Config
 
-Read from the root `.env`:
+Read from the root `.env`. Real environment variables win over the file.
 
-| Variable | Notes |
-| --- | --- |
-| `COMICK_SESSION_TOKEN` | See [auth.md](../../../docs/auth.md). |
-
-Anything Crunchyroll specific gets added here and to `.env.example` once the tool needs it.
+| Variable | Default | Notes |
+| --- | --- | --- |
+| `COMICK_SESSION_TOKEN` | none, required for uploads | See [auth.md](../../../docs/auth.md). |
+| `COMICK_UPLOADS_PER_SECOND` | `5` | Cap on requests to the ComicK API. Decimals work, e.g. `0.5`. |
+| `COMICK_API_BASE` | `https://api.comick.dev` | Only worth changing for testing against a local server. |
 
 ## Usage
 
@@ -43,8 +44,11 @@ English Title: Demons and Strategies
 Duration: 24:30
 Aired: 2024-04-05
 Description: Rimuru has returned to Jura after having attended Walpurgis...
-Preview: https://www.crunchyroll.com/imgsrv/display/thumbnail/1920x1080/...
+Preview: images/1.png
+Source: https://www.crunchyroll.com/watch/G14U411V1/demons-and-strategies
 ```
+
+`Source` is the Crunchyroll watch page. The uploader sends it to reviewers when the anime is in request mode.
 
 Flags:
 
@@ -110,6 +114,46 @@ Crunchyroll often numbers later seasons straight on from the last one, so Slime 
 
 Pass `--keep-numbers` to skip all of this and print Crunchyroll's numbers as is.
 
+### upload_episodes.py
+
+Sends `data/output.txt` to an anime on ComicK. The slug is required:
+
+```bash
+python tools/public/crunchyroll-importer/upload_episodes.py --slug that-time-i-got-reincarnated-as-a-slime
+```
+
+| Flag | Default |
+| --- | --- |
+| `--slug` | required, the anime's slug on ComicK |
+| `-i`, `--input` | `data/output.txt` |
+| `--dry-run` | off. Checks everything and shows what would go up, sends nothing |
+| `-y`, `--yes` | off, so it asks before uploading |
+| `--note` | empty. Moderator note, only sent in request mode |
+
+What a run does, in order:
+
+1. **Checks the cookie.** No `COMICK_SESSION_TOKEN` in `.env` and it stops straight away. The cookie goes on every ComicK API request, never on the image bucket.
+2. **Validates output.txt** against the same rules as the site form: episode number 0 to 9999 with one decimal at most, type `main` / `recap` / `filler`, an English title, a real `yyyy-mm-dd` date, a duration between 1 second and 24 hours, no links in the description, titles under 255 characters, one title per language. Every problem is listed at once with its line number and nothing gets uploaded until they're fixed.
+3. **Checks permission** for the slug. Direct mode adds episodes straight away. Request mode sends them to community review, where they stay private until they get 2 net votes. A rejected cookie or a slug the account can't edit stops the run.
+4. **Reads the episodes ComicK already has** and skips any number that's already there.
+5. **Asks for confirmation**, then uploads: each preview goes through `/presign`, gets PUT to the bucket and is referenced through `tmp2.comick.pictures`, then the episode is submitted.
+
+At the end it lists anything that failed, anything not sent, and the episodes that already existed:
+
+```
+  Already on ComicK with the same date (1)
+    › Episodes  0.5
+
+  Already on ComicK but different (1), edit these on the website
+    › Episode 1 aired  file: 2024-04-05   comick: 2024-04-06
+    › Episode 1 type   file: main   comick: filler
+    The uploader never overwrites existing episodes.
+```
+
+**Rate limits.** Requests are spaced to stay under `COMICK_UPLOADS_PER_SECOND`. The API also sends `x-ratelimit-remaining` and `x-ratelimit-reset`. When remaining hits zero everything pauses until the reset, and a 429 gets one retry once the reset window is over. If ComicK answers with a limit message (a daily request cap, say) the run stops, says so, and lists what wasn't sent so it can be picked up later. Rerunning is safe since anything that made it is now an existing episode.
+
+**Titles.** `English Title` is required. `Japanese Title` and a `Romaji Title` line (add it by hand) fill the `ja` and `ja-ro` boxes. Other languages the formatter writes, like `German Title`, go in as extra rows.
+
 ## Notes
 
 - Episode numbers come from the `episode` string, so recaps like `48.5` keep their decimal. `episode_number` drops it.
@@ -118,3 +162,5 @@ Pass `--keep-numbers` to skip all of this and print Crunchyroll's numbers as is.
 - Crunchyroll returns the title in one language only, whichever the account locale is set to. With a non English locale the `English Title` line is left blank and the title shows up under that language instead, e.g. `Japanese Title:`. Switch the account to English to get English titles.
 - Preview is the widest thumbnail available, normally 1920x1080.
 - Everything in `data/` is gitignored apart from `.gitkeep`.
+- The endpoint the uploader reads existing episodes from (`EXISTING_EPISODES_PATH` at the top of `upload_episodes.py`) isn't in the API brief and is a best guess. If it's wrong the uploader stops before sending anything.
+- ComicK language codes for extra title rows (`es-la`, `pt-br`, `zh-hk` and so on) are also guessed from the main site's chapter languages. They live in `TITLE_LANGS` in the same file.

@@ -1,2 +1,1 @@
-python-dotenv
-requests
+# Standard library only. Kept so every tool has the same layout.
