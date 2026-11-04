@@ -2,7 +2,7 @@
 
 ## Requirements
 
-- Python 3.11 or newer
+- Python 3.8 or newer. 3.8 is the last release that installs on Windows 7, so every tool stays compatible with it.
 - git
 
 ## Virtual environment

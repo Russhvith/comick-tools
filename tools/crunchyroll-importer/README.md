@@ -62,7 +62,7 @@ Every episode needs `episode`, `title`, `duration_ms`, `episode_air_date`, `desc
     › Episode 49    description
 ```
 
-Terminal colour turns off when output is piped or `NO_COLOR` is set. A 5000 episode file runs in roughly 40 ms.
+Terminal colour turns off when output is piped or `NO_COLOR` is set. On Windows 7 and 8 the output is plain ASCII (`+`, `x`, `>`) since those consoles can't show colour or the symbols. A 5000 episode file runs in roughly 40 ms.
 
 ### Renumbering
 

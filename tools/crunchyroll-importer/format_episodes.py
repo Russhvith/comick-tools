@@ -40,15 +40,25 @@ LOCALE_NAMES = {
 }
 
 
+# Windows 7 and 8 consoles can't do ANSI colour at all, and their default
+# raster font has no glyphs for the tick and cross, so both get skipped
+# there rather than printing boxes and escape junk.
+LEGACY_WINDOWS = os.name == "nt" and sys.getwindowsversion().major < 10
+
+
 def enable_windows_vt(stream):
-    # Older Windows consoles print escape codes as garbage until VT
-    # processing is switched on for the handle. Returns False if that
-    # isn't possible, so we fall back to plain text.
+    # Windows 10 consoles still need VT processing switched on per handle
+    # before escape codes render. Returns False if that isn't possible, so
+    # we fall back to plain text.
     import ctypes
+    from ctypes import wintypes
 
     kernel32 = ctypes.windll.kernel32
+    # Without an explicit restype the handle comes back as a 32 bit int and
+    # gets truncated on 64 bit Python.
+    kernel32.GetStdHandle.restype = wintypes.HANDLE
     handle = kernel32.GetStdHandle(-12 if stream is sys.stderr else -11)
-    mode = ctypes.c_uint32()
+    mode = wintypes.DWORD()
     if not kernel32.GetConsoleMode(handle, ctypes.byref(mode)):
         return False
     return bool(kernel32.SetConsoleMode(handle, mode.value | 0x0004))
@@ -57,22 +67,24 @@ def enable_windows_vt(stream):
 class Console:
     """Just enough styling for a nice terminal, without pulling in rich.
 
-    Colour turns off when output is piped or NO_COLOR is set, and the
-    symbols fall back to ASCII when the stream can't encode them (old
-    Windows code pages mostly).
+    Colour turns off when output is piped, NO_COLOR is set or the console
+    is older than Windows 10. Symbols fall back to ASCII on those old
+    consoles and whenever the stream can't encode them.
     """
 
     def __init__(self, stream):
         self.stream = stream
-        self.color = stream.isatty() and "NO_COLOR" not in os.environ
+        self.color = stream.isatty() and "NO_COLOR" not in os.environ and not LEGACY_WINDOWS
         if self.color and os.name == "nt":
             self.color = enable_windows_vt(stream)
 
-        try:
-            "✓✗›─".encode(stream.encoding or "ascii")
-            self.ok, self.bad, self.arrow, self.rule = "✓", "✗", "›", "─"
-        except (UnicodeEncodeError, LookupError):
-            self.ok, self.bad, self.arrow, self.rule = "+", "x", ">", "-"
+        fancy = not LEGACY_WINDOWS
+        if fancy:
+            try:
+                "✓✗›".encode(stream.encoding or "ascii")
+            except (UnicodeEncodeError, LookupError):
+                fancy = False
+        self.ok, self.bad, self.arrow = ("✓", "✗", "›") if fancy else ("+", "x", ">")
 
     def paint(self, text, code):
         return f"\033[{code}m{text}\033[0m" if self.color else text
@@ -146,18 +158,21 @@ def format_duration(ms):
 
 def format_aired(stamp):
     # Air dates always come through as midnight UTC, so the date alone is
-    # the useful part.
+    # the useful part. Parsing just the date also sidesteps fromisoformat,
+    # which on Python 3.8 (last one for Windows 7) rejects the trailing Z.
     try:
-        return datetime.fromisoformat(stamp.replace("Z", "+00:00")).date().isoformat()
-    except (ValueError, AttributeError):
+        return datetime.strptime(stamp[:10], "%Y-%m-%d").date().isoformat()
+    except (ValueError, TypeError):
         return None
 
 
 def to_number(value):
     try:
-        return Decimal(str(value))
+        n = Decimal(str(value))
     except InvalidOperation:
         return None
+    # "NaN" and "Infinity" parse fine as Decimal but blow up on comparison.
+    return n if n.is_finite() else None
 
 
 def show_number(n):
