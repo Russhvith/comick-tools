@@ -31,6 +31,11 @@ DEFAULT_API = "https://api.comick.dev"
 DEFAULT_PER_SECOND = 5
 TEMP_IMAGE_HOST = "tmp2.comick.pictures"
 USER_AGENT = "comick-tools/crunchyroll-importer"
+
+# Goes on every review mode request so moderators know where a batch came
+# from. Anything passed with --note gets added after it.
+MODERATOR_NOTE = "Auto Uploaded using ComicK Crunchyroll Importer. https://github.com/Russhvith/comick-tools"
+MAX_NOTE = 2000
 TIMEOUT = 30
 
 # Biggest page the chapters endpoint is asked for when listing episodes
@@ -86,7 +91,11 @@ def parse_args():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--slug", required=True, help="the anime's slug on ComicK")
     parser.add_argument("-i", "--input", type=Path, default=DATA_DIR / "output.txt")
-    parser.add_argument("--note", default="", help="moderator note, only sent in request mode")
+    parser.add_argument(
+        "--note",
+        default="",
+        help="extra moderator note added after the importer credit, only sent in request mode",
+    )
     parser.add_argument("--dry-run", action="store_true", help="check everything but upload nothing")
     parser.add_argument("-y", "--yes", action="store_true", help="skip the confirmation prompt")
     return parser.parse_args()
@@ -551,6 +560,14 @@ def main():
         sys.exit(1)
     base = env.get("COMICK_API_BASE") or DEFAULT_API
 
+    note = " ".join(part for part in (MODERATOR_NOTE, args.note.strip()) if part)
+    if len(note) > MAX_NOTE:
+        err.fail("Moderator note is too long", [
+            ("Limit", f"{MAX_NOTE} characters including the importer credit"),
+            ("Yours", f"{len(note)} characters"),
+        ])
+        sys.exit(1)
+
     try:
         text = args.input.read_text(encoding="utf-8")
     except FileNotFoundError:
@@ -650,7 +667,7 @@ def main():
                 return job, None, "skipped", 0
             t = time.perf_counter()
             try:
-                size = upload_one(api, args.slug, mode, args.note, job)
+                size = upload_one(api, args.slug, mode, note, job)
                 return job, size, None, time.perf_counter() - t
             except ApiError as e:
                 if e.is_auth or e.is_limit:

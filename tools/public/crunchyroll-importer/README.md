@@ -128,7 +128,7 @@ python tools/public/crunchyroll-importer/upload_episodes.py --slug that-time-i-g
 | `-i`, `--input` | `data/output.txt` |
 | `--dry-run` | off. Checks everything and shows what would go up, sends nothing |
 | `-y`, `--yes` | off, so it asks before uploading |
-| `--note` | empty. Moderator note, only sent in request mode |
+| `--note` | empty. Extra moderator note, added after the importer credit |
 
 What a run does, in order:
 
@@ -161,6 +161,8 @@ At the end it lists anything that failed, anything not sent, and the episodes th
 ```
 
 **Rate limits.** Requests are spaced to stay under `COMICK_UPLOADS_PER_SECOND`. The API also sends `x-ratelimit-remaining` and `x-ratelimit-reset`. When remaining hits zero everything pauses until the reset, and a 429 gets one retry once the reset window is over. If ComicK answers with a limit message (a daily request cap, say) the run stops, says so, and lists what wasn't sent so it can be picked up later. Rerunning is safe since anything that made it is now an existing episode.
+
+**Moderator note.** Every review mode request carries `Auto Uploaded using ComicK Crunchyroll Importer. https://github.com/Russhvith/comick-tools` so moderators know where it came from. `--note` adds text after it, and the whole note has to stay under 2,000 characters. Direct adds don't send a note.
 
 **Titles.** `English Title` is required. `Japanese Title` and a `Romaji Title` line (add it by hand) fill the `ja` and `ja-ro` boxes. Other languages the formatter writes, like `German Title`, go in as extra rows.
 
