@@ -1,0 +1,107 @@
+# Byte-compiled / optimized files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Packaging and build output
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Test and coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+cover/
+
+# Type checkers and linters
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.pyre/
+.pytype/
+.ruff_cache/
+
+# Jupyter
+.ipynb_checkpoints
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# Tooling caches
+.pdm.toml
+.pdm-python
+.pdm-build/
+__pypackages__/
+.pybuilder/
+target/
+
+# Secrets. Only the example file is tracked.
+.env
+.env.*
+!.env.example
+
+# AI assistant local state
+.claude/
+.cursor/
+.aider*
+.continue/
+CLAUDE.local.md
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS clutter
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Tool output
+logs/
+*.log
+output/
+exports/
