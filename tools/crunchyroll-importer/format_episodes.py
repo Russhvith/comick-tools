@@ -10,7 +10,7 @@ import json
 import sys
 from pathlib import Path
 
-TOOL_DIR = Path(__file__).resolve().parent
+DATA_DIR = Path(__file__).resolve().parent / "data"
 
 # Anything less than this and the output block can't be built, so we bail
 # before writing a half finished file.
@@ -38,8 +38,8 @@ LOCALE_NAMES = {
 
 def parse_args():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("-i", "--input", type=Path, default=TOOL_DIR / "input.json")
-    parser.add_argument("-o", "--output", type=Path, default=TOOL_DIR / "output.txt")
+    parser.add_argument("-i", "--input", type=Path, default=DATA_DIR / "input.json")
+    parser.add_argument("-o", "--output", type=Path, default=DATA_DIR / "output.txt")
     return parser.parse_args()
 
 

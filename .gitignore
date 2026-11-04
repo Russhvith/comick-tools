@@ -106,6 +106,6 @@ logs/
 output/
 exports/
 
-# Per tool scratch input and output
-tools/crunchyroll-importer/input.json
-tools/crunchyroll-importer/output.txt
+# Per tool data folders hold real exports, keep only the folder itself
+tools/*/data/*
+!tools/*/data/.gitkeep

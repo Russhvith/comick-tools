@@ -34,6 +34,7 @@ time.sleep(1.2)
 
 1. Make a folder under `tools/` in kebab-case, e.g. `tools/chapter-fixer/`.
 2. Add a `README.md` (copy the layout from an existing tool) and a `requirements.txt`.
-3. Load config from the root `.env`, see [setup.md](setup.md).
-4. Any new env var goes into `.env.example` with a one line comment.
-5. Add a row to the tools table in the root `README.md`.
+3. Add a `data/` folder with an empty `.gitkeep`. Input and output files default to that folder and stay out of git.
+4. Load config from the root `.env`, see [setup.md](setup.md).
+5. Any new env var goes into `.env.example` with a one line comment.
+6. Add a row to the tools table in the root `README.md`.

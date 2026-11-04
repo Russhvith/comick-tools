@@ -28,14 +28,14 @@ Turns a Crunchyroll episode list into a readable text file. Standard library onl
 
 1. Open the season on Crunchyroll with DevTools on the **Network** tab.
 2. Find the request to `.../seasons/<season_id>/episodes` and copy the response.
-3. Paste it into `tools/crunchyroll-importer/input.json`.
+3. Paste it into `tools/crunchyroll-importer/data/input.json`.
 4. Run:
 
    ```bash
    python tools/crunchyroll-importer/format_episodes.py
    ```
 
-Output lands in `tools/crunchyroll-importer/output.txt`:
+Output lands in `tools/crunchyroll-importer/data/output.txt`:
 
 ```
 Episode 49:
@@ -49,8 +49,8 @@ Flags:
 
 | Flag | Default |
 | --- | --- |
-| `-i`, `--input` | `input.json` next to the script |
-| `-o`, `--output` | `output.txt` next to the script |
+| `-i`, `--input` | `data/input.json` |
+| `-o`, `--output` | `data/output.txt` |
 
 Every episode needs `episode`, `title`, `duration_ms`, `description` and at least one thumbnail. If any are missing the script prints which episodes and fields, exits with code 1, and writes nothing.
 
@@ -59,4 +59,4 @@ Every episode needs `episode`, `title`, `duration_ms`, `description` and at leas
 - Episode numbers come from the `episode` string, so recaps like `48.5` keep their decimal. `episode_number` drops it.
 - Crunchyroll returns the title in one language only, whichever the account locale is set to. With a non English locale the `English Title` line is left blank and the title shows up under that language instead, e.g. `Japanese Title:`. Switch the account to English to get English titles.
 - Preview is the widest thumbnail available, normally 1920x1080.
-- `input.json` and `output.txt` are gitignored.
+- Everything in `data/` is gitignored apart from `.gitkeep`.

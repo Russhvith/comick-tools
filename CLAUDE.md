@@ -26,4 +26,4 @@ Monorepo of Python staff tools for ComicK. Each tool lives in its own folder und
 
 ## Adding a tool
 
-Follow `docs/contributing.md`: kebab-case folder under `tools/`, `README.md`, `requirements.txt`, new env vars into `.env.example`, row in the root README tools table.
+Follow `docs/contributing.md`: kebab-case folder under `tools/`, `README.md`, `requirements.txt`, a `data/` folder (with `.gitkeep`) that input and output files default to, new env vars into `.env.example`, row in the root README tools table.
