@@ -135,7 +135,7 @@ What a run does, in order:
 1. **Checks the cookie.** No `COMICK_SESSION_TOKEN` in `.env` and it stops straight away. The cookie goes on every ComicK API request, never on the image bucket.
 2. **Validates output.txt** against the same rules as the site form: episode number 0 to 9999 with one decimal at most, type `main` / `recap` / `filler`, an English title, a real `yyyy-mm-dd` date, a duration between 1 second and 24 hours, no links in the description, titles under 255 characters, one title per language. Every problem is listed at once with its line number and nothing gets uploaded until they're fixed.
 3. **Checks permission** for the slug. Direct mode adds episodes straight away. Request mode sends them to community review, where they stay private until they get 2 net votes. A rejected cookie or a slug the account can't edit stops the run.
-4. **Reads the episodes ComicK already has** and skips any number that's already there.
+4. **Reads the episodes ComicK already has.** Looks up the anime's `hid` from the slug (`/comic/{slug}/?media_type=anime`), then pages through `/v1.0/comic/{hid}/chapters?entry_type=episode`, 100 at a time, until it has them all. Any episode number that's already there gets skipped.
 5. **Asks for confirmation**, then uploads: each preview goes through `/presign`, gets PUT to the bucket and is referenced through `tmp2.comick.pictures`, then the episode is submitted.
 
 At the end it lists anything that failed, anything not sent, and the episodes that already existed:
@@ -162,5 +162,4 @@ At the end it lists anything that failed, anything not sent, and the episodes th
 - Crunchyroll returns the title in one language only, whichever the account locale is set to. With a non English locale the `English Title` line is left blank and the title shows up under that language instead, e.g. `Japanese Title:`. Switch the account to English to get English titles.
 - Preview is the widest thumbnail available, normally 1920x1080.
 - Everything in `data/` is gitignored apart from `.gitkeep`.
-- The endpoint the uploader reads existing episodes from (`EXISTING_EPISODES_PATH` at the top of `upload_episodes.py`) isn't in the API brief and is a best guess. If it's wrong the uploader stops before sending anything.
 - ComicK language codes for extra title rows (`es-la`, `pt-br`, `zh-hk` and so on) are also guessed from the main site's chapter languages. They live in `TITLE_LANGS` in the same file.

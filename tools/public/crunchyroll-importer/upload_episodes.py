@@ -33,10 +33,9 @@ TEMP_IMAGE_HOST = "tmp2.comick.pictures"
 USER_AGENT = "comick-tools/crunchyroll-importer"
 TIMEOUT = 30
 
-# The API brief doesn't cover reading back existing episodes, so this path
-# is a best guess. If it's wrong the run stops before uploading anything,
-# which beats creating duplicates. Fix it here once the real one is known.
-EXISTING_EPISODES_PATH = "/v1.0/comic/{slug}/episodes"
+# Biggest page the chapters endpoint is asked for when listing episodes
+# that are already up. A long running show still only takes a few calls.
+EXISTING_PAGE_SIZE = 100
 
 EPISODE_TYPES = ("main", "recap", "filler")
 
@@ -448,26 +447,44 @@ def upload_one(api, slug, mode, note, job):
     return size
 
 
-def load_existing(api, slug):
-    body = api.request("GET", EXISTING_EPISODES_PATH.format(slug=quote(slug)))
-    if isinstance(body, dict):
-        body = body.get("episodes") or body.get("data") or []
-    if not isinstance(body, list):
-        raise ApiError(0, "existing episodes came back in a shape we don't understand")
-    existing = {}
-    for item in body:
-        if isinstance(item, dict):
-            number = item.get("episode_number", item.get("number"))
-            if number is not None:
-                existing[normalize_number(number)] = item
-    return existing
+def find_hid(api, slug):
+    body = api.request("GET", f"/comic/{quote(slug)}/?media_type=anime") or {}
+    hid = (body.get("comic") or {}).get("hid") if isinstance(body, dict) else None
+    if not hid:
+        raise ApiError(0, "the anime lookup didn't include a hid")
+    return hid
 
 
-def english_title(item):
-    for title in item.get("titles") or ():
-        if isinstance(title, dict) and title.get("lang") == "en":
-            return title.get("title")
-    return item.get("title")
+def load_existing(api, hid):
+    """Every episode ComicK has for this anime, keyed by episode number.
+
+    Episodes live on the chapters endpoint under entry_type=episode. Pages
+    are walked oldest first until we have `total` of them or a page comes
+    back short, whichever happens first.
+    """
+    existing, page = {}, 1
+    while True:
+        body = api.request(
+            "GET",
+            f"/v1.0/comic/{quote(hid)}/chapters?entry_type=episode"
+            f"&limit={EXISTING_PAGE_SIZE}&page={page}&chap-order=1",
+        ) or {}
+        chapters = body.get("chapters") if isinstance(body, dict) else None
+        if not isinstance(chapters, list):
+            raise ApiError(0, "episode list came back in a shape we don't understand")
+        for item in chapters:
+            if isinstance(item, dict) and item.get("chap") not in (None, ""):
+                profile = item.get("anime_episode_profiles") or {}
+                existing[normalize_number(item["chap"])] = {
+                    "title": item.get("title"),
+                    "type": profile.get("episode_type"),
+                    "aired": str(profile.get("aired_at") or "")[:10],
+                    "duration": profile.get("duration"),
+                }
+        total = body.get("total")
+        if len(chapters) < EXISTING_PAGE_SIZE or (isinstance(total, int) and len(existing) >= total):
+            return existing
+        page += 1
 
 
 def differences(job, item):
@@ -477,19 +494,15 @@ def differences(job, item):
     just means fewer checks rather than false alarms.
     """
     diffs = []
-    theirs = str(item.get("aired_at") or "")[:10]
-    if theirs and theirs != job["aired"]:
-        diffs.append(("aired", job["aired"], theirs))
-    theirs = item.get("episode_type")
-    if theirs and theirs != job["type"]:
-        diffs.append(("type", job["type"], theirs))
-    theirs = english_title(item)
+    if item["aired"] and item["aired"] != job["aired"]:
+        diffs.append(("aired", job["aired"], item["aired"]))
+    if item["type"] and item["type"] != job["type"]:
+        diffs.append(("type", job["type"], item["type"]))
     ours = job["titles"][0]["title"]
-    if theirs and theirs.strip() != ours:
-        diffs.append(("title", ours, theirs.strip()))
-    theirs = item.get("duration_seconds")
-    if isinstance(theirs, int) and theirs != job["duration"]:
-        diffs.append(("duration", f"{job['duration']} s", f"{theirs} s"))
+    if item["title"] and item["title"].strip() != ours:
+        diffs.append(("title", ours, item["title"].strip()))
+    if isinstance(item["duration"], int) and item["duration"] != job["duration"]:
+        diffs.append(("duration", f"{job['duration']} s", f"{item['duration']} s"))
     return diffs
 
 
@@ -585,14 +598,23 @@ def main():
         out.step("Direct add mode", "episodes go live straight away")
 
     try:
-        existing = load_existing(api, args.slug)
+        hid = find_hid(api, args.slug)
+    except ApiError as e:
+        err.fail("Couldn't find this anime on ComicK, nothing was uploaded", [(args.slug, e.message)])
+        sys.exit(1)
+    try:
+        existing = load_existing(api, hid)
     except ApiError as e:
         err.fail("Couldn't read the episodes already on ComicK, nothing was uploaded", [
-            ("Endpoint", EXISTING_EPISODES_PATH.format(slug=args.slug)),
+            ("Anime", f"{args.slug} ({hid})"),
             ("Error", e.message),
         ])
         sys.exit(1)
-    out.step(f"ComicK already has {plural(len(existing), 'episode')}")
+    if existing:
+        latest = max(existing, key=Decimal)
+        out.step(f"ComicK already has {plural(len(existing), 'episode')}", f"latest is {latest}, hid {hid}")
+    else:
+        out.step("ComicK has no episodes for this anime yet", f"hid {hid}")
 
     pending, same, changed = [], [], []
     for job in jobs:
