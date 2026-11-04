@@ -298,8 +298,10 @@ def collect(episodes, offset):
 
 def render(entry, preview):
     ep = entry["ep"]
+    # Crunchyroll has nothing that marks filler or recaps, so every episode
+    # starts as main and staff swap the tag by hand where it's wrong.
     return (
-        f"Episode {entry['number']}:\n"
+        f"Episode {entry['number']}: (main)\n"
         f"{title_lines(ep)}\n"
         f"Duration: {format_duration(ep['duration_ms'])}\n"
         f"Aired: {entry['aired']}\n"

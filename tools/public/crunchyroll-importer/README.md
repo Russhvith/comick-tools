@@ -38,7 +38,7 @@ Turns a Crunchyroll episode list into a readable text file. Standard library onl
 Output lands in `tools/public/crunchyroll-importer/data/output.txt`:
 
 ```
-Episode 1:
+Episode 1: (main)
 English Title: Demons and Strategies
 Duration: 24:30
 Aired: 2024-04-05
@@ -113,6 +113,7 @@ Pass `--keep-numbers` to skip all of this and print Crunchyroll's numbers as is.
 ## Notes
 
 - Episode numbers come from the `episode` string, so recaps like `48.5` keep their decimal. `episode_number` drops it.
+- Every episode is tagged `(main)`. Crunchyroll has no field for filler or recaps, so swap the tag by hand where it's wrong, e.g. `(recap)` on the `.5` digressions.
 - `Aired` is the date part of `episode_air_date`. Crunchyroll always sends midnight UTC there, so the time is dropped.
 - Crunchyroll returns the title in one language only, whichever the account locale is set to. With a non English locale the `English Title` line is left blank and the title shows up under that language instead, e.g. `Japanese Title:`. Switch the account to English to get English titles.
 - Preview is the widest thumbnail available, normally 1920x1080.
