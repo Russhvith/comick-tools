@@ -107,5 +107,5 @@ output/
 exports/
 
 # Per tool data folders hold real exports, keep only the folder itself
-tools/*/data/*
-!tools/*/data/.gitkeep
+tools/*/*/data/*
+!tools/*/*/data/.gitkeep

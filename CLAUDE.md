@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-Monorepo of Python staff tools for ComicK. Each tool lives in its own folder under `tools/` (`tools/crunchyroll-importer/`, `tools/mass-deleter/`). Repo wide guides are in `docs/`.
+Monorepo of Python staff tools for ComicK. Each tool lives in its own folder under `tools/public/` (any account can use it) or `tools/admin/` (needs admin rights). Today that is `tools/public/crunchyroll-importer/` and `tools/admin/mass-deleter/`. Repo wide guides are in `docs/`.
 
 ## Compatibility
 
@@ -32,4 +32,4 @@ Monorepo of Python staff tools for ComicK. Each tool lives in its own folder und
 
 ## Adding a tool
 
-Follow `docs/contributing.md`: kebab-case folder under `tools/`, `README.md`, `requirements.txt`, a `data/` folder (with `.gitkeep`) that input and output files default to, new env vars into `.env.example`, row in the root README tools table.
+Follow `docs/contributing.md`: kebab-case folder under `tools/public/` or `tools/admin/`, `README.md`, `requirements.txt`, a `data/` folder (with `.gitkeep`) that input and output files default to, new env vars into `.env.example`, row in the root README tools table.

@@ -26,7 +26,7 @@ source .venv/bin/activate
 Each tool keeps its own `requirements.txt`. Install the one you need:
 
 ```bash
-pip install -r tools/mass-deleter/requirements.txt
+pip install -r tools/admin/mass-deleter/requirements.txt
 ```
 
 ## The shared .env
@@ -45,12 +45,12 @@ cp .env.example .env
 
 ## Loading it from a tool
 
-Tools sit two levels below the root (`tools/<tool>/`), so point `python-dotenv` at the repo root instead of relying on the working directory:
+Tools sit three levels below the root (`tools/<admin|public>/<tool>/`), so point `python-dotenv` at the repo root instead of relying on the working directory:
 
 ```python
 from pathlib import Path
 from dotenv import load_dotenv
 
 # Root .env is shared across tools, so resolve it relative to this file.
-load_dotenv(Path(__file__).resolve().parents[2] / ".env")
+load_dotenv(Path(__file__).resolve().parents[3] / ".env")
 ```

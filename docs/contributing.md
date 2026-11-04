@@ -32,7 +32,7 @@ time.sleep(1.2)
 
 ## Adding a new tool
 
-1. Make a folder under `tools/` in kebab-case, e.g. `tools/chapter-fixer/`.
+1. Make a kebab-case folder under `tools/public/` if any account can use it, or `tools/admin/` if it needs admin rights, e.g. `tools/public/chapter-fixer/`.
 2. Add a `README.md` (copy the layout from an existing tool) and a `requirements.txt`.
 3. Add a `data/` folder with an empty `.gitkeep`. Input and output files default to that folder and stay out of git.
 4. Load config from the root `.env`, see [setup.md](setup.md).
