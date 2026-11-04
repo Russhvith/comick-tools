@@ -418,6 +418,21 @@ def human_size(n):
         n /= 1024
 
 
+def human_time(seconds):
+    # Steps up a unit once the smaller one stops being easy to read, so a
+    # quick run says 40 ms and an image heavy one says 3.2 s, not 3195 ms.
+    # Round before picking the unit, otherwise 59.96 s prints as "60.0 s".
+    if round(seconds * 1000) < 1000:
+        return f"{seconds * 1000:.0f} ms"
+    if round(seconds, 1) < 60:
+        return f"{seconds:.1f} s"
+    minutes, secs = divmod(round(seconds), 60)
+    if minutes < 60:
+        return f"{minutes} m {secs:02} s"
+    hours, minutes = divmod(minutes, 60)
+    return f"{hours} h {minutes:02} m"
+
+
 def short(path):
     try:
         return str(path.resolve().relative_to(Path.cwd()))
@@ -481,7 +496,7 @@ def main():
         if local:
             out.step(
                 f"Downloaded {plural(len(local), 'image')}",
-                f"{short(images_dir)}, {human_size(total)}, {took:.1f} s",
+                f"{short(images_dir)}, {human_size(total)}, {human_time(took)}",
             )
         if failures:
             out.warn(f"{plural(len(failures), 'image')} failed, kept the Crunchyroll URL", failures)
@@ -491,9 +506,9 @@ def main():
     args.output.write_text("\n\n".join(blocks) + "\n", encoding="utf-8")
     out.step(f"Wrote {short(args.output)}")
 
-    elapsed = (time.perf_counter() - started) * 1000
+    elapsed = human_time(time.perf_counter() - started)
     out.say()
-    out.say(f"  {out.bold(f'{len(blocks)} episodes')} {out.dim(f'in {elapsed:.0f} ms')}")
+    out.say(f"  {out.bold(f'{len(blocks)} episodes')} {out.dim(f'in {elapsed}')}")
     out.say()
 
 
