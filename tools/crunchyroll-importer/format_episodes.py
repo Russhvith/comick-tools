@@ -10,13 +10,15 @@ import json
 import os
 import sys
 import time
+from datetime import datetime
+from decimal import Decimal, InvalidOperation
 from pathlib import Path
 
 DATA_DIR = Path(__file__).resolve().parent / "data"
 
 # Anything less than this and the output block can't be built, so we bail
 # before writing a half finished file.
-REQUIRED_FIELDS = ("episode", "title", "duration_ms", "description")
+REQUIRED_FIELDS = ("episode", "title", "duration_ms", "episode_air_date", "description")
 
 LOCALE_NAMES = {
     "ja-JP": "Japanese",
@@ -113,6 +115,11 @@ def parse_args():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("-i", "--input", type=Path, default=DATA_DIR / "input.json")
     parser.add_argument("-o", "--output", type=Path, default=DATA_DIR / "output.txt")
+    parser.add_argument(
+        "--keep-numbers",
+        action="store_true",
+        help="use Crunchyroll's episode numbers as is instead of restarting the season at 1",
+    )
     return parser.parse_args()
 
 
@@ -137,6 +144,51 @@ def format_duration(ms):
     return f"{minutes}:{seconds:02}"
 
 
+def format_aired(stamp):
+    # Air dates always come through as midnight UTC, so the date alone is
+    # the useful part.
+    try:
+        return datetime.fromisoformat(stamp.replace("Z", "+00:00")).date().isoformat()
+    except (ValueError, AttributeError):
+        return None
+
+
+def to_number(value):
+    try:
+        return Decimal(str(value))
+    except InvalidOperation:
+        return None
+
+
+def show_number(n):
+    # Decimal keeps 0.5 exact. Whole numbers print without a trailing ".0".
+    whole = n.to_integral_value()
+    return str(whole) if n == whole else str(n.normalize())
+
+
+def season_offset(episodes):
+    """How much to subtract so the season starts at 1.
+
+    Crunchyroll often numbers later seasons straight on from the previous
+    one (season 3 starting at 49). We take the lowest whole episode number
+    and shift everything so it becomes 1. Recaps like 48.5 shift with it
+    and land on 0.5, which keeps them in the right spot.
+
+    A season whose lowest whole number is 0 or 1 is already numbered per
+    season, so it's left alone. That covers seasons with an episode 0
+    prologue.
+    """
+    lowest = None
+    for ep in episodes:
+        if isinstance(ep, dict):
+            n = to_number(ep.get("episode"))
+            if n is not None and n == n.to_integral_value() and (lowest is None or n < lowest):
+                lowest = n
+    if lowest is None or lowest <= 1:
+        return Decimal(0)
+    return lowest - 1
+
+
 def title_lines(ep):
     # Crunchyroll only sends the title in whatever locale the request asked
     # for. If that isn't English we label it with the language instead of
@@ -148,7 +200,7 @@ def title_lines(ep):
     return f"English Title:\n{language} Title: {ep['title']}"
 
 
-def build(episodes):
+def build(episodes, offset):
     """Validate and format in one pass.
 
     Returns (blocks, problems). Blocks are only worth writing when problems
@@ -162,6 +214,9 @@ def build(episodes):
             continue
 
         missing = [field for field in REQUIRED_FIELDS if ep.get(field) in (None, "")]
+        aired = format_aired(ep.get("episode_air_date"))
+        if "episode_air_date" not in missing and not aired:
+            missing.append("episode_air_date (bad date)")
         preview = pick_preview(ep)
         if not preview:
             missing.append("images.thumbnail")
@@ -172,10 +227,14 @@ def build(episodes):
             continue
 
         if not problems:
+            # Non numeric labels like "SP" pass through untouched.
+            n = to_number(ep["episode"])
+            number = show_number(n - offset) if n is not None else ep["episode"]
             blocks.append(
-                f"Episode {ep['episode']}:\n"
+                f"Episode {number}:\n"
                 f"{title_lines(ep)}\n"
                 f"Duration: {format_duration(ep['duration_ms'])}\n"
+                f"Aired: {aired}\n"
                 f"Description: {ep['description'].strip()}\n"
                 f"Preview: {preview}"
             )
@@ -221,11 +280,19 @@ def main():
 
     out.step(f"Read {short(args.input)}", f"{len(episodes)} episodes, {human_size(len(raw))}")
 
-    blocks, problems = build(episodes)
+    offset = Decimal(0) if args.keep_numbers else season_offset(episodes)
+    blocks, problems = build(episodes, offset)
     if problems:
         err.fail("Fields missing, aborted", problems)
         sys.exit(1)
     out.step("All required fields present")
+
+    if args.keep_numbers:
+        out.step("Kept Crunchyroll numbering", "--keep-numbers")
+    elif offset:
+        out.step(f"Renumbered {show_number(offset + 1)} to 1", f"shifted by {show_number(offset)}")
+    else:
+        out.step("Numbering already starts at 0 or 1", "left as is")
 
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text("\n\n".join(blocks) + "\n", encoding="utf-8")
