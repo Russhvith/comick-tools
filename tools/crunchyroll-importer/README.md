@@ -22,8 +22,41 @@ Anything Crunchyroll specific gets added here and to `.env.example` once the too
 
 ## Usage
 
-Not built yet. Document the run command and flags here as they land.
+### format_episodes.py
+
+Turns a Crunchyroll episode list into a readable text file. Standard library only, no `.env` needed.
+
+1. Open the season on Crunchyroll with DevTools on the **Network** tab.
+2. Find the request to `.../seasons/<season_id>/episodes` and copy the response.
+3. Paste it into `tools/crunchyroll-importer/input.json`.
+4. Run:
+
+   ```bash
+   python tools/crunchyroll-importer/format_episodes.py
+   ```
+
+Output lands in `tools/crunchyroll-importer/output.txt`:
+
+```
+Episode 49:
+English Title: Demons and Strategies
+Duration: 24:30
+Description: Rimuru has returned to Jura after having attended Walpurgis...
+Preview: https://www.crunchyroll.com/imgsrv/display/thumbnail/1920x1080/...
+```
+
+Flags:
+
+| Flag | Default |
+| --- | --- |
+| `-i`, `--input` | `input.json` next to the script |
+| `-o`, `--output` | `output.txt` next to the script |
+
+Every episode needs `episode`, `title`, `duration_ms`, `description` and at least one thumbnail. If any are missing the script prints which episodes and fields, exits with code 1, and writes nothing.
 
 ## Notes
 
-Rate limits, known quirks, and edge cases go here.
+- Episode numbers come from the `episode` string, so recaps like `48.5` keep their decimal. `episode_number` drops it.
+- Crunchyroll returns the title in one language only, whichever the account locale is set to. With a non English locale the `English Title` line is left blank and the title shows up under that language instead, e.g. `Japanese Title:`. Switch the account to English to get English titles.
+- Preview is the widest thumbnail available, normally 1920x1080.
+- `input.json` and `output.txt` are gitignored.
