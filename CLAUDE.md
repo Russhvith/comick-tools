@@ -2,6 +2,12 @@
 
 Monorepo of Python staff tools for ComicK. Each tool lives in its own folder under `tools/` (`tools/crunchyroll-importer/`, `tools/mass-deleter/`). Repo wide guides are in `docs/`.
 
+## Compatibility
+
+- Tools must run on Windows 7, which caps Python at 3.8. Nothing newer than 3.8 in syntax or stdlib (no `match`, no `str.removeprefix`, no `datetime.fromisoformat` on strings ending in Z, no `list[str]` style hints evaluated at runtime).
+- Win 7 and 8 consoles have no ANSI colour and no glyphs for symbols like the tick, so terminal styling falls back to plain ASCII there.
+- Check with `vermin -t=3.8- --violations <file>` before committing.
+
 ## Config
 
 - One shared `.env` at the repo root. Tools load it by path relative to their own file, not the working directory.
