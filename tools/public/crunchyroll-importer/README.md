@@ -138,6 +138,16 @@ What a run does, in order:
 4. **Reads the episodes ComicK already has.** Looks up the anime's `hid` from the slug (`/comic/{slug}/?media_type=anime`), then pages through `/v1.0/comic/{hid}/chapters?entry_type=episode`, 100 at a time, until it has them all. Any episode number that's already there gets skipped.
 5. **Asks for confirmation**, then uploads: each preview goes through `/presign`, gets PUT to the bucket and is referenced through `tmp2.comick.pictures`, then the episode is submitted.
 
+Each episode prints a line as soon as it finishes, in the order uploads complete:
+
+```
+  ✓ Episode 3     Peaceful Days                             main      1.5 MB  436 ms
+  ✓ Episode 17.5  Digression: Luminus Memories              recap     1.3 MB  642 ms
+  ✗ Episode 7     Episode synopsis is too similar to an existing one
+```
+
+The time on each line includes any wait for the rate limit, so one that sat out a 429 shows a few extra seconds.
+
 At the end it lists anything that failed, anything not sent, and the episodes that already existed:
 
 ```

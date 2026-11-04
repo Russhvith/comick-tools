@@ -647,9 +647,11 @@ def main():
 
         def run(job):
             if stop.is_set():
-                return job, None, "skipped"
+                return job, None, "skipped", 0
+            t = time.perf_counter()
             try:
-                return job, upload_one(api, args.slug, mode, args.note, job), None
+                size = upload_one(api, args.slug, mode, args.note, job)
+                return job, size, None, time.perf_counter() - t
             except ApiError as e:
                 if e.is_auth or e.is_limit:
                     # Nothing past this point will get through either, and
@@ -657,27 +659,31 @@ def main():
                     # with the rest of the unsent ones.
                     stop.set()
                     stop_reason.append(e)
-                    return job, None, "skipped"
-                return job, None, e
+                    return job, None, "skipped", 0
+                return job, None, e, time.perf_counter() - t
             except Exception as e:
                 # A bad image file or similar shouldn't take the whole batch
                 # down with it, so report it against this episode only.
-                return job, None, ApiError(0, str(e) or type(e).__name__)
+                return job, None, ApiError(0, str(e) or type(e).__name__), time.perf_counter() - t
 
+        width = max(len(f"Episode {j['number']}") for j in pending)
         t0 = time.perf_counter()
         with ThreadPoolExecutor(max_workers=workers) as pool:
             futures = [pool.submit(run, job) for job in pending]
             for count, future in enumerate(as_completed(futures), start=1):
-                job, size, problem = future.result()
+                job, size, problem, took = future.result()
                 if problem == "skipped":
                     skipped.append(job)
                 elif problem:
                     failed.append((job, problem))
+                    episode_line(job, width, problem.message, took, ok=False)
                 else:
                     done.append(job)
                     total_bytes += size or 0
+                    episode_line(job, width, f"{human_size(size)}" if size else "no preview", took)
                 out.progress(f"Uploading {count}/{len(pending)}")
         out.end_progress()
+        out.say()
 
         if done:
             verb = "Sent for review" if mode == "request" else "Uploaded"
@@ -693,6 +699,32 @@ def main():
 
     report(same, changed, failed, skipped, done, started, "dry run, nothing uploaded" if args.dry_run else None)
     sys.exit(1 if failed or skipped else 0)
+
+
+TYPE_COLORS = {"main": "2", "recap": "36", "filler": "35"}
+TITLE_WIDTH = 40
+
+
+def episode_line(job, width, detail, took, ok=True):
+    """One line per finished episode, printed as soon as it's done.
+
+    Lines show up in the order uploads finish rather than episode order,
+    which is the honest picture of what's happening. The summary at the
+    end is sorted.
+    """
+    out.end_progress()
+    label = f"Episode {job['number']}".ljust(width)
+    if not ok:
+        out.say(f"  {out.paint(out.bad, '31')} {label}  {out.paint(detail, '31')}")
+        return
+    title = job["titles"][0]["title"]
+    if len(title) > TITLE_WIDTH:
+        title = title[: TITLE_WIDTH - 3].rstrip() + "..."
+    kind = out.paint(job["type"].ljust(6), TYPE_COLORS.get(job["type"], "2"))
+    out.say(
+        f"  {out.paint(out.ok, '32')} {label}  {title.ljust(TITLE_WIDTH)}  {kind}  "
+        + out.dim(f"{detail.rjust(8)}  {human_time(took).rjust(6)}")
+    )
 
 
 def by_number(job):
