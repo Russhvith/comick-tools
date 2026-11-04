@@ -53,7 +53,7 @@ Flags:
 | `-i`, `--input` | `data/input.json` |
 | `-o`, `--output` | `data/output.txt` |
 | `--keep-numbers` | off, so episodes get renumbered |
-| `--images` | off, so `Preview` stays a Crunchyroll URL |
+| `--no-images` | off, so previews get downloaded |
 
 Every episode needs `episode`, `title`, `duration_ms`, `episode_air_date`, `description` and at least one thumbnail. If any are missing the script prints which episodes and fields, exits with code 1, and writes nothing:
 
@@ -63,11 +63,11 @@ Every episode needs `episode`, `title`, `duration_ms`, `episode_air_date`, `desc
     › Episode 49    description
 ```
 
-Terminal colour turns off when output is piped or `NO_COLOR` is set. On Windows 7 and 8 the output is plain ASCII (`+`, `x`, `>`) since those consoles can't show colour or the symbols. A 5000 episode file runs in roughly 40 ms.
+Terminal colour turns off when output is piped or `NO_COLOR` is set. On Windows 7 and 8 the output is plain ASCII (`+`, `x`, `>`) since those consoles can't show colour or the symbols. Without the image download a 5000 episode file runs in roughly 40 ms.
 
 ### Images
 
-`--images` downloads every preview into `data/images/`, named after the episode number in the output, and `Preview` points at the local file:
+Every run downloads the previews into `data/images/`, named after the episode number in the output, and `Preview` points at the local file:
 
 ```
 Preview: images/1.png
@@ -88,8 +88,9 @@ data/
 - The extension comes from what the server actually sent, not the URL.
 - Downloads run eight at a time. A full season of 1080p PNGs is about 30 MB and a few seconds.
 - An image that fails (404, no connection) keeps its Crunchyroll URL in the output and gets listed as a warning. The rest of the run carries on.
+- `--no-images` skips the download and leaves `Preview` as the Crunchyroll URL, which keeps the run under a second.
 
-**Every run permanently deletes the previous images** in `data/images/`, with or without `--images`, so the folder never drifts out of sync with `output.txt`. They skip the recycle bin. Only image files are removed, anything else in the folder is left alone. A run that aborts on missing fields leaves the old images untouched.
+**Every run permanently deletes the previous images** in `data/images/`, `--no-images` runs included, so the folder never drifts out of sync with `output.txt`. They skip the recycle bin. Only image files are removed, anything else in the folder is left alone. A run that aborts on missing fields leaves the old images untouched.
 
 ### Renumbering
 

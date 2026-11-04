@@ -2,8 +2,8 @@
 
 Reads the JSON returned by Crunchyroll's season episodes endpoint and writes
 one block per episode with its number, title, duration, description and a
-preview image. With --images the previews get downloaded next to the output
-and the text points at the local files instead of Crunchyroll's URLs.
+preview image. Previews get downloaded next to the output and the text points
+at the local files, unless --no-images asks for Crunchyroll's URLs instead.
 """
 
 import argparse
@@ -174,9 +174,10 @@ def parse_args():
         help="use Crunchyroll's episode numbers as is instead of restarting the season at 1",
     )
     parser.add_argument(
-        "--images",
-        action="store_true",
-        help="download previews into images/ next to the output and link those instead",
+        "--no-images",
+        dest="images",
+        action="store_false",
+        help="skip downloading previews and link Crunchyroll's URLs instead",
     )
     return parser.parse_args()
 
@@ -463,8 +464,8 @@ def main():
     else:
         out.step("Numbering already starts at 0 or 1", "left as is")
 
-    # Wiping happens on every run that gets this far, not just --images
-    # runs, so a stale folder never sits next to an output.txt that no
+    # Wiping happens on every run that gets this far, --no-images runs
+    # included, so a stale folder never sits next to an output.txt that no
     # longer points at it. A run that failed validation above leaves the
     # previous images alone.
     images_dir = args.output.parent / "images"
