@@ -7,7 +7,6 @@ from the root .env.
 """
 
 import argparse
-import json
 import re
 import sys
 import threading
@@ -16,31 +15,29 @@ import urllib.error
 import urllib.request
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime
-from decimal import Decimal, InvalidOperation
+from decimal import Decimal
 from pathlib import Path
 from urllib.parse import quote, urlparse, urlunparse
 
-from common import err, human_size, human_time, load_env, out, plural, short
+# Scripts run straight from their folder, so the shared lib isn't on the
+# import path until we put it there.
+sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "lib"))
+
+from comick_tools.api import ApiError, comic_hid, connect, list_entries, normalize_number  # noqa: E402
+from comick_tools.console import err, human_size, human_time, out, plural, short  # noqa: E402
+from comick_tools.env import SettingsError, comick_settings  # noqa: E402
 
 TOOL_DIR = Path(__file__).resolve().parent
 DATA_DIR = TOOL_DIR / "data"
-REPO_ROOT = TOOL_DIR.parents[2]
 
-COOKIE_NAME = "__Secure-comick-auth.session_token"
-DEFAULT_API = "https://api.comick.dev"
-DEFAULT_PER_SECOND = 5
 TEMP_IMAGE_HOST = "tmp2.comick.pictures"
 USER_AGENT = "comick-tools/crunchyroll-importer"
+TIMEOUT = 30
 
 # Goes on every review mode request so moderators know where a batch came
 # from. Anything passed with --note gets added after it.
-MODERATOR_NOTE = "Auto Uploaded using ComicK Crunchyroll Importer. https://github.com/Russhvith/comick-tools"
+MODERATOR_NOTE = "Auto Uploaded using ComicK Crunchyroll Importer. (https://github.com/Russhvith/comick-tools)"
 MAX_NOTE = 2000
-TIMEOUT = 30
-
-# Biggest page the chapters endpoint is asked for when listing episodes
-# that are already up. A long running show still only takes a few calls.
-EXISTING_PAGE_SIZE = 100
 
 EPISODE_TYPES = ("main", "recap", "filler")
 
@@ -84,7 +81,6 @@ FIELD_RE = re.compile(r"^([A-Za-z][A-Za-z ()]*?):(?:\s(.*))?$")
 NUMBER_RE = re.compile(r"^\d{1,4}(\.\d)?$")
 DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 URL_IN_TEXT_RE = re.compile(r"https?://|www\.", re.IGNORECASE)
-LIMIT_WORDS_RE = re.compile(r"limit|too many|slow down|try again later", re.IGNORECASE)
 
 
 def parse_args():
@@ -161,17 +157,6 @@ def json_number(text):
     # 12 goes out as an int and 12.5 as a float, the same as the site form.
     value = Decimal(text)
     return int(value) if value == value.to_integral_value() else float(value)
-
-
-def normalize_number(value):
-    try:
-        n = Decimal(str(value))
-    except InvalidOperation:
-        return str(value)
-    if not n.is_finite():
-        return str(value)
-    whole = n.to_integral_value()
-    return str(whole) if n == whole else str(n.normalize())
 
 
 def validate(raw, base_dir):
@@ -263,116 +248,6 @@ def validate(raw, base_dir):
 # Talking to ComicK
 
 
-class ApiError(Exception):
-    def __init__(self, status, message):
-        super().__init__(message)
-        self.status = status
-        self.message = message
-
-    @property
-    def is_auth(self):
-        return self.status == 401
-
-    @property
-    def is_limit(self):
-        return self.status == 429 or bool(LIMIT_WORDS_RE.search(self.message or ""))
-
-
-def error_text(body, status):
-    if isinstance(body, dict):
-        text = body.get("message") or body.get("error")
-        if isinstance(text, str) and text:
-            return text
-    return f"HTTP {status}"
-
-
-class Comick:
-    """Thin client that keeps us inside both our own and the server's limits.
-
-    Our own cap (COMICK_UPLOADS_PER_SECOND) spaces out request starts. On
-    top of that the server sends x-ratelimit-remaining and -reset, and once
-    remaining hits zero every thread waits for the reset before sending
-    more. A 429 gets one retry after the reset window.
-    """
-
-    def __init__(self, base, token, per_second, on_wait=None):
-        self.base = base.rstrip("/")
-        self.cookie = f"{COOKIE_NAME}={token}"
-        # 5% over the exact spacing. Requests arrive with a few tens of ms
-        # of network jitter, and without the slack the server can still
-        # count one more than the cap inside a single second.
-        self.interval = 1.05 / per_second
-        self.on_wait = on_wait
-        self.lock = threading.Lock()
-        self.next_slot = 0.0
-        self.blocked_until = 0.0
-
-    def _wait_turn(self):
-        # Spacing is measured from when a request really went out, not when
-        # it was scheduled. Otherwise a thread that wakes up late lets the
-        # next one fire right behind it and the server sees a burst.
-        while True:
-            with self.lock:
-                now = time.monotonic()
-                ready = max(self.next_slot, self.blocked_until)
-                if now >= ready:
-                    self.next_slot = now + self.interval
-                    return
-            time.sleep(ready - now)
-
-    def _block_for(self, seconds):
-        with self.lock:
-            self.blocked_until = max(self.blocked_until, time.monotonic() + seconds)
-
-    def _read_limits(self, headers):
-        try:
-            remaining = int(headers.get("x-ratelimit-remaining"))
-            reset = float(headers.get("x-ratelimit-reset"))
-        except (TypeError, ValueError):
-            return None
-        if remaining <= 0:
-            self._block_for(reset)
-        return reset
-
-    def _send(self, method, path, body):
-        data = json.dumps(body).encode("utf-8") if body is not None else None
-        request = urllib.request.Request(self.base + path, data=data, method=method, headers={
-            "Cookie": self.cookie,
-            "Accept": "application/json",
-            "Content-Type": "application/json",
-            "User-Agent": USER_AGENT,
-        })
-        try:
-            with urllib.request.urlopen(request, timeout=TIMEOUT) as response:
-                return response.status, response.headers, response.read()
-        except urllib.error.HTTPError as e:
-            return e.code, e.headers, e.read()
-        except (urllib.error.URLError, OSError) as e:
-            reason = getattr(e, "reason", e)
-            raise ApiError(0, f"can't reach {self.base} ({reason})")
-
-    def request(self, method, path, body=None):
-        for attempt in (1, 2):
-            self._wait_turn()
-            status, headers, raw = self._send(method, path, body)
-            reset = self._read_limits(headers)
-            try:
-                parsed = json.loads(raw) if raw else None
-            except ValueError:
-                parsed = None
-
-            if status == 429 and attempt == 1:
-                wait = reset if reset is not None else 10
-                self._block_for(wait)
-                if self.on_wait:
-                    self.on_wait(wait)
-                continue
-            if status >= 400:
-                raise ApiError(status, error_text(parsed, status))
-            return parsed
-        raise AssertionError("unreachable")
-
-
 def put_file(url, data, content_type):
     # Presigned bucket URLs carry their own auth in the query string, and
     # sending the ComicK cookie there would leak it to the storage host.
@@ -456,44 +331,19 @@ def upload_one(api, slug, mode, note, job):
     return size
 
 
-def find_hid(api, slug):
-    body = api.request("GET", f"/comic/{quote(slug)}/?media_type=anime") or {}
-    hid = (body.get("comic") or {}).get("hid") if isinstance(body, dict) else None
-    if not hid:
-        raise ApiError(0, "the anime lookup didn't include a hid")
-    return hid
-
-
 def load_existing(api, hid):
-    """Every episode ComicK has for this anime, keyed by episode number.
-
-    Episodes live on the chapters endpoint under entry_type=episode. Pages
-    are walked oldest first until we have `total` of them or a page comes
-    back short, whichever happens first.
-    """
-    existing, page = {}, 1
-    while True:
-        body = api.request(
-            "GET",
-            f"/v1.0/comic/{quote(hid)}/chapters?entry_type=episode"
-            f"&limit={EXISTING_PAGE_SIZE}&page={page}&chap-order=1",
-        ) or {}
-        chapters = body.get("chapters") if isinstance(body, dict) else None
-        if not isinstance(chapters, list):
-            raise ApiError(0, "episode list came back in a shape we don't understand")
-        for item in chapters:
-            if isinstance(item, dict) and item.get("chap") not in (None, ""):
-                profile = item.get("anime_episode_profiles") or {}
-                existing[normalize_number(item["chap"])] = {
-                    "title": item.get("title"),
-                    "type": profile.get("episode_type"),
-                    "aired": str(profile.get("aired_at") or "")[:10],
-                    "duration": profile.get("duration"),
-                }
-        total = body.get("total")
-        if len(chapters) < EXISTING_PAGE_SIZE or (isinstance(total, int) and len(existing) >= total):
-            return existing
-        page += 1
+    """Every episode ComicK has for this anime, keyed by episode number."""
+    existing = {}
+    for item in list_entries(api, hid, episodes=True):
+        if item.get("chap") not in (None, ""):
+            profile = item.get("anime_episode_profiles") or {}
+            existing[normalize_number(item["chap"])] = {
+                "title": item.get("title"),
+                "type": profile.get("episode_type"),
+                "aired": str(profile.get("aired_at") or "")[:10],
+                "duration": profile.get("duration"),
+            }
+    return existing
 
 
 def differences(job, item):
@@ -543,22 +393,11 @@ def main():
     started = time.perf_counter()
     out.header("crunchyroll-importer", f"upload episodes to {args.slug}")
 
-    env = load_env(REPO_ROOT / ".env")
-    token = env.get("COMICK_SESSION_TOKEN", "").strip()
-    if not token:
-        err.fail("No session cookie set", [
-            ("Missing", "COMICK_SESSION_TOKEN in .env"),
-            ("Fix", "copy __Secure-comick-auth.session_token from the browser, see docs/auth.md"),
-        ])
-        sys.exit(1)
     try:
-        per_second = float(env.get("COMICK_UPLOADS_PER_SECOND") or DEFAULT_PER_SECOND)
-        if per_second <= 0:
-            raise ValueError
-    except ValueError:
-        err.fail("COMICK_UPLOADS_PER_SECOND must be a positive number")
+        settings = comick_settings()
+    except SettingsError as e:
+        err.fail(e.title, e.rows)
         sys.exit(1)
-    base = env.get("COMICK_API_BASE") or DEFAULT_API
 
     note = " ".join(part for part in (MODERATOR_NOTE, args.note.strip()) if part)
     if len(note) > MAX_NOTE:
@@ -597,8 +436,8 @@ def main():
     breakdown = ", ".join(f"{n} {t}" for t, n in types.items() if n)
     out.step(f"Read {plural(len(jobs), 'episode')} from {short(args.input)}", breakdown)
 
-    api = Comick(base, token, per_second,
-                 on_wait=lambda s: out.progress(f"Rate limited, waiting {human_time(s)}"))
+    api = connect(settings, USER_AGENT,
+                  on_wait=lambda secs: out.progress(f"Rate limited, waiting {human_time(secs)}"))
 
     try:
         permission = api.request("GET", f"/comic/{quote(args.slug)}/check-add-episode-permission") or {}
@@ -615,7 +454,7 @@ def main():
         out.step("Direct add mode", "episodes go live straight away")
 
     try:
-        hid = find_hid(api, args.slug)
+        hid = comic_hid(api, args.slug, anime=True)
     except ApiError as e:
         err.fail("Couldn't find this anime on ComicK, nothing was uploaded", [(args.slug, e.message)])
         sys.exit(1)
@@ -660,7 +499,7 @@ def main():
         out.say()
         stop = threading.Event()
         stop_reason = []
-        workers = max(1, min(4, int(per_second), len(pending)))
+        workers = max(1, min(4, int(settings["per_second"]), len(pending)))
 
         def run(job):
             if stop.is_set():

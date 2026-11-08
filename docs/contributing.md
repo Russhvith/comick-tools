@@ -35,6 +35,6 @@ time.sleep(1.2)
 1. Make a kebab-case folder under `tools/public/` if any account can use it, or `tools/admin/` if it needs admin rights, e.g. `tools/public/chapter-fixer/`.
 2. Add a `README.md` (copy the layout from an existing tool) and a `requirements.txt`.
 3. Add a `data/` folder with an empty `.gitkeep`. Input and output files default to that folder and stay out of git.
-4. Load config from the root `.env`, see [setup.md](setup.md).
+4. Load config from the root `.env` and talk to ComicK through `lib/comick_tools` (`env.comick_settings()`, `api.connect()`), which already handles the cookie and rate limits. See [setup.md](setup.md).
 5. Any new env var goes into `.env.example` with a one line comment.
 6. Add a row to the tools table in the root `README.md`.

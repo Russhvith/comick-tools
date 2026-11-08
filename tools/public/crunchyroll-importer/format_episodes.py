@@ -21,7 +21,11 @@ from decimal import Decimal, InvalidOperation
 from pathlib import Path
 from urllib.parse import urlparse
 
-from common import human_size, human_time, out, err, plural, short
+# Scripts run straight from their folder, so the shared lib isn't on the
+# import path until we put it there.
+sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "lib"))
+
+from comick_tools.console import err, human_size, human_time, out, plural, short  # noqa: E402
 
 DATA_DIR = Path(__file__).resolve().parent / "data"
 

@@ -12,7 +12,7 @@ Tools are split by who can run them:
 | Tool | Group | What it does |
 | --- | --- | --- |
 | [crunchyroll-importer](tools/public/crunchyroll-importer/README.md) | public | Pulls a Crunchyroll list into ComicK. |
-| [mass-deleter](tools/admin/mass-deleter/README.md) | admin | Bulk deletes entries on ComicK. |
+| [mass-deleter](tools/admin/mass-deleter/README.md) | admin | Bulk deletes chapters or anime episodes on ComicK. |
 
 ## Quick start
 
@@ -37,6 +37,7 @@ Then fill in `.env` and follow the README of whichever tool you need.
 comick-tools/
   .env.example          shared config template, copy to .env
   docs/                 repo wide guides
+  lib/comick_tools/     code shared by the tools (console, .env, API client)
   tools/
     admin/              needs admin rights
       mass-deleter/

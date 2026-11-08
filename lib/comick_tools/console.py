@@ -1,5 +1,5 @@
-"""Bits shared by the scripts in this tool: terminal output, .env loading
-and the small formatters used in status lines."""
+"""Terminal output shared by every tool, plus the small formatters used in
+status lines."""
 
 import os
 import sys
@@ -144,29 +144,3 @@ def short(path):
     except ValueError:
         return str(path)
 
-
-def load_env(path):
-    """Read KEY=VALUE pairs from a .env file without needing python-dotenv.
-
-    Real environment variables win over the file, same as dotenv, which
-    makes one off overrides on the command line easy.
-    """
-    values = {}
-    try:
-        text = path.read_text(encoding="utf-8-sig")
-    except FileNotFoundError:
-        text = ""
-    for line in text.splitlines():
-        line = line.strip()
-        if not line or line.startswith("#") or "=" not in line:
-            continue
-        key, _, value = line.partition("=")
-        key = key.strip()
-        if key.startswith("export "):
-            key = key[len("export "):].strip()
-        value = value.strip()
-        if len(value) >= 2 and value[0] == value[-1] and value[0] in "\"'":
-            value = value[1:-1]
-        values[key] = value
-    values.update({k: v for k, v in os.environ.items() if k in values or k.startswith("COMICK_")})
-    return values
