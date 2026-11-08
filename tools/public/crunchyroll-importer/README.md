@@ -141,7 +141,7 @@ Pass `--keep-numbers` to skip all of this and print Crunchyroll's numbers as is.
 
 ### upload_episodes.py
 
-Sends `data/output.txt` to an anime on ComicK. The slug is required:
+Sends `data/output.txt` to an anime on ComicK. Pass the slug as a flag, or leave it out and it gets asked for:
 
 ```bash
 python tools/public/crunchyroll-importer/upload_episodes.py --slug that-time-i-got-reincarnated-as-a-slime
@@ -149,7 +149,7 @@ python tools/public/crunchyroll-importer/upload_episodes.py --slug that-time-i-g
 
 | Flag | Default |
 | --- | --- |
-| `--slug` | required, the anime's slug on ComicK |
+| `--slug` | the anime's slug on ComicK. Asked for if left out |
 | `-i`, `--input` | `data/output.txt` |
 | `--dry-run` | off. Checks everything and shows what would go up, sends nothing |
 | `-y`, `--yes` | off, so it asks before uploading |

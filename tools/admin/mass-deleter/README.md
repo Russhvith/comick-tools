@@ -1,6 +1,9 @@
 # mass-deleter
 
-Deletes chapters or anime episodes on ComicK in bulk.
+Deletes chapters or anime episodes on ComicK in bulk, working from either:
+
+- **a comic's list**: its chapters (by language and group) or its anime episodes, or
+- **a user's uploads**: everything on their `comick.dev/user/<id>/uploaded-chapters` page.
 
 **Deletes can't be undone.** Run with `--dry-run` first if there's any doubt about the selection.
 
@@ -27,11 +30,12 @@ Read from the root `.env`. Real environment variables win over the file.
 python tools/admin/mass-deleter/mass_delete.py
 ```
 
-It asks for everything it needs:
+It asks for everything it needs. Working from a comic:
 
 ```
   ✓ Signed in as russ  trusted
 
+  ? Work from a comic or a user's uploads? [c/u] c
   ? Comic or anime slug: some-manga
   ? Delete chapters or episodes? [c/e] c
   ? Language code, or 'all' for every language: [en] en
@@ -56,14 +60,40 @@ It asks for everything it needs:
   ...
 ```
 
-Every answer can also come from a flag, which skips that prompt. The `DELETE` confirmation is always asked.
+Working from a user's uploads, paste their profile link (or just the id):
+
+```
+  ? Work from a comic or a user's uploads? [c/u] u
+  ? User id or profile URL: https://comick.dev/user/aff9eeae-0723-4fe8-b62f-329c59190513/uploaded-chapters
+  ✓ Skipping 1 chapter already removed
+  ✓ Found 65 chapters  across 2 comics, languages: en, fr
+  ? Language code, or 'all' for every language: [all] all
+    › official-test-manga  60 chapters
+    › another-comic        5 chapters
+  ? Only from comic slug (blank for any): another-comic
+  ? Which numbers? e.g. 1-10, 12.5 or all: all
+
+  About to permanently delete 5 chapters uploaded by aff9eeae-0723-4fe8-b62f-329c59190513
+    Chapter  Vol    Lang  Comic          hid
+    Ch 1     vol 1  fr    another-comic  upfr1
+    ...
+```
+
+Every answer can also come from a flag, and only the missing ones get asked for. Both `--slug x` and `--slug=x` work. The `DELETE` confirmation is always asked, no flag skips it.
+
+```bash
+python tools/admin/mass-deleter/mass_delete.py --slug=some-manga --type=chapter --lang=en --group="Beta Team" --select=1-30
+python tools/admin/mass-deleter/mass_delete.py --user=https://comick.dev/user/<id>/uploaded-chapters --comic=another-comic --select=all
+```
 
 | Flag | Notes |
 | --- | --- |
-| `--slug` | comic or anime slug |
-| `--type` | `chapter` or `episode` |
+| `--slug` | work from this comic or anime |
+| `--user` | work from this user's uploads. A user id or any profile URL containing one |
+| `--type` | `chapter` or `episode`, with `--slug`. `--user` is chapters only |
 | `--lang` | chapter language code, or `all`. Ignored for episodes |
-| `--group` | only chapters from this scanlation group, matched case insensitively |
+| `--group` | only chapters from this scanlation group, with `--slug`. Matched case insensitively |
+| `--comic` | only chapters from this comic slug, with `--user`. Matched case insensitively |
 | `--select` | numbers and ranges like `1-10, 12.5 15`, or `all` |
 | `--reason` | why they're being deleted |
 | `--dry-run` | go through everything, including the permission checks, but send no deletes |
@@ -72,8 +102,10 @@ Every answer can also come from a flag, which skips that prompt. The `DELETE` co
 
 1. **Checks the cookie.** No `COMICK_SESSION_TOKEN` in `.env` and it stops.
 2. **Checks the account** with `GET /v2.0/sessions/whoami`. It needs `active: true` on the session, `identity.state: "active"`, and `user_info.role` (or `info.role`) of `trusted`, `moderator` or `admin`. Anything else stops the run there.
-3. **Lists the chapters or episodes.** Looks up the comic's hid from the slug (`?media_type=anime` for episodes), then pages through `/v1.0/comic/{hid}/chapters`, 100 at a time, filtered by language for chapters or `entry_type=episode` for episodes.
-4. **Narrows it down** by group (chapters only) and by number. Ranges include decimals, so `12-13` also picks `12.5`. Chapters without a number only get picked by `all`.
+3. **Lists the chapters or episodes.**
+   - From a comic: looks up its hid from the slug (`?media_type=anime` for episodes), then pages through `/v1.0/comic/{hid}/chapters`, 100 at a time, filtered by language for chapters or `entry_type=episode` for episodes.
+   - From a user: pages through `/chapter/uploaded?user_id={id}` until a page comes back empty, the same list their profile shows. Chapters already marked `REMOVED` or `removed_and_deleted` are skipped.
+4. **Narrows it down** by group (comic chapters), by language and comic (user uploads), and by number. Ranges include decimals, so `12-13` also picks `12.5`. Chapters without a number only get picked by `all`.
 5. **Checks permission for each one** with `GET /{chapter|episode}/{hid}/manage_permissions`. Anything without `can_delete: true` is listed and left out.
 6. **Shows the full list** (number, volume or type, language or air date, group or title, hid) and asks for a reason. The reason has `Mass deleted by ComicK MassDeleter. (https://github.com/Russhvith/comick-tools)` added to the end, and the whole thing has to fit in 500 characters.
 7. **Waits for `DELETE`** typed exactly. Anything else cancels.

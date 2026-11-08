@@ -85,7 +85,7 @@ URL_IN_TEXT_RE = re.compile(r"https?://|www\.", re.IGNORECASE)
 
 def parse_args():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--slug", required=True, help="the anime's slug on ComicK")
+    parser.add_argument("--slug", help="the anime's slug on ComicK, asked for if left out")
     parser.add_argument("-i", "--input", type=Path, default=DATA_DIR / "output.txt")
     parser.add_argument(
         "--note",
@@ -384,6 +384,21 @@ def confirm(question):
     return answer in ("y", "yes")
 
 
+def ask_slug():
+    # Same rule as the confirmation: flags cover everything, prompts only
+    # fill in what's missing.
+    while True:
+        try:
+            answer = input(f"  {out.paint('?', '1;36')} Anime slug on ComicK: ").strip()
+        except EOFError:
+            out.say()
+            err.fail("No anime slug", [("Fix", "pass --slug or run it from a terminal")])
+            sys.exit(1)
+        if answer:
+            return answer
+        out.say(f"    {out.paint('a slug is needed', '33')}")
+
+
 def compact(numbers):
     return ", ".join(numbers) if len(numbers) <= 12 else ", ".join(numbers[:12]) + f" and {len(numbers) - 12} more"
 
@@ -391,7 +406,10 @@ def compact(numbers):
 def main():
     args = parse_args()
     started = time.perf_counter()
-    out.header("crunchyroll-importer", f"upload episodes to {args.slug}")
+    out.header("crunchyroll-importer", "upload episodes to ComicK")
+    if not args.slug:
+        args.slug = ask_slug()
+        out.say()
 
     try:
         settings = comick_settings()

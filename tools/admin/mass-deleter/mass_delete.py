@@ -1,8 +1,12 @@
 """Delete chapters or anime episodes on ComicK in bulk.
 
-Walks through picking a comic, a language and which chapters (or
-episodes) to remove, shows the full list, and only sends deletes after
-a typed confirmation. Needs a trusted, moderator or admin account.
+Works from one of two lists: a comic's chapters or episodes, or every
+chapter a single user uploaded. Walks through narrowing that list down,
+shows exactly what will go, and only sends deletes after a typed
+confirmation. Needs a trusted, moderator or admin account.
+
+Every prompt has a matching flag, and only the missing answers get
+asked for.
 """
 
 import argparse
@@ -36,11 +40,13 @@ WORKERS = 4
 
 def parse_args():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--slug", help="comic or anime slug, asked for if left out")
-    parser.add_argument("--type", choices=("chapter", "episode"), help="what to delete, asked for if left out")
+    parser.add_argument("--slug", help="comic or anime slug, to work from that comic's list")
+    parser.add_argument("--user", help="user id or profile URL, to work from everything that user uploaded")
+    parser.add_argument("--type", choices=("chapter", "episode"), help="what to delete when using --slug")
     parser.add_argument("--lang", help="chapter language code, or 'all'. Ignored for episodes")
     parser.add_argument("--select", help="numbers and ranges like '1-10, 12.5', or 'all'")
-    parser.add_argument("--group", help="only chapters from this scanlation group")
+    parser.add_argument("--group", help="only chapters from this scanlation group (--slug only)")
+    parser.add_argument("--comic", help="only chapters from this comic slug (--user only)")
     parser.add_argument("--reason", help="why these are being deleted, asked for if left out")
     parser.add_argument("--dry-run", action="store_true", help="go through everything but send no deletes")
     return parser.parse_args()
@@ -69,6 +75,21 @@ def ask_until(question, check, default=None, hint=None):
         if not problem:
             return answer
         out.say(f"    {out.paint(problem, '33')}")
+
+
+def narrow(entries, key, noun, preset, question):
+    """Show how entries split by group or comic and ask which one to keep.
+
+    Skipped when everything shares one value and nothing was passed on the
+    command line, since there'd be nothing to choose between.
+    """
+    counts = counts_by(entries, key)
+    if len(counts) <= 1 and preset is None:
+        return None
+    out.rows([(name, plural(n, "chapter")) for name, n in counts[:15]], "2")
+    if len(counts) > 15:
+        out.say(f"    {out.dim(f'and {len(counts) - 15} more {noun}s')}")
+    return (preset if preset is not None else ask(question)).strip() or None
 
 
 # Account check
@@ -166,22 +187,29 @@ def as_decimal(value):
         return None
 
 
-def describe(entries, episodes):
+def describe(entries, mode):
+    langs = sorted({e.get("lang") or "?" for e in entries})
+    if mode == "user":
+        comics = {comic_of(e) for e in entries}
+        return f"across {plural(len(comics), 'comic')}, languages: {', '.join(langs)}"
     numbers = [as_decimal(e.get("chap")) for e in entries]
     numbers = sorted(n for n in numbers if n is not None)
     span = f"{normalize_number(numbers[0])} to {normalize_number(numbers[-1])}" if numbers else "no numbers"
-    if episodes:
+    if mode == "episode":
         return span
-    langs = sorted({e.get("lang") or "?" for e in entries})
     return f"{span}, languages: {', '.join(langs)}"
 
 
-def group_counts(entries):
+def counts_by(entries, key):
     counts = {}
     for e in entries:
-        name = group_of(e)
+        name = key(e)
         counts[name] = counts.get(name, 0) + 1
     return sorted(counts.items(), key=lambda kv: (-kv[1], kv[0].lower()))
+
+
+def comic_of(entry):
+    return (entry.get("md_comics") or {}).get("slug") or "(unknown comic)"
 
 
 def group_of(entry):
@@ -191,14 +219,15 @@ def group_of(entry):
     return name or "(no group)"
 
 
-def entry_row(entry, episodes):
+def entry_row(entry, mode):
     number = normalize_number(entry.get("chap")) if entry.get("chap") not in (None, "") else "-"
-    if episodes:
+    if mode == "episode":
         profile = entry.get("anime_episode_profiles") or {}
         aired = str(profile.get("aired_at") or "")[:10] or "-"
         return [f"Ep {number}", profile.get("episode_type") or "-", aired, entry.get("title") or "", entry["hid"]]
     vol = f"vol {entry['vol']}" if entry.get("vol") not in (None, "") else "-"
-    return [f"Ch {number}", vol, entry.get("lang") or "-", group_of(entry), entry["hid"]]
+    fourth = comic_of(entry) if mode == "user" else group_of(entry)
+    return [f"Ch {number}", vol, entry.get("lang") or "-", fourth, entry["hid"]]
 
 
 def print_table(rows, header):
@@ -248,13 +277,14 @@ def check_permissions(api, kind, entries):
     return allowed, refused, failed
 
 
-def delete_all(api, kind, entries, reason, episodes):
+def delete_all(api, kind, entries, reason, mode):
     stop = threading.Event()
     stop_reason = []
-    rows = [entry_row(e, episodes) for e in entries]
+    rows = [entry_row(e, mode) for e in entries]
     width = max(len(r[0]) for r in rows)
     # Column three is the aired date for episodes or the language for
-    # chapters, column four the title or group. Pad both so lines align.
+    # chapters, column four the title, group or comic. Pad both so lines
+    # align.
     width3 = max(len(str(r[2])) for r in rows)
     width4 = min(40, max(len(str(r[3])) for r in rows))
 
@@ -277,7 +307,7 @@ def delete_all(api, kind, entries, reason, episodes):
         futures = [pool.submit(run, e) for e in entries]
         for count, future in enumerate(as_completed(futures), start=1):
             entry, problem, took = future.result()
-            row = entry_row(entry, episodes)
+            row = entry_row(entry, mode)
             label = row[0].ljust(width)
             out.end_progress()
             if problem == "skipped":
@@ -301,8 +331,40 @@ def delete_all(api, kind, entries, reason, episodes):
     return done, gone, failed, skipped, (stop_reason[0] if stop_reason else None)
 
 
-def sort_entries(entries):
+def sort_entries(entries, mode="chapter"):
+    if mode == "user":
+        return sorted(entries, key=lambda e: (comic_of(e).lower(), number_key(e.get("chap")), e.get("lang") or ""))
     return sorted(entries, key=lambda e: (number_key(e.get("chap")), e.get("lang") or "", group_of(e).lower()))
+
+
+# Loading the list
+
+
+USER_ID_RE = re.compile(r"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}", re.IGNORECASE)
+# Statuses the uploaded chapters page shows as already removed. Nothing
+# left to delete on those.
+REMOVED_STATUSES = ("removed", "removed_and_deleted")
+
+
+def parse_user_id(text):
+    """Accept a bare user id or any comick.dev profile URL containing one."""
+    match = USER_ID_RE.search(text or "")
+    return match.group(0).lower() if match else None
+
+
+def list_user_chapters(api, user_id):
+    """Everything a user uploaded, the same list their uploaded chapters
+    page shows. Pages come back as plain lists and an empty one means
+    we've reached the end."""
+    chapters, page = [], 1
+    while True:
+        body = api.request("GET", f"/chapter/uploaded?user_id={quote(user_id)}&page={page}")
+        if not isinstance(body, list):
+            raise ApiError(0, "uploaded chapters came back in a shape we don't understand")
+        if not body:
+            return chapters
+        chapters.extend(item for item in body if isinstance(item, dict))
+        page += 1
 
 
 def main():
@@ -321,42 +383,91 @@ def main():
     check_account(api)
     out.say()
 
-    slug = args.slug or ask_until("Comic or anime slug:", lambda a: None if a.strip() else "a slug is needed")
-    slug = slug.strip()
-    kind = args.type or ask_until(
-        "Delete chapters or episodes?", lambda a: None if a.lower() in ("c", "e", "chapter", "episode") else "type c or e",
-        default="c", hint="c/e",
-    ).lower()
-    kind = "episode" if kind in ("e", "episode") else "chapter"
-    episodes = kind == "episode"
-
-    lang = None
-    if not episodes:
-        lang = (args.lang or ask("Language code, or 'all' for every language:", default="en")).strip().lower()
-        if lang == "all":
-            lang = None
-
-    try:
-        hid = comic_hid(api, slug, anime=episodes)
-        entries = list_entries(api, hid, episodes=episodes, lang=lang)
-    except ApiError as e:
-        err.fail(f"Couldn't load {kind}s for {slug}", [("Error", e.message)])
+    if args.slug and args.user:
+        err.fail("Pick one list", [("Fix", "use --slug for a comic or --user for an uploader, not both")])
         sys.exit(1)
-    entries = [e for e in entries if e.get("hid")]
+    if args.user and args.type == "episode":
+        err.fail("--user only covers chapters", [("Why", "the uploaded chapters list has no episodes in it")])
+        sys.exit(1)
+
+    if args.user:
+        source = "user"
+    elif args.slug or args.type:
+        source = "comic"
+    else:
+        answer = ask_until(
+            "Work from a comic or a user's uploads?",
+            lambda a: None if a.lower() in ("c", "u", "comic", "user") else "type c or u",
+            default="c", hint="c/u",
+        ).lower()
+        source = "user" if answer in ("u", "user") else "comic"
+
+    if source == "user":
+        mode, kind = "user", "chapter"
+        raw_user = args.user or ask_until(
+            "User id or profile URL:", lambda a: None if parse_user_id(a) else "no user id in that, paste the profile link")
+        user_id = parse_user_id(raw_user)
+        if not user_id:
+            err.fail("Bad --user", [("Problem", "no user id in that, paste the profile link or the id")])
+            sys.exit(1)
+        label = user_id
+        try:
+            entries = list_user_chapters(api, user_id)
+        except ApiError as e:
+            err.fail(f"Couldn't load chapters uploaded by {user_id}", [("Error", e.message)])
+            sys.exit(1)
+        before = len(entries)
+        entries = [e for e in entries if e.get("hid") and str(e.get("status") or "").lower() not in REMOVED_STATUSES]
+        if before != len(entries):
+            out.step(f"Skipping {plural(before - len(entries), 'chapter')} already removed")
+    else:
+        slug = (args.slug or ask_until("Comic or anime slug:", lambda a: None if a.strip() else "a slug is needed")).strip()
+        kind = args.type or ask_until(
+            "Delete chapters or episodes?",
+            lambda a: None if a.lower() in ("c", "e", "chapter", "episode") else "type c or e",
+            default="c", hint="c/e",
+        ).lower()
+        kind = "episode" if kind in ("e", "episode") else "chapter"
+        mode = kind
+        label = slug
+        lang = None
+        if mode == "chapter":
+            lang = (args.lang or ask("Language code, or 'all' for every language:", default="en")).strip().lower()
+            lang = None if lang == "all" else lang
+        try:
+            hid = comic_hid(api, slug, anime=mode == "episode")
+            entries = list_entries(api, hid, episodes=mode == "episode", lang=lang)
+        except ApiError as e:
+            err.fail(f"Couldn't load {kind}s for {slug}", [("Error", e.message)])
+            sys.exit(1)
+        entries = [e for e in entries if e.get("hid")]
+
     if not entries:
-        out.warn(f"No {kind}s found for {slug}" + (f" in {lang}" if lang else ""))
+        out.warn(f"No {kind}s found for {label}")
         out.say()
         return
-    out.step(f"Found {plural(len(entries), kind)}", describe(entries, episodes))
+    out.step(f"Found {plural(len(entries), kind)}", describe(entries, mode))
 
-    group = None
-    if not episodes:
-        groups = group_counts(entries)
-        if len(groups) > 1 or args.group:
-            out.rows([(name, plural(n, "chapter")) for name, n in groups[:15]], "2")
-            if len(groups) > 15:
-                out.say(f"    {out.dim(f'and {len(groups) - 15} more groups')}")
-            group = (args.group if args.group is not None else ask("Only from group (blank for any):")).strip()
+    # The user list can mix languages and comics, so offer to narrow both.
+    # A comic's chapter list was already filtered by language above, and
+    # narrows by group instead.
+    if mode == "user":
+        langs = sorted({e.get("lang") or "?" for e in entries})
+        if len(langs) > 1 or args.lang:
+            lang = (args.lang or ask("Language code, or 'all' for every language:", default="all")).strip().lower()
+            if lang != "all":
+                entries = [e for e in entries if (e.get("lang") or "").lower() == lang]
+        comic = narrow(entries, comic_of, "comic", args.comic, "Only from comic slug (blank for any):")
+        if comic:
+            entries = [e for e in entries if comic_of(e).lower() == comic.lower()]
+    elif mode == "chapter":
+        group = narrow(entries, group_of, "group", args.group, "Only from group (blank for any):")
+        if group:
+            entries = [e for e in entries if group_of(e).lower() == group.lower()]
+    if not entries:
+        out.warn("Nothing left after those filters")
+        out.say()
+        return
 
     while True:
         selection = args.select or ask("Which numbers? e.g. 1-10, 12.5 or all:")
@@ -367,14 +478,9 @@ def main():
                 sys.exit(1)
             out.say(f"    {out.paint(problem, '33')}")
             continue
-        picked = []
-        for e in entries:
-            n = as_decimal(e.get("chap"))
-            if selection.strip().lower() != "all" and (n is None or not matcher(n)):
-                continue
-            if group and group_of(e).lower() != group.lower():
-                continue
-            picked.append(e)
+        take_all = selection.strip().lower() == "all"
+        picked = [e for e in entries
+                  if take_all or (as_decimal(e.get("chap")) is not None and matcher(as_decimal(e.get("chap"))))]
         if picked or args.select:
             break
         out.say(f"    {out.paint('nothing matches that, try again', '33')}")
@@ -383,21 +489,26 @@ def main():
         out.say()
         return
 
-    picked = sort_entries(picked)
+    picked = sort_entries(picked, mode)
     allowed, refused, check_failed = check_permissions(api, kind, picked)
     if refused or check_failed:
         out.warn(f"{plural(len(refused) + len(check_failed), kind)} can't be deleted with this account, left out",
-                 [(entry_row(e, episodes)[0], "not allowed") for e in refused]
-                 + [(entry_row(e, episodes)[0], p.message) for e, p in check_failed])
+                 [(entry_row(e, mode)[0], "not allowed") for e in refused]
+                 + [(entry_row(e, mode)[0], p.message) for e, p in check_failed])
     if not allowed:
         out.say()
         return
     # Permission checks finish in whatever order the threads get to them.
-    allowed = sort_entries(allowed)
+    allowed = sort_entries(allowed, mode)
 
-    header = ["Episode", "Type", "Aired", "Title", "hid"] if episodes else ["Chapter", "Vol", "Lang", "Group", "hid"]
-    out.section(f"About to permanently delete {plural(len(allowed), kind)} from {slug}", "1;31")
-    print_table([entry_row(e, episodes) for e in allowed], header)
+    header = {
+        "episode": ["Episode", "Type", "Aired", "Title", "hid"],
+        "chapter": ["Chapter", "Vol", "Lang", "Group", "hid"],
+        "user": ["Chapter", "Vol", "Lang", "Comic", "hid"],
+    }[mode]
+    where = f"uploaded by {label}" if mode == "user" else f"from {label}"
+    out.section(f"About to permanently delete {plural(len(allowed), kind)} {where}", "1;31")
+    print_table([entry_row(e, mode) for e in allowed], header)
     out.say()
 
     def full_reason(text):
@@ -437,7 +548,7 @@ def main():
 
     out.say()
     t0 = time.perf_counter()
-    done, gone, failed, skipped, stopped = delete_all(api, kind, allowed, reason, episodes)
+    done, gone, failed, skipped, stopped = delete_all(api, kind, allowed, reason, mode)
     out.say()
     if done:
         out.step(f"Deleted {plural(len(done), kind)}", human_time(time.perf_counter() - t0))
@@ -450,14 +561,14 @@ def main():
 
     if gone:
         out.section(f"Already gone ({len(gone)})", "1;33")
-        out.rows([("hid", ", ".join(e["hid"] for e in sort_entries(gone)))])
+        out.rows([("hid", ", ".join(e["hid"] for e in sort_entries(gone, mode)))])
     if failed:
         out.section(f"Failed ({len(failed)})", "1;31")
-        out.rows([(f"{entry_row(e, episodes)[0]} {e['hid']}", p.message)
+        out.rows([(f"{entry_row(e, mode)[0]} {e['hid']}", p.message)
                   for e, p in sorted(failed, key=lambda pair: number_key(pair[0].get("chap")))], "31")
     if skipped:
         out.section(f"Not sent ({len(skipped)})", "1;33")
-        out.rows([("hid", ", ".join(e["hid"] for e in sort_entries(skipped)))])
+        out.rows([("hid", ", ".join(e["hid"] for e in sort_entries(skipped, mode)))])
 
     out.say()
     out.say(f"  {out.bold(plural(len(done), kind) + ' deleted')} {out.dim('in ' + human_time(time.perf_counter() - started))}")
