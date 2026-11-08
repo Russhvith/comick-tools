@@ -1,0 +1,32 @@
+.dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: var(--muted-foreground);
+  flex: none;
+}
+
+.dot[data-status="running"],
+.dot[data-status="pending"] {
+  background: var(--link);
+  box-shadow: 0 0 0 0 rgb(96 165 250 / 0.6);
+  animation: ping 1.4s ease-out infinite;
+}
+
+.dot[data-status="done"] {
+  background: var(--success);
+}
+
+.dot[data-status="failed"] {
+  background: var(--destructive);
+}
+
+.dot[data-status="stopped"] {
+  background: var(--warning);
+}
+
+@keyframes ping {
+  to {
+    box-shadow: 0 0 0 6px rgb(96 165 250 / 0);
+  }
+}

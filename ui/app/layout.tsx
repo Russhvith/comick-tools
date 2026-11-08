@@ -1,20 +1,29 @@
-import type { Metadata } from "next";
-import { Dela_Gothic_One, Instrument_Sans, JetBrains_Mono } from "next/font/google";
+import type { Metadata, Viewport } from "next";
+import { Inter } from "next/font/google";
+import { Toaster } from "@/components/organisms/Toaster";
+import { site } from "@/config/site";
 import "./globals.css";
 
-const display = Dela_Gothic_One({ weight: "400", subsets: ["latin"], variable: "--font-display" });
-const body = Instrument_Sans({ subsets: ["latin"], variable: "--font-body" });
-const mono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-mono" });
+const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
 export const metadata: Metadata = {
-  title: "comick tools",
+  title: site.name,
   description: "Run the ComicK staff tools from the browser",
+};
+
+export const viewport: Viewport = {
+  themeColor: "#1f2937",
+  colorScheme: "dark",
+  // Lets the safe-area insets in the CSS take effect on notched phones.
+  viewportFit: "cover",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${display.variable} ${body.variable} ${mono.variable}`}>
-      <body>{children}</body>
+    <html lang="en" className={inter.variable}>
+      <body>
+        <Toaster>{children}</Toaster>
+      </body>
     </html>
   );
 }

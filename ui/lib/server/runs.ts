@@ -1,9 +1,9 @@
 import { spawn, type ChildProcess } from "node:child_process";
 import { randomUUID } from "node:crypto";
+import type { RunEvent, RunStatus, RunSummary } from "@/types/runs";
 import { REPO_ROOT } from "./paths";
 
-export type RunStatus = "running" | "done" | "failed" | "stopped";
-export type RunEvent = { type: "output"; text: string } | { type: "exit"; status: RunStatus; code: number | null };
+export type { RunEvent, RunStatus, RunSummary };
 
 export type Run = {
   id: string;
@@ -16,12 +16,10 @@ export type Run = {
   code: number | null;
   output: string[];
   outputSize: number;
-  listeners: Set<(event: RunEvent) => void>;
+  listeners: Set<(event: Exclude<RunEvent, { type: "ping" }>) => void>;
   child?: ChildProcess;
   acceptsInput: boolean;
 };
-
-export type RunSummary = Pick<Run, "id" | "kind" | "title" | "toolId" | "startedAt" | "endedAt" | "status" | "code" | "acceptsInput">;
 
 // Keeps a page that reconnects able to replay what it missed, without a
 // chatty run eating memory forever.
@@ -92,7 +90,7 @@ export function finish(run: Run, status: RunStatus, code: number | null) {
 }
 
 /** Subscribe to a run. Returns what's already been printed plus an unsubscribe. */
-export function subscribe(run: Run, listener: (event: RunEvent) => void) {
+export function subscribe(run: Run, listener: (event: Exclude<RunEvent, { type: "ping" }>) => void) {
   run.listeners.add(listener);
   return { backlog: run.output.join(""), unsubscribe: () => run.listeners.delete(listener) };
 }

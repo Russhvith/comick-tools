@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
-import { rejectRemote } from "@/lib/guard";
-import { summary } from "@/lib/runs";
-import { startUpdate, updateRunning } from "@/lib/update";
+import { rejectRemote } from "@/lib/server/guard";
+import { summary } from "@/lib/server/runs";
+import { startUpdate, updateRunning } from "@/lib/server/update";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";

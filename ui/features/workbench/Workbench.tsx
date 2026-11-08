@@ -1,0 +1,211 @@
+"use client";
+
+import { useCallback, useMemo, useState } from "react";
+import { Banner } from "@/components/molecules/Banner";
+import { NavItem } from "@/components/molecules/NavItem";
+import { SegmentedControl } from "@/components/molecules/SegmentedControl";
+import { CommandPalette } from "@/components/organisms/CommandPalette";
+import { Sidebar, SidebarSection } from "@/components/organisms/Sidebar";
+import { useToast } from "@/components/organisms/Toaster";
+import { TopBar } from "@/components/organisms/TopBar";
+import { AppShell } from "@/components/templates/AppShell";
+import { shortcuts } from "@/config/shortcuts";
+import { site } from "@/config/site";
+import { groups, toolIcon } from "@/config/tools";
+import { useHotkey } from "@/hooks/useHotkey";
+import { useViewTransition } from "@/hooks/useViewTransition";
+import { buildCommands } from "@/features/command/buildCommands";
+import { FileEditor } from "@/features/files/components/FileEditor";
+import { stopRun } from "@/features/runs/api";
+import { RecentRuns } from "@/features/runs/components/RecentRuns";
+import { RunConsole } from "@/features/runs/components/RunConsole";
+import { addRunOptimistically, markRun, useRuns } from "@/features/runs/useRuns";
+import { ScriptForm } from "@/features/tools/components/ScriptForm";
+import { ToolHeader } from "@/features/tools/components/ToolHeader";
+import { RestartOverlay } from "@/features/updates/components/RestartOverlay";
+import { UpdateControl } from "@/features/updates/components/UpdateControl";
+import { startUpdate, useVersion, waitForRestart } from "@/features/updates/useVersion";
+import type { RunStatus, RunSummary } from "@/types/runs";
+import type { Tool, ToolGroup } from "@/types/tools";
+import styles from "./Workbench.module.css";
+
+type Props = {
+  tools: Tool[];
+  cookieSet: boolean;
+  version: string;
+  initialRuns: RunSummary[];
+};
+
+export function Workbench({ tools, cookieSet, version, initialRuns }: Props) {
+  const [toolId, setToolId] = useState(tools[0]?.id);
+  const [scriptId, setScriptId] = useState(tools[0]?.scripts[0]?.id);
+  const [activeRunId, setActiveRunId] = useState<string | null>(() => initialRuns.find((r) => r.status === "running")?.id ?? null);
+  const [refreshKey, setRefreshKey] = useState(0);
+  const [paletteOpen, setPaletteOpen] = useState(false);
+  const [restarting, setRestarting] = useState(false);
+  const [updateWatch, setUpdateWatch] = useState<{ runId: string; startedAt: number } | null>(null);
+
+  const { runs, busy, refresh } = useRuns(initialRuns);
+  const { data: versionInfo, checkNow } = useVersion();
+  const toast = useToast();
+  const transition = useViewTransition();
+
+  const tool = tools.find((t) => t.id === toolId);
+  const script = tool?.scripts.find((s) => s.id === scriptId) ?? tool?.scripts[0];
+  const activeRun = runs.find((r) => r.id === activeRunId) ?? null;
+  const needsCookie = !cookieSet && (tool?.group === "admin" || script?.id === "upload");
+
+  const grouped = useMemo(() => {
+    const order: ToolGroup[] = ["public", "admin"];
+    return order.map((group) => ({ group, tools: tools.filter((t) => t.group === group) })).filter((g) => g.tools.length);
+  }, [tools]);
+
+  const openScript = useCallback(
+    (nextTool: string, nextScript: string) => {
+      transition(() => {
+        setToolId(nextTool);
+        setScriptId(nextScript);
+      });
+    },
+    [transition],
+  );
+
+  const openRun = useCallback(
+    (id: string) => {
+      setActiveRunId(id);
+      void refresh();
+    },
+    [refresh],
+  );
+
+  function onStarted(run: RunSummary) {
+    addRunOptimistically(run);
+    setActiveRunId(run.id);
+  }
+
+  async function stopActive() {
+    if (!activeRun) return;
+    markRun(activeRun.id, { status: "stopped", endedAt: Date.now() });
+    try {
+      await stopRun(activeRun.id);
+    } catch (e) {
+      toast({ tone: "error", message: (e as Error).message });
+    }
+    void refresh();
+  }
+
+  async function update() {
+    try {
+      const run = await startUpdate();
+      addRunOptimistically(run);
+      setActiveRunId(run.id);
+      setUpdateWatch({ runId: run.id, startedAt: versionInfo?.startedAt ?? 0 });
+    } catch (e) {
+      toast({ tone: "error", message: (e as Error).message });
+    }
+  }
+
+  function onExit(status: RunStatus, code: number | null) {
+    if (activeRunId) markRun(activeRunId, { status, code, endedAt: Date.now() });
+    setRefreshKey((k) => k + 1);
+    void refresh();
+    if (updateWatch && updateWatch.runId === activeRunId && status === "done") {
+      setUpdateWatch(null);
+      void waitForRestart(updateWatch.startedAt, setRestarting);
+    }
+  }
+
+  async function checkUpdates() {
+    try {
+      await checkNow();
+      toast({ tone: "success", message: "Checked GitHub for a newer release" });
+    } catch (e) {
+      toast({ tone: "error", message: `Couldn't check for updates: ${(e as Error).message}` });
+    }
+  }
+
+  useHotkey(shortcuts.commandMenu.combo, () => setPaletteOpen((open) => !open));
+
+  const commands = buildCommands(tools, runs, {
+    openScript,
+    openRun,
+    stopActive: activeRun?.status === "running" && activeRun.kind === "script" ? () => void stopActive() : null,
+    checkUpdates: () => void checkUpdates(),
+    update: versionInfo?.updateAvailable ? () => void update() : null,
+    updateLabel: versionInfo?.latest ? `Update to ${versionInfo.latest.version}` : undefined,
+  });
+
+  return (
+    <>
+      <AppShell
+        header={
+          <TopBar
+            title={site.name}
+            subtitle={site.tagline}
+            searchLabel="Search tools, files and runs"
+            searchKeys={shortcuts.commandMenu.keys}
+            onSearch={() => setPaletteOpen(true)}
+            end={<UpdateControl fallbackVersion={version} onUpdate={() => void update()} />}
+          />
+        }
+        sidebar={
+          <Sidebar label="Tools">
+            {grouped.map(({ group, tools: list }) => (
+              <SidebarSection key={group} title={groups[group].title} note={groups[group].note}>
+                {list.map((t) => (
+                  <li key={t.id}>
+                    <NavItem
+                      icon={toolIcon(t.id)}
+                      label={t.name}
+                      tone={groups[t.group].tone}
+                      active={t.id === toolId}
+                      onSelect={() => openScript(t.id, t.scripts[0]?.id ?? "")}
+                    />
+                  </li>
+                ))}
+              </SidebarSection>
+            ))}
+          </Sidebar>
+        }
+        aside={<RecentRuns runs={runs} activeId={activeRunId} onOpen={openRun} />}
+      >
+        {tool && script ? (
+          <div className={styles.stack}>
+            <ToolHeader tool={tool} />
+
+            {needsCookie && (
+              <Banner tone="warning">
+                No session cookie in <code>.env</code> yet. Set <code>COMICK_SESSION_TOKEN</code> there before running this, see{" "}
+                <a href={`${site.repoUrl}/blob/main/docs/auth.md`} target="_blank" rel="noreferrer">
+                  docs/auth.md
+                </a>
+                .
+              </Banner>
+            )}
+
+            {tool.scripts.length > 1 && (
+              <SegmentedControl
+                label="Scripts"
+                value={script.id}
+                options={tool.scripts.map((s) => ({ value: s.id, label: s.title }))}
+                onChange={(id) => openScript(tool.id, id)}
+              />
+            )}
+
+            <div className={styles.work} data-files={tool.files.length > 0}>
+              <ScriptForm key={`${tool.id}/${script.id}`} toolId={tool.id} group={tool.group} script={script} busy={busy} onStarted={onStarted} />
+              {tool.files.length > 0 && <FileEditor key={tool.id} toolId={tool.id} files={tool.files} refreshKey={refreshKey} />}
+            </div>
+
+            <RunConsole run={activeRun} onStop={() => void stopActive()} onExit={onExit} />
+          </div>
+        ) : (
+          <Banner>No tools found. Each tool needs a tool.json next to its scripts, see docs/contributing.md.</Banner>
+        )}
+      </AppShell>
+
+      <CommandPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} commands={commands} placeholder="Search tools, files and runs" />
+      {restarting && <RestartOverlay />}
+    </>
+  );
+}

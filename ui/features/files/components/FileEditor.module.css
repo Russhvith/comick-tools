@@ -1,0 +1,64 @@
+.tabs {
+  margin-bottom: 0.75rem;
+}
+
+.editor {
+  display: block;
+  width: 100%;
+  min-height: 20rem;
+  padding: 0.75rem;
+  border: 1px solid var(--input);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  color: var(--foreground-strong);
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  line-height: 1.55;
+  white-space: pre;
+  resize: vertical;
+  tab-size: 2;
+}
+
+.editor:focus-visible {
+  outline: none;
+  border-color: var(--ring);
+  box-shadow: 0 0 0 3px rgb(96 165 250 / 0.25);
+}
+
+.skeleton {
+  display: grid;
+  gap: 0.625rem;
+  min-height: 20rem;
+  padding: 0.875rem;
+  border: 1px solid var(--input);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  align-content: start;
+}
+
+.footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.625rem;
+  margin-top: 0.75rem;
+  font-size: 0.8125rem;
+}
+
+.path {
+  color: var(--muted-foreground);
+  font-size: 0.75rem;
+}
+
+.dirty {
+  color: var(--warning);
+  font-weight: 600;
+}
+
+.error {
+  color: var(--destructive);
+}
+
+.spacer {
+  flex: 1;
+}

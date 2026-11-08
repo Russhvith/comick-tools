@@ -1,8 +1,8 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { NextResponse } from "next/server";
-import { rejectRemote } from "@/lib/guard";
-import { resolveToolFile } from "@/lib/tools";
+import { rejectRemote } from "@/lib/server/guard";
+import { resolveToolFile } from "@/lib/server/tools";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";

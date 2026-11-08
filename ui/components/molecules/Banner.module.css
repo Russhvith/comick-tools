@@ -1,0 +1,30 @@
+.banner {
+  display: flex;
+  gap: 0.625rem;
+  align-items: flex-start;
+  padding: 0.625rem 0.875rem;
+  border-left: 6px solid;
+  border-radius: var(--radius-sm);
+  font-size: 0.875rem;
+}
+
+.banner code {
+  font-size: 0.8125rem;
+}
+
+.icon {
+  flex: none;
+  margin-top: 0.125rem;
+}
+
+.info {
+  background: var(--info-bg);
+  border-color: var(--info-border);
+  color: var(--info-text);
+}
+
+.warning {
+  background: var(--warning-bg);
+  border-color: var(--warning-border);
+  color: var(--warning-text);
+}

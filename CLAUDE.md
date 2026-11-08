@@ -5,6 +5,8 @@ Monorepo of Python staff tools for ComicK. Each tool lives in its own folder und
 ## Web UI
 
 - `ui/` is a Next.js app (Node 20.9+, TypeScript) that runs the tools in a browser console. It lists tools from each tool's `tool.json`.
+- Layout: feature folders under `ui/features/` for app logic, atomic design (`atoms`, `molecules`, `organisms`, `templates`) under `ui/components/` for shared UI. `components/` never imports from `features/`. Server only code goes in `ui/lib/server/`. Details in `ui/README.md`.
+- Visual design copies comick.dev: tokens in `ui/app/globals.css`, Inter, Lucide icons. Monospace only for the console, key hints and file paths.
 - The Windows 7 rule below covers the Python tools, not `ui/`. The UI is optional and every tool must keep working from the command line.
 - Every script prompt needs a matching flag that skips it, since the UI turns filled fields into flags.
 - The server listens on 127.0.0.1 only and checks Host and Origin on every route. Keep it that way.

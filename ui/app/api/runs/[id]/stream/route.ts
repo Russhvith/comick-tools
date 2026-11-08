@@ -1,5 +1,5 @@
-import { rejectRemote } from "@/lib/guard";
-import { getRun, subscribe, type RunEvent } from "@/lib/runs";
+import { rejectRemote } from "@/lib/server/guard";
+import { getRun, subscribe, type RunEvent } from "@/lib/server/runs";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";

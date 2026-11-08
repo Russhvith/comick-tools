@@ -1,0 +1,84 @@
+.viewport {
+  position: fixed;
+  right: max(1rem, env(safe-area-inset-right));
+  bottom: max(1rem, env(safe-area-inset-bottom));
+  z-index: 60;
+  display: grid;
+  gap: 0.5rem;
+  width: min(24rem, calc(100vw - 2rem));
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.625rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--card);
+  box-shadow: 0 10px 30px rgb(0 0 0 / 0.35);
+  font-size: 0.875rem;
+  /* Transitions rather than keyframes, so a toast dismissed mid-entry
+     reverses from where it is instead of jumping. */
+  transition:
+    opacity 180ms var(--ease-out),
+    transform 180ms var(--ease-out);
+}
+
+@starting-style {
+  .toast {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+.leaving {
+  opacity: 0;
+  transform: translateY(8px);
+}
+
+.success {
+  color: var(--success);
+  flex: none;
+}
+
+.error {
+  color: var(--destructive);
+  flex: none;
+}
+
+.message {
+  flex: 1;
+  min-width: 0;
+}
+
+.action {
+  border: 0;
+  background: none;
+  color: var(--link);
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0.25rem;
+}
+
+.action:hover {
+  color: var(--link-hover);
+}
+
+.close {
+  display: grid;
+  place-items: center;
+  border: 0;
+  background: none;
+  color: var(--muted-foreground);
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: var(--radius-sm);
+}
+
+.close:hover {
+  color: var(--foreground-strong);
+}

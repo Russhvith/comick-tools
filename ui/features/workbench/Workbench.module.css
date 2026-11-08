@@ -1,0 +1,21 @@
+.stack {
+  display: grid;
+  gap: 1.25rem;
+  max-width: 78rem;
+}
+
+.work {
+  display: grid;
+  gap: 1.25rem;
+  align-items: start;
+}
+
+.work[data-files="true"] {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+}
+
+@media (max-width: 1100px) {
+  .work[data-files="true"] {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { rejectRemote } from "@/lib/guard";
-import { cookieConfigured, loadTools } from "@/lib/tools";
+import { rejectRemote } from "@/lib/server/guard";
+import { cookieConfigured, loadTools } from "@/lib/server/tools";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";

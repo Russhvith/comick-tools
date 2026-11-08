@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { rejectRemote } from "@/lib/guard";
-import { versionInfo } from "@/lib/version";
+import { rejectRemote } from "@/lib/server/guard";
+import { versionInfo } from "@/lib/server/version";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";

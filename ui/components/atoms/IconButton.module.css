@@ -1,0 +1,31 @@
+.iconButton {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border: 0;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--muted-foreground);
+  cursor: pointer;
+  transition:
+    background-color 120ms,
+    color 120ms;
+}
+
+/* The button is drawn small but takes taps across a 44px square. */
+.iconButton::after {
+  content: "";
+  position: absolute;
+  inset: -8px;
+}
+
+.iconButton:hover {
+  background: var(--accent);
+  color: var(--foreground-strong);
+}
+
+.danger:hover {
+  color: var(--destructive);
+}

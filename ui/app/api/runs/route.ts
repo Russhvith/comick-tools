@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
-import { rejectRemote } from "@/lib/guard";
-import { listRuns, startScript, summary } from "@/lib/runs";
-import { buildArgs, findScript } from "@/lib/tools";
-import { updateRunning } from "@/lib/update";
+import { rejectRemote } from "@/lib/server/guard";
+import { rememberKey, runForKey } from "@/lib/server/idempotency";
+import { getRun, listRuns, startScript, summary } from "@/lib/server/runs";
+import { buildArgs, findScript } from "@/lib/server/tools";
+import { updateRunning } from "@/lib/server/update";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -16,6 +17,11 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
   const refused = rejectRemote(req);
   if (refused) return refused;
+  const key = req.headers.get("idempotency-key");
+  const existing = runForKey(key);
+  const existingRun = existing ? getRun(existing) : undefined;
+  if (existingRun) return NextResponse.json({ run: summary(existingRun) }, { status: 200 });
+
   if (updateRunning()) {
     return NextResponse.json({ error: "An update is running, try again once it's done" }, { status: 409 });
   }
@@ -36,5 +42,6 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: (error as Error).message }, { status: 400 });
   }
   const run = startScript(`${found.tool.name}: ${found.script.title}`, found.tool.id, found.file, args);
+  rememberKey(key, run.id);
   return NextResponse.json({ run: summary(run) }, { status: 201 });
 }

@@ -1,0 +1,36 @@
+.control {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.version {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--foreground);
+  font-variant-numeric: tabular-nums;
+}
+
+.status {
+  font-weight: 400;
+  color: var(--muted-foreground);
+}
+
+.spinning svg {
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 960px) {
+  .status {
+    display: none;
+  }
+}

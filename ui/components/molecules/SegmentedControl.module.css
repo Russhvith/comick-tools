@@ -1,0 +1,38 @@
+.group {
+  --pad: 3px;
+  display: inline-flex;
+  justify-self: start;
+  width: fit-content;
+  max-width: 100%;
+  overflow-x: auto;
+  gap: 2px;
+  padding: var(--pad);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: rgb(55 65 81 / 0.6);
+}
+
+.segment {
+  height: 2rem;
+  padding: 0 0.875rem;
+  border: 0;
+  /* Inner radius = outer radius minus the padding between them. */
+  border-radius: calc(var(--radius-md) - var(--pad));
+  background: transparent;
+  color: var(--muted-foreground);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background-color 140ms,
+    color 140ms;
+}
+
+.segment:hover {
+  color: var(--foreground-strong);
+}
+
+.active {
+  background: var(--card);
+  color: var(--foreground-strong);
+}

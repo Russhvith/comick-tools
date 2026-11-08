@@ -33,11 +33,53 @@ Everything else (session cookie, rate limits) comes from the root `.env`, same a
 
 ## What's on the page
 
-- **Menu** with every tool, grouped into public and admin. Admin tools are shown in pink.
+The look follows comick.dev: same dark palette, Inter, Lucide icons, the sticky top bar and left sidebar.
+
+- **Sidebar** with every tool, grouped into public and admin. Admin tools are marked in red.
 - **A form per script**, built from the tool's `tool.json`. Filled fields become flags. Empty ones are asked in the console.
 - **Data files** a tool declares, like the importer's `input.json` and `output.txt`, open in an editor next to the form. Paste the Crunchyroll response straight in, or fix episode types after formatting, then save.
 - **Console** running the script. Click in it and type to answer a prompt, press Enter to send. `Ctrl + C` or the Stop button ends the run.
-- **Recent runs** in the menu. Clicking one replays its output, including the answers typed into it.
+- **Recent runs** on the right. Clicking one replays its output, including the answers typed into it.
+- **Command menu** on `Ctrl K` (`⌘ K` on a Mac) to jump to any tool, file or recent run, stop the current run, or check for updates.
+
+| Shortcut | Does |
+| --- | --- |
+| `Ctrl K` | Open the command menu |
+| `Ctrl Enter` | Run the form on screen |
+| `Ctrl S` | Save the open data file |
+| `Ctrl C` in the console | Stop the run |
+
+Saving a data file shows an undo toast for a few seconds. Starting a run sends an idempotency key, so a double click or a retried request can't start the same script twice.
+
+## Code layout
+
+```
+ui/
+  app/            routes: the page and the API
+  features/       one folder per feature, each with its own components and hooks
+    tools/        tool header and the script form
+    runs/         console, terminal, recent runs, run API calls
+    files/        data file editor
+    updates/      version check, update and restart
+    command/      what the command menu lists
+    workbench/    puts the features together into the page
+  components/     shared UI, in atomic design layers
+    atoms/        Button, TextInput, Kbd, Spinner, Skeleton...
+    molecules/    Field, Card, Banner, NavItem, SegmentedControl
+    organisms/    TopBar, Sidebar, CommandPalette, Toaster
+    templates/    AppShell, the page frame
+  config/         site details, tool icons, shortcuts
+  hooks/          shared hooks (data fetching, hotkeys, view transitions)
+  lib/            small helpers, and lib/server for code only the API runs
+  types/          types shared by the API and the page
+```
+
+Rules of thumb:
+
+- Anything that knows about tools, runs, files or updates lives in its feature folder. `components/` stays generic and never imports from `features/`.
+- A component only uses layers below it: atoms use nothing, molecules use atoms, organisms use both, templates arrange organisms.
+- Code under `lib/server` touches the filesystem and spawns processes. Only API routes and the server rendered page import it, never a client component.
+- Colours, radii and fonts are tokens in `app/globals.css`. Use the variables, not raw values.
 
 ## Updates
 

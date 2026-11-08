@@ -2,6 +2,7 @@ import { execFile } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import { promisify } from "node:util";
+import type { Release, VersionInfo } from "@/types/version";
 import { REPO_ROOT } from "./paths";
 
 const run = promisify(execFile);
@@ -11,18 +12,6 @@ export const GITHUB_REPO = process.env.COMICK_TOOLS_REPO || "Russhvith/comick-to
 // caching keeps a tab left open all day well under that.
 const CACHE_MS = 10 * 60 * 1000;
 export const SERVER_STARTED_AT = Date.now();
-
-export type Release = { version: string; tag: string; name: string; url: string; publishedAt: string; notes: string };
-export type VersionInfo = {
-  current: string;
-  commit: string | null;
-  branch: string | null;
-  latest: Release | null;
-  updateAvailable: boolean;
-  checkError: string | null;
-  supervised: boolean;
-  startedAt: number;
-};
 
 let cached: { at: number; release: Release | null; error: string | null } | null = null;
 
