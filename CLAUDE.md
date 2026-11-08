@@ -2,6 +2,14 @@
 
 Monorepo of Python staff tools for ComicK. Each tool lives in its own folder under `tools/public/` (any account can use it) or `tools/admin/` (needs admin rights). Today that is `tools/public/crunchyroll-importer/` and `tools/admin/mass-deleter/`. Repo wide guides are in `docs/`. Code more than one tool needs (console output, .env loading, the rate limited ComicK API client) lives in `lib/comick_tools/`, and scripts put `lib/` on `sys.path` themselves since they're run directly.
 
+## Web UI
+
+- `ui/` is a Next.js app (Node 20.9+, TypeScript) that runs the tools in a browser console. It lists tools from each tool's `tool.json`.
+- The Windows 7 rule below covers the Python tools, not `ui/`. The UI is optional and every tool must keep working from the command line.
+- Every script prompt needs a matching flag that skips it, since the UI turns filled fields into flags.
+- The server listens on 127.0.0.1 only and checks Host and Origin on every route. Keep it that way.
+- Releases: bump `VERSION`, tag `vX.Y.Z`, publish a GitHub release. The UI's update check reads the latest release.
+
 ## Compatibility
 
 - Tools must run on Windows 7, which caps Python at 3.8. Nothing newer than 3.8 in syntax or stdlib (no `match`, no `str.removeprefix`, no `datetime.fromisoformat` on strings ending in Z, no `list[str]` style hints evaluated at runtime).
@@ -32,4 +40,4 @@ Monorepo of Python staff tools for ComicK. Each tool lives in its own folder und
 
 ## Adding a tool
 
-Follow `docs/contributing.md`: kebab-case folder under `tools/public/` or `tools/admin/`, `README.md`, `requirements.txt`, a `data/` folder (with `.gitkeep`) that input and output files default to, new env vars into `.env.example`, row in the root README tools table.
+Follow `docs/contributing.md`: kebab-case folder under `tools/public/` or `tools/admin/`, `README.md`, `requirements.txt`, `tool.json`, a `data/` folder (with `.gitkeep`) that input and output files default to, new env vars into `.env.example`, row in the root README tools table.

@@ -137,6 +137,12 @@ export function startScript(title: string, toolId: string, file: string, args: s
 export function sendInput(run: Run, line: string): boolean {
   if (run.status !== "running" || !run.acceptsInput || !run.child?.stdin?.writable) return false;
   run.child.stdin.write(`${line}\n`);
+  // The console that typed this already echoed it, so live listeners don't
+  // get it again. It still goes in the backlog, otherwise a replay shows
+  // every prompt unanswered with the next output glued onto it.
+  const echo = `${line}\r\n`;
+  run.output.push(echo);
+  run.outputSize += echo.length;
   return true;
 }
 
