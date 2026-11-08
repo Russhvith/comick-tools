@@ -7,6 +7,7 @@ from the root .env.
 """
 
 import argparse
+import os
 import re
 import sys
 import threading
@@ -369,7 +370,8 @@ def differences(job, item):
 
 
 def confirm(question):
-    if not sys.stdin.isatty():
+    # The web UI pipes stdin but has a person typing into it.
+    if not sys.stdin.isatty() and os.environ.get("COMICK_TOOLS_FORCE_TTY") != "1":
         err.fail("No terminal to ask for confirmation", [("Fix", "pass --yes to upload without the prompt")])
         sys.exit(1)
     out.say()

@@ -39,8 +39,12 @@ class Console:
 
     def __init__(self, stream):
         self.stream = stream
-        self.color = stream.isatty() and "NO_COLOR" not in os.environ and not LEGACY_WINDOWS
-        if self.color and os.name == "nt":
+        # The web UI runs scripts over pipes but renders output in a real
+        # terminal emulator, so it asks for terminal behaviour explicitly.
+        forced = os.environ.get("COMICK_TOOLS_FORCE_TTY") == "1"
+        tty = stream.isatty() or forced
+        self.color = tty and "NO_COLOR" not in os.environ and not LEGACY_WINDOWS
+        if self.color and os.name == "nt" and not forced:
             self.color = enable_windows_vt(stream)
 
         fancy = not LEGACY_WINDOWS
@@ -50,7 +54,7 @@ class Console:
             except (UnicodeEncodeError, LookupError):
                 fancy = False
         self.ok, self.bad, self.arrow = ("✓", "✗", "›") if fancy else ("+", "x", ">")
-        self.live = stream.isatty()
+        self.live = tty
 
     def paint(self, text, code):
         return f"\033[{code}m{text}\033[0m" if self.color else text

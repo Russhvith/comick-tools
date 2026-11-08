@@ -1,0 +1,32 @@
+{
+  "name": "Crunchyroll importer",
+  "summary": "Turn a Crunchyroll season into ComicK episodes.",
+  "scripts": [
+    {
+      "id": "format",
+      "file": "format_episodes.py",
+      "title": "Format episodes",
+      "summary": "Reads data/input.json and writes data/output.txt plus preview images. Edit the episode types in output.txt before uploading.",
+      "fields": [
+        { "flag": "--keep-numbers", "type": "bool", "label": "Keep Crunchyroll's episode numbers" },
+        { "flag": "--no-images", "type": "bool", "label": "Skip downloading preview images" }
+      ]
+    },
+    {
+      "id": "upload",
+      "file": "upload_episodes.py",
+      "title": "Upload to ComicK",
+      "summary": "Sends data/output.txt to an anime. Episodes already on ComicK are skipped and listed.",
+      "fields": [
+        { "flag": "--slug", "type": "text", "label": "Anime slug", "placeholder": "tensei-shitara-slime-datta-ken-3rd-season" },
+        { "flag": "--note", "type": "text", "label": "Extra moderator note", "placeholder": "Added after the importer credit, review mode only" },
+        { "flag": "--dry-run", "type": "bool", "label": "Dry run, upload nothing" },
+        { "flag": "--yes", "type": "bool", "label": "Upload without asking first" }
+      ]
+    }
+  ],
+  "files": [
+    { "path": "data/input.json", "label": "Crunchyroll response", "hint": "Paste the season episodes response here" },
+    { "path": "data/output.txt", "label": "Formatted episodes", "hint": "Change (main) to (recap) or (filler) where needed" }
+  ]
+}

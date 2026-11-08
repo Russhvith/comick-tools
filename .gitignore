@@ -112,3 +112,9 @@ exports/
 # Per tool data folders hold real exports, keep only the folder itself
 tools/*/*/data/*
 !tools/*/*/data/.gitkeep
+
+# Web UI
+node_modules/
+ui/.next/
+ui/next-env.d.ts
+ui/*.tsbuildinfo

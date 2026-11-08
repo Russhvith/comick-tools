@@ -1,0 +1,24 @@
+{
+  "name": "Mass deleter",
+  "summary": "Delete chapters or episodes in bulk, from a comic or from one user's uploads.",
+  "scripts": [
+    {
+      "id": "delete",
+      "file": "mass_delete.py",
+      "title": "Delete chapters or episodes",
+      "summary": "Anything left blank gets asked in the console. Deleting always needs DELETE typed in the console.",
+      "fields": [
+        { "flag": "--slug", "type": "text", "label": "Comic or anime slug", "placeholder": "Leave empty when using a user" },
+        { "flag": "--user", "type": "text", "label": "User id or profile link", "placeholder": "https://comick.dev/user/.../uploaded-chapters" },
+        { "flag": "--type", "type": "select", "label": "What to delete", "options": ["chapter", "episode"] },
+        { "flag": "--lang", "type": "text", "label": "Language", "placeholder": "en, or all" },
+        { "flag": "--group", "type": "text", "label": "Only from group", "placeholder": "Comic chapters only" },
+        { "flag": "--comic", "type": "text", "label": "Only from comic", "placeholder": "User uploads only" },
+        { "flag": "--select", "type": "text", "label": "Numbers", "placeholder": "1-10, 12.5 or all" },
+        { "flag": "--reason", "type": "text", "label": "Reason", "placeholder": "Why these are being deleted" },
+        { "flag": "--dry-run", "type": "bool", "label": "Dry run, delete nothing" }
+      ]
+    }
+  ],
+  "files": []
+}
