@@ -77,27 +77,19 @@ def ask_until(question, check, default=None, hint=None):
 def account_fields(me):
     """Pull active / state / role / username out of whoami.
 
-    The interesting fields might sit at the top level or under a user
-    style object, so look in both rather than guessing one shape.
+    The session itself carries `active`, the identity behind it carries
+    `state` and the username, and the ComicK profile (`user_info`, with
+    `info` as an older copy of the same thing) carries the role.
     """
-    scopes = [me] + [me[k] for k in ("user", "data", "profile", "account") if isinstance(me.get(k), dict)]
-
-    def pick(key):
-        for scope in scopes:
-            if key in scope:
-                return scope[key]
-        return None
-
-    roles = pick("roles")
-    roles = [str(r).lower() for r in roles] if isinstance(roles, list) else []
-    role = pick("role")
-    if isinstance(role, str):
-        roles.insert(0, role.lower())
+    identity = me.get("identity") if isinstance(me.get("identity"), dict) else {}
+    traits = identity.get("traits") if isinstance(identity.get("traits"), dict) else {}
+    profile = next((me[k] for k in ("user_info", "info") if isinstance(me.get(k), dict)), {})
+    role = profile.get("role")
     return {
-        "active": pick("active"),
-        "state": pick("state"),
-        "roles": roles,
-        "name": pick("username") or pick("name") or pick("display_name"),
+        "active": me.get("active"),
+        "state": identity.get("state"),
+        "roles": [role.lower()] if isinstance(role, str) else [],
+        "name": traits.get("username"),
     }
 
 

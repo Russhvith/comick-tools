@@ -71,7 +71,7 @@ Every answer can also come from a flag, which skips that prompt. The `DELETE` co
 ### What a run does
 
 1. **Checks the cookie.** No `COMICK_SESSION_TOKEN` in `.env` and it stops.
-2. **Checks the account** with `GET /v2.0/sessions/whoami`. It needs `active: true`, `state: "active"`, and a role of `trusted`, `moderator` or `admin`. Anything else stops the run there.
+2. **Checks the account** with `GET /v2.0/sessions/whoami`. It needs `active: true` on the session, `identity.state: "active"`, and `user_info.role` (or `info.role`) of `trusted`, `moderator` or `admin`. Anything else stops the run there.
 3. **Lists the chapters or episodes.** Looks up the comic's hid from the slug (`?media_type=anime` for episodes), then pages through `/v1.0/comic/{hid}/chapters`, 100 at a time, filtered by language for chapters or `entry_type=episode` for episodes.
 4. **Narrows it down** by group (chapters only) and by number. Ranges include decimals, so `12-13` also picks `12.5`. Chapters without a number only get picked by `all`.
 5. **Checks permission for each one** with `GET /{chapter|episode}/{hid}/manage_permissions`. Anything without `can_delete: true` is listed and left out.
