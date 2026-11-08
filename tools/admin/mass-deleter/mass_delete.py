@@ -24,6 +24,7 @@ from comick_tools.console import err, human_time, out, plural  # noqa: E402
 from comick_tools.env import SettingsError, comick_settings  # noqa: E402
 
 USER_AGENT = "comick-tools/mass-deleter"
+WHOAMI_PATH = "/v2.0/sessions/whoami"
 ALLOWED_ROLES = ("trusted", "moderator", "admin")
 # Appended to every reason so reviewers and the audit log can tell these
 # came from a script, and where to find it.
@@ -74,7 +75,7 @@ def ask_until(question, check, default=None, hint=None):
 
 
 def account_fields(me):
-    """Pull active / state / role / username out of /me.
+    """Pull active / state / role / username out of whoami.
 
     The interesting fields might sit at the top level or under a user
     style object, so look in both rather than guessing one shape.
@@ -102,15 +103,15 @@ def account_fields(me):
 
 def check_account(api):
     try:
-        me = api.request("GET", "/me")
+        me = api.request("GET", WHOAMI_PATH)
     except ApiError as e:
         if e.is_auth:
             err.fail("Session cookie was rejected", [("Fix", "grab a fresh one, see docs/auth.md")])
         else:
-            err.fail("Couldn't load the account behind this cookie", [("/me", e.message)])
+            err.fail("Couldn't load the account behind this cookie", [("whoami", e.message)])
         sys.exit(1)
     if not isinstance(me, dict):
-        err.fail("Couldn't load the account behind this cookie", [("/me", "unexpected response")])
+        err.fail("Couldn't load the account behind this cookie", [("whoami", "unexpected response")])
         sys.exit(1)
 
     info = account_fields(me)

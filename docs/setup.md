@@ -61,7 +61,7 @@ from comick_tools.api import connect
 from comick_tools.env import comick_settings
 
 api = connect(comick_settings(), "comick-tools/my-tool")
-me = api.request("GET", "/me")
+me = api.request("GET", "/v2.0/sessions/whoami")
 ```
 
 `connect` gives back a client that adds the cookie, keeps to both rate limits and retries a 429 once.
