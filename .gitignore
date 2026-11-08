@@ -14,11 +14,10 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
-lib64/
-# The repo's own shared code lives in lib/ at the root, the rule above is
-# only meant for build output.
-!/lib/
+# The template's usual lib/ rule is left out on purpose. Both lib/ and
+# ui/lib/ hold real source here, and a blanket lib/ quietly kept them out
+# of commits. Setuptools build output lands under build/ anyway.
+/lib64/
 parts/
 sdist/
 var/
