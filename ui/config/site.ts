@@ -6,8 +6,7 @@ export const site = {
   comickUrl: "https://comick.dev",
 };
 
-/** How often the runs list refreshes, faster while something is running. */
+/** How often the runs list refreshes while a run is going. Idle means never. */
 export const polling = {
-  runsIdle: 5000,
-  runsBusy: 1500,
+  runsWhileRunning: 3000,
 };

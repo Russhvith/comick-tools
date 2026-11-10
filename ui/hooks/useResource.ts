@@ -26,8 +26,14 @@ export function mutateResource<T>(key: string, data: T | ((prev: T | undefined) 
 }
 
 type Options<T> = {
-  /** Background refresh interval in ms. Omit to only fetch on mount. */
-  interval?: number;
+  /**
+   * Background refresh interval in ms, or a function of the current data
+   * that returns one (undefined or 0 means don't poll). Omit to only fetch
+   * on mount.
+   */
+  interval?: number | ((data: T | undefined) => number | undefined);
+  /** Refresh when the tab becomes visible or the window regains focus. */
+  revalidateOnFocus?: boolean;
   /** Server rendered data, shown right away and treated as fresh. */
   initial?: T;
 };
@@ -80,16 +86,38 @@ export function useResource<T>(key: string | null, fetcher: () => Promise<T>, op
     return inflight;
   }, [key]);
 
+  // Resolved on every render so a function can turn polling on and off as
+  // the data changes (poll while something is running, stop when it isn't).
+  const wait = typeof options.interval === "function" ? options.interval(entry?.data) : options.interval;
+
   useEffect(() => {
     if (!key) return;
     if (options.initial === undefined || Date.now() - (cache.get(key)?.updatedAt ?? 0) > 2000) void revalidate();
-    if (!options.interval) return;
+    // options.initial is left out on purpose, it only matters on first render.
+  }, [key, revalidate]);
+
+  useEffect(() => {
+    if (!key || !wait) return;
     const timer = setInterval(() => {
       if (document.visibilityState === "visible") void revalidate();
-    }, options.interval);
+    }, wait);
     return () => clearInterval(timer);
-    // options.initial is left out on purpose, it only matters on first render.
-  }, [key, options.interval, revalidate]);
+  }, [key, wait, revalidate]);
+
+  // Coming back to the tab is when stale data matters, so refresh then
+  // instead of polling in the background.
+  useEffect(() => {
+    if (!key || !options.revalidateOnFocus) return;
+    const onVisible = () => {
+      if (document.visibilityState === "visible") void revalidate();
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    window.addEventListener("focus", onVisible);
+    return () => {
+      document.removeEventListener("visibilitychange", onVisible);
+      window.removeEventListener("focus", onVisible);
+    };
+  }, [key, options.revalidateOnFocus, revalidate]);
 
   return {
     data: entry?.data,

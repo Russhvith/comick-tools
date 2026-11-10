@@ -3,7 +3,7 @@
   "private": true,
   "description": "Local web UI for the comick-tools scripts",
   "scripts": {
-    "dev": "next dev --hostname 127.0.0.1 --port 4321",
+    "dev": "next dev --port 4321",
     "build": "next build",
     "start": "node scripts/serve.mjs",
     "typecheck": "tsc --noEmit"
