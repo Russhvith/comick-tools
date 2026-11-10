@@ -38,7 +38,7 @@ time.sleep(1.2)
 4. Load config from the root `.env` and talk to ComicK through `lib/comick_tools` (`env.comick_settings()`, `api.connect()`), which already handles the cookie and rate limits. See [setup.md](setup.md).
 5. Any new env var goes into `.env.example` with a one line comment.
 6. Add a row to the tools table in the root `README.md`.
-7. Add a `tool.json` so the web UI lists it. Copy one from an existing tool. Each script declares its flags as `bool`, `text` or `select` fields, and the UI builds the form from them. Only declared scripts and flags can be run from the UI, and only listed `files` can be edited.
+7. Add a `tool.json` so the web UI lists it. Copy one from an existing tool. Its `name` is in Title Case, like "Crunchyroll Importer". Each script declares its flags as `bool`, `text` or `select` fields, and the UI builds the form from them. Only declared scripts and flags can be run from the UI, and only listed `files` can be edited.
 
 Mark scripts that talk to ComicK with `"needsCookie": true`, so the UI warns when `.env` has no cookie.
 

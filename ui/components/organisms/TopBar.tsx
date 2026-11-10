@@ -19,7 +19,7 @@ export function TopBar({ wordmark, subtitle, searchLabel, searchKeys, onSearch, 
     <header className={styles.bar}>
       <div className={styles.brand}>
         <span className={styles.logo}>
-          <LogoMark size={34} />
+          <LogoMark size={32} />
         </span>
         <span className={styles.names}>
           <span className={styles.title}>

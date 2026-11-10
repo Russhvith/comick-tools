@@ -37,7 +37,7 @@ The look follows comick.dev: same dark palette, Inter, Lucide icons, the sticky 
 
 - **Sidebar** with every tool, grouped into public and admin. Admin tools are marked in red.
 - **A form per script**, built from the tool's `tool.json`. Filled fields become flags. Empty ones are asked in the console.
-- **Steps** for tools that run in order. The Crunchyroll importer shows four:
+- **Steps** for tools that run in order. The Crunchyroll Importer shows four:
   1. Paste the response. Once it's valid the step shows the series, season and episode count instead of the JSON.
   2. Format. Locked until step 1 is valid. If any episode in the formatted file is tagged recap or filler, it asks before replacing them.
   3. Check the episode types. One row per episode with a Main / Recap / Filler switch. A change rewrites only that episode's header line and saves straight away, with undo.
