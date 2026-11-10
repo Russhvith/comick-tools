@@ -8,43 +8,11 @@
 .box {
   display: grid;
   justify-items: center;
-  gap: 0.75rem;
-  width: min(28rem, 100%);
-  text-align: center;
+  width: min(30rem, 100%);
 }
 
 .logo {
-  margin-bottom: 1.5rem;
-}
-
-.icon {
-  display: grid;
-  place-items: center;
-  width: 3rem;
-  height: 3rem;
-  border-radius: var(--radius-lg);
-  background: rgb(220 38 38 / 0.12);
-  color: var(--destructive);
-}
-
-.code {
-  margin: 0.5rem 0 0;
-  font-size: 0.8125rem;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  color: var(--destructive);
-}
-
-.title {
-  font-size: 1.75rem;
-  font-weight: 800;
-  letter-spacing: -0.02em;
-}
-
-.text {
-  margin: 0;
-  line-height: 1.6;
-  color: var(--muted-foreground);
+  margin-bottom: 2rem;
 }
 
 .button {
@@ -52,7 +20,6 @@
   align-items: center;
   gap: 0.5rem;
   height: 2.5rem;
-  margin-top: 0.75rem;
   padding: 0 1rem;
   border: 1px solid var(--border);
   border-radius: var(--radius-md);

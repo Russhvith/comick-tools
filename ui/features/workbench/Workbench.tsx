@@ -23,6 +23,8 @@ import { StepFlow } from "@/features/steps/StepFlow";
 import { ScriptForm } from "@/features/tools/components/ScriptForm";
 import { ToolHeader } from "@/features/tools/components/ToolHeader";
 import { ToolNav } from "@/features/tools/components/ToolNav";
+import { AdminGate } from "@/features/account/AdminGate";
+import { RoleNote } from "@/features/account/RoleNote";
 import { RestartOverlay } from "@/features/updates/components/RestartOverlay";
 import { UpdateControl } from "@/features/updates/components/UpdateControl";
 import { startUpdate, useVersion, waitForRestart } from "@/features/updates/useVersion";
@@ -171,6 +173,8 @@ export function Workbench({ tools, initialToolId, cookieSet, version, initialRun
         {tool && script ? (
           <div className={styles.stack}>
             <ToolHeader tool={tool} />
+            <RoleNote tool={tool} />
+            <AdminGate tool={tool} />
 
             {needsCookie && (
               <Banner tone="warning">

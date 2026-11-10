@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import type { LucideIcon } from "lucide-react";
+import { X, type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/cn";
 import styles from "./NavItem.module.css";
 
@@ -18,14 +18,18 @@ type Props = {
    * the browser, so opening in a new tab keeps working.
    */
   onSelect?: () => void;
+  /** Shown but crossed out, for something the current account can't use. */
+  locked?: string;
 };
 
-export function NavItem({ icon: Icon, label, detail, tone = "primary", active, href, onSelect }: Props) {
+export function NavItem({ icon: Icon, label, detail, tone = "primary", active, href, onSelect, locked }: Props) {
   return (
     <Link
       href={href}
-      className={cn(styles.item, active && styles.active)}
+      className={cn(styles.item, active && styles.active, locked && styles.locked)}
       aria-current={active ? "page" : undefined}
+      aria-label={locked ? `${label}, ${locked}` : undefined}
+      title={locked}
       onClick={(event) => {
         if (!onSelect || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
         event.preventDefault();
@@ -37,6 +41,7 @@ export function NavItem({ icon: Icon, label, detail, tone = "primary", active, h
         <span className={styles.label}>{label}</span>
         {detail && <span className={styles.detail}>{detail}</span>}
       </span>
+      {locked && <X size={14} strokeWidth={2.5} aria-hidden className={styles.lockMark} />}
     </Link>
   );
 }

@@ -70,6 +70,12 @@ export type Tool = {
    * falls back to the plain form.
    */
   flow?: string;
+  /**
+   * A line for the signed in account's role, like where its uploads end up.
+   * Keys are ComicK roles. Moderators and admins fall back to the trusted
+   * line when they have none of their own.
+   */
+  roleNotes?: Partial<Record<"user" | "uploader" | "trusted" | "moderator" | "admin", string>>;
 };
 
 export type FieldValues = Record<string, string | boolean>;

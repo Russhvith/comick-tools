@@ -25,6 +25,24 @@
   color: var(--foreground);
 }
 
+/* Still a link, so the overlay can say why, but plainly not for you. */
+.locked .label {
+  color: var(--muted-foreground);
+  text-decoration: line-through;
+  text-decoration-color: rgb(248 113 113 / 0.6);
+}
+
+.locked .icon {
+  opacity: 0.45;
+}
+
+.lockMark {
+  flex: none;
+  align-self: center;
+  margin-left: auto;
+  color: var(--destructive);
+}
+
 .active {
   background: var(--secondary);
   color: var(--foreground-strong);

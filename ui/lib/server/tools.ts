@@ -44,6 +44,7 @@ export function loadTools(): Tool[] {
           files,
           steps: readSteps(raw.steps, scripts, files),
           flow: typeof raw.flow === "string" ? raw.flow : undefined,
+          roleNotes: raw.roleNotes && typeof raw.roleNotes === "object" ? raw.roleNotes : undefined,
         });
       } catch {
         // A broken manifest hides that one tool rather than the whole menu.

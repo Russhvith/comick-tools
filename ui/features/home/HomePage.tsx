@@ -5,6 +5,8 @@ import { TopBar } from "@/components/organisms/TopBar";
 import { AppShell } from "@/components/templates/AppShell";
 import { site } from "@/config/site";
 import { groups, toolIcon } from "@/config/tools";
+import { AccountCard } from "@/features/account/AccountCard";
+import { AdminLockMark } from "@/features/account/AdminLockMark";
 import { ToolNav } from "@/features/tools/components/ToolNav";
 import { cn } from "@/lib/cn";
 import type { ChangelogSection } from "@/lib/server/repo";
@@ -103,6 +105,7 @@ export function HomePage({ tools, version, runCount, commitCount, days, changelo
                         <span className={styles.toolName}>{tool.name}</span>
                         <span className={styles.toolSummary}>{tool.summary}</span>
                         <span className={cn(styles.audience, styles[`tone-${group.tone}`])}>{group.note}</span>
+                        {tool.group === "admin" && <AdminLockMark />}
                       </span>
                       <ArrowRight size={16} aria-hidden className={styles.toolArrow} />
                     </Link>
@@ -115,6 +118,8 @@ export function HomePage({ tools, version, runCount, commitCount, days, changelo
         </div>
 
         <div className={styles.column}>
+          <AccountCard className={styles.reveal} />
+
           <dl className={cn(styles.stats, styles.reveal)} style={order(1)}>
             {stats.map((s) => (
               <div key={s.label} className={styles.stat}>

@@ -4,6 +4,7 @@ import { House } from "lucide-react";
 import { NavItem } from "@/components/molecules/NavItem";
 import { Sidebar, SidebarList, SidebarSection } from "@/components/organisms/Sidebar";
 import { groups, toolIcon } from "@/config/tools";
+import { adminLocked, useAccount } from "@/features/account/useAccount";
 import type { Tool, ToolGroup } from "@/types/tools";
 
 type Props = {
@@ -18,6 +19,8 @@ const order: ToolGroup[] = ["public", "admin"];
 
 /** The left sidebar, the same on the homepage and every tool. */
 export function ToolNav({ tools, active, onSelectTool }: Props) {
+  const { data: account } = useAccount();
+  const locked = adminLocked(account);
   return (
     <Sidebar label="Pages">
       <SidebarList>
@@ -38,6 +41,7 @@ export function ToolNav({ tools, active, onSelectTool }: Props) {
                   tone={groups[t.group].tone}
                   href={`/tools/${t.id}`}
                   active={t.id === active}
+                  locked={locked && t.group === "admin" ? "not available for your account" : undefined}
                   onSelect={onSelectTool ? () => onSelectTool(t.id) : undefined}
                 />
               </li>

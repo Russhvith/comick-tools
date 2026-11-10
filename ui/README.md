@@ -35,7 +35,9 @@ Everything else (session cookie, rate limits) comes from the root `.env`, same a
 
 - `/` is the homepage: what the tools are, who made them, some numbers, a year of commits as a calendar, the last 30 days as a chart and a changelog grouped by release tag. All of it comes from the local git clone, so it works while the repo is private.
 - `/tools/<group>/<tool>`, like `/tools/public/crunchyroll-importer`, is a tool. `/tools` opens the first one. Switching tools changes the address without reloading, so a running console keeps going and the back button works.
-- `/403` is a forbidden page, there for when something needs it.
+- `/403` is a forbidden page. The same panel shows in an overlay when an account without the trusted role opens an admin tool.
+
+On load the page asks `/api/account` which ComicK account the `.env` cookie belongs to. The server gets that through `lib/comick_tools/whoami.py`, since Cloudflare turns away Node's own requests, and only the name, role, Gravatar hash and profile numbers come back, never the email or the cookie. The answer is cached for five minutes. The homepage shows it as a card, tools can show a line per role through `roleNotes` in their `tool.json`, and admin tools are crossed out in the sidebar for accounts below trusted.
 - Any other address goes to the homepage. Unknown `/api/...` paths answer with a JSON 404 instead.
 
 ## What's on a tool page

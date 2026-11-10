@@ -1,14 +1,15 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowLeft, Lock } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { LogoMark } from "@/components/atoms/LogoMark";
+import { ForbiddenPanel } from "@/components/organisms/ForbiddenPanel";
 import { pageTitle } from "@/config/site";
 import styles from "./page.module.css";
 
 export const metadata: Metadata = { title: pageTitle("Forbidden") };
 
-// A page to send people to when they can't have what they asked for. Not
-// wired up to anything yet, it only needs to look right when it is.
+// A page to send people to when they can't have what they asked for. The
+// same panel shows in an overlay when an account opens a tool it can't use.
 export default function Forbidden() {
   return (
     <main className={styles.page}>
@@ -16,17 +17,16 @@ export default function Forbidden() {
         <Link href="/" className={styles.logo} aria-label="ComicK Tools, home">
           <LogoMark size={36} />
         </Link>
-        <span className={styles.icon} aria-hidden>
-          <Lock size={22} />
-        </span>
-        <p className={styles.code}>403</p>
-        <h1 className={styles.title}>You can&apos;t open this page</h1>
-        <p className={styles.text}>
-          Your account doesn&apos;t have access to it. If you think it should, ask whoever runs this ComicK Tools to check your role.
-        </p>
-        <Link href="/" className={styles.button}>
-          <ArrowLeft size={15} aria-hidden /> Back to the homepage
-        </Link>
+        <ForbiddenPanel
+          title="You can't open this page"
+          actions={
+            <Link href="/" className={styles.button}>
+              <ArrowLeft size={15} aria-hidden /> Back to the homepage
+            </Link>
+          }
+        >
+          <p>Your account doesn&apos;t have access to it. If you think it should, ask whoever runs this ComicK Tools to check your role.</p>
+        </ForbiddenPanel>
       </div>
     </main>
   );
