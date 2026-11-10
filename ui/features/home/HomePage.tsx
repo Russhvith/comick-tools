@@ -1,6 +1,6 @@
 import type { CSSProperties } from "react";
 import Link from "next/link";
-import { ArrowRight, BookOpen, ExternalLink, GitCommitHorizontal, Tag } from "lucide-react";
+import { ArrowRight, BookOpen, ExternalLink } from "lucide-react";
 import { TopBar } from "@/components/organisms/TopBar";
 import { AppShell } from "@/components/templates/AppShell";
 import { site } from "@/config/site";
@@ -9,6 +9,7 @@ import { ToolNav } from "@/features/tools/components/ToolNav";
 import { cn } from "@/lib/cn";
 import type { ChangelogSection } from "@/lib/server/repo";
 import type { Tool } from "@/types/tools";
+import { Changelog } from "./components/Changelog";
 import { ContributionCalendar } from "./components/ContributionCalendar";
 import { DailyBars } from "./components/DailyBars";
 import styles from "./HomePage.module.css";
@@ -23,9 +24,6 @@ type Props = {
   /** yyyy-mm-dd on the server, so the charts and the client agree. */
   today: string;
 };
-
-const longDate = (key: string) =>
-  new Date(`${key}T00:00:00Z`).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric", timeZone: "UTC" });
 
 /** Order in the entrance, so blocks settle in one after another. */
 const order = (i: number) => ({ "--i": i }) as CSSProperties;
@@ -114,40 +112,6 @@ export function HomePage({ tools, version, runCount, commitCount, days, changelo
             </ul>
           </section>
 
-          {changelog && changelog.length > 0 && (
-            <section id="changelog" className={cn(styles.section, styles.reveal)} style={order(4)} aria-labelledby="changelog-heading">
-              <h2 id="changelog-heading" className={styles.heading}>
-                Changelog
-              </h2>
-              <ol className={styles.releases}>
-                {changelog.map((release) => (
-                  <li key={release.tag ?? "unreleased"} className={styles.release}>
-                    <header className={styles.releaseHeader}>
-                      <span className={cn(styles.releaseTag, !release.tag && styles.unreleased)}>
-                        <Tag size={13} aria-hidden />
-                        {release.tag ?? "Unreleased"}
-                      </span>
-                      <span className={styles.releaseDate}>{release.date ? longDate(release.date) : "Not in a release yet"}</span>
-                    </header>
-                    <ul className={styles.commits}>
-                      {release.entries.map((entry) => (
-                        <li key={entry.hash} className={styles.commit}>
-                          <GitCommitHorizontal size={14} aria-hidden className={styles.commitIcon} />
-                          <span className={styles.commitSubject}>{entry.subject}</span>
-                          <code className={styles.commitHash}>{entry.hash}</code>
-                        </li>
-                      ))}
-                    </ul>
-                    {release.more > 0 && (
-                      <p className={styles.more}>
-                        And {release.more} more commit{release.more === 1 ? "" : "s"}.
-                      </p>
-                    )}
-                  </li>
-                ))}
-              </ol>
-            </section>
-          )}
         </div>
 
         <div className={styles.column}>
@@ -177,6 +141,15 @@ export function HomePage({ tools, version, runCount, commitCount, days, changelo
           )}
         </div>
       </div>
+
+      {changelog && changelog.length > 0 && (
+        <section id="changelog" className={cn(styles.section, styles.changelog, styles.reveal)} style={order(4)} aria-labelledby="changelog-heading">
+          <h2 id="changelog-heading" className={styles.heading}>
+            Changelog
+          </h2>
+          <Changelog releases={changelog} />
+        </section>
+      )}
 
       <footer className={styles.footer}>
         <span>
