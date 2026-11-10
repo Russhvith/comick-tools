@@ -99,6 +99,35 @@ export function resolveToolFile(toolId: string, rel: string): string | null {
   return isInside(toolDir, full) ? full : null;
 }
 
+export const IMAGE_TYPES: Record<string, string> = {
+  ".png": "image/png",
+  ".jpg": "image/jpeg",
+  ".jpeg": "image/jpeg",
+  ".webp": "image/webp",
+  ".gif": "image/gif",
+  ".avif": "image/avif",
+};
+
+/**
+ * An image a script saved next to one of the tool's files, like the
+ * previews the formatter downloads into data/images. Only image types, and
+ * only under a folder that holds a file the manifest lists, so this can't
+ * be pointed at the scripts or anything outside the tool.
+ */
+export function resolveToolImage(toolId: string, rel: string): { full: string; type: string } | null {
+  const tool = loadTools().find((t) => t.id === toolId);
+  if (!tool) return null;
+  const type = IMAGE_TYPES[path.extname(rel).toLowerCase()];
+  if (!type) return null;
+  const toolDir = path.join(TOOLS_DIR, tool.group, tool.folder);
+  const full = path.resolve(toolDir, rel);
+  const allowed = new Set(tool.files.map((f) => path.dirname(path.resolve(toolDir, f.path))));
+  for (const dir of allowed) {
+    if (isInside(toolDir, dir) && isInside(dir, full)) return { full, type };
+  }
+  return null;
+}
+
 /** Whether the shared .env (or the environment) has a session cookie. */
 export function cookieConfigured(): boolean {
   if (process.env.COMICK_SESSION_TOKEN?.trim()) return true;

@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ChevronLeft, ChevronRight, Plus, Trash2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, Image as ImageIcon, ImageOff, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/atoms/Button";
 import { IconButton } from "@/components/atoms/IconButton";
+import { Thumbnail } from "@/components/atoms/Thumbnail";
 import { Select, TextArea, TextInput } from "@/components/atoms/TextInput";
 import { ChoiceGroup } from "@/components/molecules/ChoiceGroup";
 import { DurationInput } from "@/components/molecules/DurationInput";
@@ -36,6 +37,8 @@ type Props = {
   onIndexChange: (index: number | null) => void;
   /** Writes the new file. Resolves once the server has it. */
   onSave: (next: string, number: string) => Promise<void>;
+  /** Image URL for a Preview value, or null when it isn't a local file. */
+  imageSrc: (preview: string) => string | null;
 };
 
 const same = (a: EpisodeDetails | null, b: EpisodeDetails | null) => JSON.stringify(a) === JSON.stringify(b);
@@ -46,7 +49,7 @@ function numberOnly(value: string) {
   return rest.length ? `${whole}.${rest.join("")}` : whole;
 }
 
-export function EpisodeEditor({ content, rows, index, onIndexChange, onSave }: Props) {
+export function EpisodeEditor({ content, rows, index, onIndexChange, onSave, imageSrc }: Props) {
   const [draft, setDraft] = useState<EpisodeDetails | null>(null);
   const [saved, setSaved] = useState<EpisodeDetails | null>(null);
   const [saving, setSaving] = useState(false);
@@ -131,6 +134,7 @@ export function EpisodeEditor({ content, rows, index, onIndexChange, onSave }: P
   const usedLanguages = new Set(draft.titles.map((t) => t.language.toLowerCase()));
   const freeLanguages = TITLE_LANGUAGES.filter((l) => !usedLanguages.has(l.toLowerCase()));
   const previewIsLink = /^https?:\/\//i.test(draft.preview.trim());
+  const heroSrc = imageSrc(draft.preview);
   const position = rows.findIndex((r) => r.index === index);
   const blockedStep = saving || (dirty && (invalid || changedOutside));
 
@@ -204,6 +208,25 @@ export function EpisodeEditor({ content, rows, index, onIndexChange, onSave }: P
             <Button size="sm" onClick={() => load(index)}>
               Load the new version
             </Button>
+          </div>
+        )}
+
+        {heroSrc ? (
+          <figure className={styles.hero}>
+            <Thumbnail key={heroSrc} src={heroSrc} alt={`Preview of episode ${draft.number}`} loading="eager" className={styles.heroImage} />
+            <figcaption className={styles.heroCaption}>
+              <ImageIcon size={13} aria-hidden />
+              {draft.preview.trim()}
+            </figcaption>
+          </figure>
+        ) : (
+          <div className={styles.noHero}>
+            <ImageOff size={18} aria-hidden />
+            <span>
+              {previewIsLink
+                ? "The preview wasn't downloaded, so this episode uploads without one."
+                : "No preview image, so this episode uploads without one."}
+            </span>
           </div>
         )}
 

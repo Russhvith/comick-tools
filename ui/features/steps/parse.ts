@@ -60,6 +60,7 @@ export type EpisodeRow = {
   type: string;
   title: string;
   aired: string | null;
+  preview: string | null;
 };
 
 // Same patterns as upload_episodes.py, so what we show is what it will read.
@@ -75,7 +76,7 @@ export function parseEpisodes(text: string): EpisodeRow[] {
     const line = raw.trim();
     const header = HEADER.exec(line);
     if (header) {
-      current = { index: rows.length, number: header[1], type: (header[2] ?? "main").toLowerCase(), title: "", aired: null };
+      current = { index: rows.length, number: header[1], type: (header[2] ?? "main").toLowerCase(), title: "", aired: null, preview: null };
       hasEnglish = false;
       rows.push(current);
       continue;
@@ -87,6 +88,7 @@ export function parseEpisodes(text: string): EpisodeRow[] {
     const key = field[1].trim();
     const value = (field[2] ?? "").trim();
     if (key.toLowerCase() === "aired") current.aired = value || null;
+    else if (key.toLowerCase() === "preview") current.preview = value || null;
     else if (/ title$/i.test(key) && value) {
       // English wins, otherwise the first title the file has.
       const english = /^english title$/i.test(key);

@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { FileText, Pencil } from "lucide-react";
+import { FileText, ImageOff, Pencil } from "lucide-react";
 import { Button } from "@/components/atoms/Button";
 import { Skeleton } from "@/components/atoms/Skeleton";
+import { Thumbnail } from "@/components/atoms/Thumbnail";
 import { ChoiceGroup } from "@/components/molecules/ChoiceGroup";
 import { useToast } from "@/components/organisms/Toaster";
 import { RawEditor } from "@/features/files/components/RawEditor";
@@ -11,6 +12,7 @@ import { useToolFile } from "@/features/files/useToolFile";
 import { plural } from "@/lib/format";
 import type { StepStatus } from "@/types/steps";
 import { EPISODE_TYPES, isEpisodeType, parseEpisodes, setEpisodeType, type EpisodeRow, type EpisodeType } from "../parse";
+import { previewSrc } from "../preview";
 import { EpisodeEditor } from "./EpisodeEditor";
 import type { ViewProps } from "./types";
 import styles from "./EpisodeList.module.css";
@@ -39,6 +41,14 @@ export function EpisodeList({ toolId, file, refreshKey, held, onStatus }: ViewPr
   const [rawDirty, setRawDirty] = useState(false);
   const [open, setOpen] = useState<number | null>(null);
   const toast = useToast();
+
+  // Thumbnails only when the formatter actually downloaded previews. A
+  // --no-images run leaves links, and a column of empty boxes says nothing.
+  const thumbs = useMemo(
+    () => rows.map((r) => previewSrc(toolId, file.path, r.preview, data?.modifiedAt)),
+    [rows, toolId, file.path, data?.modifiedAt],
+  );
+  const withImages = thumbs.some(Boolean);
 
   const counts = EPISODE_TYPES.map((type) => ({ type, n: rows.filter((r) => r.type === type).length }));
   const bad = rows.find((r) => !isEpisodeType(r.type));
@@ -132,7 +142,18 @@ export function EpisodeList({ toolId, file, refreshKey, held, onStatus }: ViewPr
                 >
                   <span className={styles.number}>{row.number}</span>
                   <span className={styles.title} title={row.title}>
-                    {row.title || "No title"}
+                    {withImages && (
+                      <span className={styles.thumbSlot}>
+                        {thumbs[row.index] ? (
+                          <Thumbnail src={thumbs[row.index]!} alt="" className={styles.thumb} />
+                        ) : (
+                          <span className={styles.noThumb} title="No preview, this episode uploads without one">
+                            <ImageOff size={14} aria-hidden />
+                          </span>
+                        )}
+                      </span>
+                    )}
+                    <span className={styles.titleText}>{row.title || "No title"}</span>
                     <Pencil size={13} aria-hidden className={styles.pencil} />
                   </span>
                   <span className={styles.aired}>{row.aired ?? "No date"}</span>
@@ -157,7 +178,10 @@ export function EpisodeList({ toolId, file, refreshKey, held, onStatus }: ViewPr
         rows.length > 0 && <p className={styles.tip}>Click an episode to edit its titles, dates, description and links.</p>
       )}
 
-      <EpisodeEditor content={content} rows={rows} index={open} onIndexChange={setOpen} onSave={saveEpisode} />
+      <EpisodeEditor content={content} rows={rows} index={open} onIndexChange={setOpen}
+        onSave={saveEpisode}
+        imageSrc={(preview) => previewSrc(toolId, file.path, preview, data?.modifiedAt)}
+      />
 
       <div className={styles.actions}>
         <Button variant="ghost" onClick={() => setRaw((v) => !v)} aria-expanded={raw}>
