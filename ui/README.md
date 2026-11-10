@@ -37,7 +37,12 @@ The look follows comick.dev: same dark palette, Inter, Lucide icons, the sticky 
 
 - **Sidebar** with every tool, grouped into public and admin. Admin tools are marked in red.
 - **A form per script**, built from the tool's `tool.json`. Filled fields become flags. Empty ones are asked in the console.
-- **Data files** a tool declares, like the importer's `input.json` and `output.txt`, open in an editor next to the form. Paste the Crunchyroll response straight in, or fix episode types after formatting, then save.
+- **Steps** for tools that run in order. The Crunchyroll importer shows four:
+  1. Paste the response. Once it's valid the step shows the series, season and episode count instead of the JSON.
+  2. Format. Locked until step 1 is valid. If any episode in the formatted file is tagged recap or filler, it asks before replacing them.
+  3. Check the episode types. One row per episode with a Main / Recap / Filler switch. A change rewrites only that episode's header line and saves straight away, with undo.
+  4. Upload. Locked until there are formatted episodes.
+- **Data files** of a tool without steps open in an editor next to the form. Steps that show a file also have a raw text option.
 - **Console** running the script. Click in it and type to answer a prompt, press Enter to send. `Ctrl + C` or the Stop button ends the run.
 - **Recent runs** on the right. Clicking one replays its output, including the answers typed into it.
 - **Command menu** on `Ctrl K` (`⌘ K` on a Mac) to jump to any tool, file or recent run, stop the current run, or check for updates.
@@ -58,6 +63,7 @@ ui/
   app/            routes: the page and the API
   features/       one folder per feature, each with its own components and hooks
     tools/        tool header and the script form
+    steps/        the step flow and the views it shows for data files
     runs/         console, terminal, recent runs, run API calls
     files/        data file editor
     updates/      version check, update and restart

@@ -1,7 +1,22 @@
 import fs from "node:fs";
 import path from "node:path";
-import type { Script, Tool } from "@/types/tools";
+import type { Script, Step, Tool } from "@/types/tools";
 import { GROUPS, REPO_ROOT, TOOLS_DIR, isInside } from "./paths";
+
+/**
+ * Keep only steps that point at something real, so a typo in a manifest
+ * drops that step instead of rendering an empty box. A tool whose steps
+ * all fall away just shows its scripts as tabs.
+ */
+function readSteps(raw: unknown, scripts: Script[], files: Tool["files"]): Step[] | undefined {
+  if (!Array.isArray(raw)) return undefined;
+  const steps = raw.filter((s): s is Step => {
+    if (!s || typeof s !== "object" || typeof s.id !== "string" || typeof s.title !== "string") return false;
+    if (typeof s.script === "string") return scripts.some((x) => x.id === s.script);
+    return typeof s.file === "string" && files.some((f) => f.path === s.file);
+  });
+  return steps.length ? steps : undefined;
+}
 
 /**
  * Every tool with a tool.json, read fresh on each call so a new tool or an
@@ -17,14 +32,17 @@ export function loadTools(): Tool[] {
       if (!fs.existsSync(manifest)) continue;
       try {
         const raw = JSON.parse(fs.readFileSync(manifest, "utf8"));
+        const scripts: Script[] = Array.isArray(raw.scripts) ? raw.scripts : [];
+        const files: Tool["files"] = Array.isArray(raw.files) ? raw.files : [];
         tools.push({
           id: `${group}/${folder}`,
           group,
           folder,
           name: String(raw.name || folder),
           summary: String(raw.summary || ""),
-          scripts: Array.isArray(raw.scripts) ? raw.scripts : [],
-          files: Array.isArray(raw.files) ? raw.files : [],
+          scripts,
+          files,
+          steps: readSteps(raw.steps, scripts, files),
         });
       } catch {
         // A broken manifest hides that one tool rather than the whole menu.

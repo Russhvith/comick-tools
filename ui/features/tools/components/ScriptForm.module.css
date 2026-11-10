@@ -3,6 +3,18 @@
   gap: 1.125rem;
 }
 
+.bare {
+  display: grid;
+  gap: 0.875rem;
+}
+
+.summary {
+  margin: 0;
+  max-width: 62ch;
+  font-size: 0.875rem;
+  color: var(--muted-foreground);
+}
+
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));

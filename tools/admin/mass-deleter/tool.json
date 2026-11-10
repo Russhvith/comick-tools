@@ -7,6 +7,7 @@
       "file": "mass_delete.py",
       "title": "Delete chapters or episodes",
       "summary": "Anything left blank gets asked in the console. Deleting always needs DELETE typed in the console.",
+      "needsCookie": true,
       "fields": [
         { "flag": "--slug", "type": "text", "label": "Comic or anime slug", "placeholder": "Leave empty when using a user" },
         { "flag": "--user", "type": "text", "label": "User id or profile link", "placeholder": "https://comick.dev/user/.../uploaded-chapters" },

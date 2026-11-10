@@ -5,6 +5,16 @@ export function clockTime(ms: number) {
   return new Date(ms).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
 }
 
+export function plural(n: number, word: string) {
+  return `${n} ${word}${n === 1 ? "" : "s"}`;
+}
+
+export function fileSize(bytes: number) {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`;
+  return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
+}
+
 /** Same steps as the Python side: ms, then s, then m and s. */
 export function duration(ms: number) {
   if (ms < 1000) return `${Math.round(ms)} ms`;

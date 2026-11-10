@@ -20,6 +20,7 @@ import { stopRun } from "@/features/runs/api";
 import { RecentRuns } from "@/features/runs/components/RecentRuns";
 import { RunConsole } from "@/features/runs/components/RunConsole";
 import { addRunOptimistically, markRun, useRuns } from "@/features/runs/useRuns";
+import { StepFlow } from "@/features/steps/StepFlow";
 import { ScriptForm } from "@/features/tools/components/ScriptForm";
 import { ToolHeader } from "@/features/tools/components/ToolHeader";
 import { RestartOverlay } from "@/features/updates/components/RestartOverlay";
@@ -53,7 +54,9 @@ export function Workbench({ tools, cookieSet, version, initialRuns }: Props) {
   const tool = tools.find((t) => t.id === toolId);
   const script = tool?.scripts.find((s) => s.id === scriptId) ?? tool?.scripts[0];
   const activeRun = runs.find((r) => r.id === activeRunId) ?? null;
-  const needsCookie = !cookieSet && (tool?.group === "admin" || script?.id === "upload");
+  // A tool with steps uses all its scripts on one page, otherwise just
+  // the one that's selected.
+  const needsCookie = !cookieSet && !!tool && (tool.steps ? tool.scripts.some((s) => s.needsCookie) : !!script?.needsCookie);
 
   const grouped = useMemo(() => {
     const order: ToolGroup[] = ["public", "admin"];
@@ -183,19 +186,25 @@ export function Workbench({ tools, cookieSet, version, initialRuns }: Props) {
               </Banner>
             )}
 
-            {tool.scripts.length > 1 && (
-              <SegmentedControl
-                label="Scripts"
-                value={script.id}
-                options={tool.scripts.map((s) => ({ value: s.id, label: s.title }))}
-                onChange={(id) => openScript(tool.id, id)}
-              />
-            )}
+            {tool.steps ? (
+              <StepFlow key={tool.id} tool={tool} steps={tool.steps} busy={busy} refreshKey={refreshKey} onStarted={onStarted} />
+            ) : (
+              <>
+                {tool.scripts.length > 1 && (
+                  <SegmentedControl
+                    label="Scripts"
+                    value={script.id}
+                    options={tool.scripts.map((s) => ({ value: s.id, label: s.title }))}
+                    onChange={(id) => openScript(tool.id, id)}
+                  />
+                )}
 
-            <div className={styles.work} data-files={tool.files.length > 0}>
-              <ScriptForm key={`${tool.id}/${script.id}`} toolId={tool.id} group={tool.group} script={script} busy={busy} onStarted={onStarted} />
-              {tool.files.length > 0 && <FileEditor key={tool.id} toolId={tool.id} files={tool.files} refreshKey={refreshKey} />}
-            </div>
+                <div className={styles.work} data-files={tool.files.length > 0}>
+                  <ScriptForm key={`${tool.id}/${script.id}`} toolId={tool.id} group={tool.group} script={script} busy={busy} onStarted={onStarted} />
+                  {tool.files.length > 0 && <FileEditor key={tool.id} toolId={tool.id} files={tool.files} refreshKey={refreshKey} />}
+                </div>
+              </>
+            )}
 
             <RunConsole run={activeRun} onStop={() => void stopActive()} onExit={onExit} />
           </div>

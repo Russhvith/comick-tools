@@ -1,0 +1,60 @@
+.group {
+  --pad: 2px;
+  display: inline-flex;
+  gap: 2px;
+  padding: var(--pad);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: rgb(55 65 81 / 0.5);
+}
+
+.invalid {
+  border-color: var(--destructive);
+}
+
+.option {
+  position: relative;
+  height: 1.625rem;
+  padding: 0 0.625rem;
+  border: 0;
+  border-radius: calc(var(--radius-md) - var(--pad));
+  background: transparent;
+  color: var(--muted-foreground);
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background-color 120ms,
+    color 120ms;
+}
+
+/* Rows are short, so stretch the hit area into the gap above and below. */
+.option::after {
+  content: "";
+  position: absolute;
+  inset: -6px 0;
+}
+
+.option:hover:not(:disabled) {
+  color: var(--foreground-strong);
+}
+
+.option:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.option[aria-checked="true"] {
+  background: var(--card);
+  color: var(--foreground-strong);
+}
+
+.option[aria-checked="true"][data-tone="info"] {
+  background: var(--info-bg);
+  color: var(--info-text);
+}
+
+.option[aria-checked="true"][data-tone="warning"] {
+  background: var(--warning-bg);
+  color: var(--warning-text);
+}

@@ -40,6 +40,22 @@ time.sleep(1.2)
 6. Add a row to the tools table in the root `README.md`.
 7. Add a `tool.json` so the web UI lists it. Copy one from an existing tool. Each script declares its flags as `bool`, `text` or `select` fields, and the UI builds the form from them. Only declared scripts and flags can be run from the UI, and only listed `files` can be edited.
 
+Mark scripts that talk to ComicK with `"needsCookie": true`, so the UI warns when `.env` has no cookie.
+
+A tool that runs in order can add `steps`, and the UI shows them as a numbered flow instead of tabs:
+
+```json
+"steps": [
+  { "id": "input", "title": "Paste the response", "file": "data/input.json", "view": "crunchyroll-input" },
+  { "id": "format", "title": "Format", "script": "format", "needs": "input", "produces": "review", "blockedText": "Paste a valid response first." },
+  { "id": "review", "title": "Check the types", "file": "data/output.txt", "view": "episode-list" }
+]
+```
+
+- A step is either a `file` shown through a `view`, or a `script`. Views live in `ui/features/steps/views/` and are listed in its `index.ts`.
+- `needs` locks a script until that step is ready, with `blockedText` as the reason shown.
+- `produces` names the file step a script writes. The UI marks the script up to date when that output is newer than its input, and asks before replacing hand edits the file step reports.
+
 Every prompt a script has should also have a flag, and a flag that's passed should skip its prompt. The UI relies on that: filled in fields become flags, empty ones are left for the script to ask.
 
 ## Releasing a version

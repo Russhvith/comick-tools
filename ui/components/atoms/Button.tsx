@@ -10,12 +10,15 @@ type Props = ButtonHTMLAttributes<HTMLButtonElement> & {
 };
 
 export const Button = forwardRef<HTMLButtonElement, Props>(function Button(
-  { variant = "secondary", size = "md", loading, disabled, className, children, ...rest },
+  { variant = "secondary", size = "md", loading, disabled, className, children, type = "button", ...rest },
   ref,
 ) {
+  // HTML defaults a button to submit, which turns any button that happens
+  // to sit inside a form into a second submit. Forms opt in with type="submit".
   return (
     <button
       ref={ref}
+      type={type}
       className={cn(styles.button, styles[variant], styles[size], className)}
       disabled={disabled || loading}
       aria-busy={loading || undefined}
