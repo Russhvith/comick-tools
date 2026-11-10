@@ -25,7 +25,7 @@ function names(rows: EpisodeRow[]) {
   return rows.length > 4 ? `${shown.join(", ")} and ${rows.length - 4} more` : shown.join(" and ");
 }
 
-export function EpisodeList({ toolId, file, refreshKey, onStatus }: ViewProps) {
+export function EpisodeList({ toolId, file, refreshKey, held, onStatus }: ViewProps) {
   const { data, loading, save, revalidate } = useToolFile(toolId, file.path);
   const content = data?.content ?? "";
   const rows = useMemo(() => parseEpisodes(content), [content]);
@@ -91,6 +91,10 @@ export function EpisodeList({ toolId, file, refreshKey, onStatus }: ViewProps) {
 
   if (!data?.exists) {
     return <p className={styles.empty}>Run the format step above and the episodes show up here.</p>;
+  }
+
+  if (held) {
+    return <p className={styles.empty}>{held}</p>;
   }
 
   return (

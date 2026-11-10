@@ -33,6 +33,43 @@ export function StepFlow({ tool, steps, busy, refreshKey, onStarted }: Props) {
     [],
   );
 
+  const position = (id: string | undefined) => steps.findIndex((s) => s.id === id) + 1;
+
+  /**
+   * A file a script writes is only worth showing when it belongs to the
+   * input on screen. While that script's input isn't ready, or is newer
+   * than the file, the file is left over from an earlier run: the step is
+   * held, its contents hidden, and it doesn't count as ready for anything
+   * after it. Statuses are worked out in order, so a held step holds back
+   * the steps that need it too.
+   */
+  const effective: Record<string, { status?: StepStatus; held: string | null }> = {};
+  for (const step of steps) {
+    const raw = statuses[step.id];
+    const producer = steps.find((s) => s.script && s.produces === step.id);
+    const input = producer?.needs ? effective[producer.needs]?.status : undefined;
+    const exists = raw?.modifiedAt != null;
+
+    if (!producer || !raw) {
+      effective[step.id] = { status: raw, held: null };
+    } else if (producer.needs && !input?.ready) {
+      const n = position(producer.needs);
+      effective[step.id] = {
+        status: { ...raw, state: "blocked", text: `Waiting for step ${n}`, ready: false },
+        held: exists
+          ? `Finish step ${n} first. The episodes from the last format are still on disk, and step ${position(producer.id)} replaces them.`
+          : null,
+      };
+    } else if (exists && input?.modifiedAt && raw.modifiedAt && input.modifiedAt > raw.modifiedAt) {
+      effective[step.id] = {
+        status: { ...raw, state: "blocked", text: "Older than the response", ready: false },
+        held: `These episodes were formatted from an earlier response. Run step ${position(producer.id)} again to get the ones for this response.`,
+      };
+    } else {
+      effective[step.id] = { status: raw, held: null };
+    }
+  }
+
   return (
     <ol className={styles.flow}>
       {steps.map((step, i) => {
@@ -40,7 +77,9 @@ export function StepFlow({ tool, steps, busy, refreshKey, onStarted }: Props) {
 
         if (step.script) {
           const script = tool.scripts.find((s) => s.id === step.script)!;
-          const needs = step.needs ? statuses[step.needs] : undefined;
+          const needs = step.needs ? effective[step.needs]?.status : undefined;
+          // The raw status, so the warning about hand edits still shows
+          // while the file is held.
           const produced = step.produces ? statuses[step.produces] : undefined;
           const blocked = !!step.needs && !needs?.ready;
 
@@ -78,11 +117,11 @@ export function StepFlow({ tool, steps, busy, refreshKey, onStarted }: Props) {
 
         const View = step.view ? stepViews[step.view] : undefined;
         const file = tool.files.find((f) => f.path === step.file);
-        const status = statuses[step.id];
+        const { status, held } = effective[step.id] ?? { held: null };
         return (
           <StepCard key={step.id} index={index} title={step.title} state={status?.state ?? "pending"} status={status?.text ?? "Loading"}>
             {View && file ? (
-              <View toolId={tool.id} file={file} refreshKey={refreshKey} onStatus={reporter(step.id)} />
+              <View toolId={tool.id} file={file} refreshKey={refreshKey} held={held} onStatus={reporter(step.id)} />
             ) : (
               <p className={styles.missing}>This step names a view the UI doesn't have ({step.view ?? "none"}).</p>
             )}
