@@ -43,6 +43,39 @@ export function compareVersions(a: string, b: string): number {
   return 0;
 }
 
+/**
+ * The newest vX.Y.Z tag on origin, through git and whatever credentials it
+ * already has. That's the only way to see a private repo without handing
+ * the UI a GitHub token, since the API answers 404 to anonymous requests.
+ * Tags are what releases hang off, so the version is the same, there are
+ * just no release notes.
+ */
+async function latestTag(): Promise<Release | null> {
+  let stdout: string;
+  try {
+    ({ stdout } = await run("git", ["ls-remote", "--tags", "--refs", "origin"], {
+      cwd: REPO_ROOT,
+      windowsHide: true,
+      timeout: 15_000,
+      // Never wait on a password prompt nobody can see.
+      env: { ...process.env, GIT_TERMINAL_PROMPT: "0" },
+    }));
+  } catch {
+    return null;
+  }
+  const tags = [...stdout.matchAll(/refs\/tags\/(v?\d+(?:\.\d+)*)$/gm)].map((m) => m[1]);
+  if (!tags.length) return null;
+  const tag = tags.sort(compareVersions).at(-1)!;
+  return {
+    version: tag.replace(/^v/i, ""),
+    tag,
+    name: tag,
+    url: `https://github.com/${GITHUB_REPO}/releases/tag/${tag}`,
+    publishedAt: "",
+    notes: "",
+  };
+}
+
 async function latestRelease(force: boolean): Promise<{ release: Release | null; error: string | null }> {
   if (!force && cached && Date.now() - cached.at < CACHE_MS) return cached;
   let result: { release: Release | null; error: string | null };
@@ -53,7 +86,10 @@ async function latestRelease(force: boolean): Promise<{ release: Release | null;
       signal: AbortSignal.timeout(10_000),
     });
     if (res.status === 404) {
-      result = { release: null, error: "No releases published on GitHub yet" };
+      // Either nothing is published or the repo is private. Git can tell
+      // those apart for us.
+      const tag = await latestTag();
+      result = tag ? { release: tag, error: null } : { release: null, error: "No releases published on GitHub yet" };
     } else if (!res.ok) {
       result = { release: null, error: `GitHub answered ${res.status}` };
     } else {
