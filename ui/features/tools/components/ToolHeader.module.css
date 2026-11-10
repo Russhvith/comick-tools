@@ -5,6 +5,27 @@
   view-transition-name: tool-header;
 }
 
+.text {
+  flex: 1;
+  min-width: 0;
+}
+
+.actions {
+  display: flex;
+  flex: none;
+  gap: 0.5rem;
+}
+
+/* On a phone the button drops under the title instead of squeezing it. */
+@media (max-width: 640px) {
+  .header {
+    flex-wrap: wrap;
+  }
+  .actions {
+    width: 100%;
+  }
+}
+
 .icon {
   display: grid;
   place-items: center;

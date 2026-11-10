@@ -1,6 +1,10 @@
 {
   "name": "Crunchyroll Importer",
   "summary": "Turn a Crunchyroll season into ComicK episodes.",
+  "reset": {
+    "files": ["data/input.json", "data/output.txt"],
+    "folders": ["data/images"]
+  },
   "roleNotes": {
     "user": "Your episodes go to community review. They stay private until trusted users vote them in, 2 net votes each, and the moderator note is what reviewers read.",
     "uploader": "As an uploader your episodes are published straight away, with no review.",

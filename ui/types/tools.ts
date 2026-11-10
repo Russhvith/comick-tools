@@ -76,6 +76,12 @@ export type Tool = {
    * line when they have none of their own.
    */
   roleNotes?: Partial<Record<"user" | "uploader" | "trusted" | "moderator" | "admin", string>>;
+  /**
+   * What "Start over" clears: files deleted outright, and folders whose
+   * files are deleted (dotfiles like .gitkeep stay). All of it has to sit
+   * in a folder that holds one of the tool's listed files.
+   */
+  reset?: { files?: string[]; folders?: string[] };
 };
 
 export type FieldValues = Record<string, string | boolean>;

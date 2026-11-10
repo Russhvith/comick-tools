@@ -22,6 +22,7 @@ import { addRunOptimistically, markRun, useRuns } from "@/features/runs/useRuns"
 import { StepFlow } from "@/features/steps/StepFlow";
 import { ScriptForm } from "@/features/tools/components/ScriptForm";
 import { ToolHeader } from "@/features/tools/components/ToolHeader";
+import { StartOver } from "@/features/tools/components/StartOver";
 import { ToolNav } from "@/features/tools/components/ToolNav";
 import { AdminGate } from "@/features/account/AdminGate";
 import { RoleNote } from "@/features/account/RoleNote";
@@ -172,7 +173,7 @@ export function Workbench({ tools, initialToolId, cookieSet, version, initialRun
       >
         {tool && script ? (
           <div className={styles.stack}>
-            <ToolHeader tool={tool} />
+            <ToolHeader tool={tool} actions={<StartOver tool={tool} busy={busy} onCleared={() => setRefreshKey((k) => k + 1)} />} />
             <RoleNote tool={tool} />
             <AdminGate tool={tool} />
 

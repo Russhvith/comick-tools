@@ -18,6 +18,14 @@ function readSteps(raw: unknown, scripts: Script[], files: Tool["files"]): Step[
   return steps.length ? steps : undefined;
 }
 
+function readReset(raw: unknown): Tool["reset"] {
+  if (!raw || typeof raw !== "object") return undefined;
+  const strings = (v: unknown) => (Array.isArray(v) ? v.filter((x): x is string => typeof x === "string") : []);
+  const r = raw as { files?: unknown; folders?: unknown };
+  const reset = { files: strings(r.files), folders: strings(r.folders) };
+  return reset.files.length || reset.folders.length ? reset : undefined;
+}
+
 /**
  * Every tool with a tool.json, read fresh on each call so a new tool or an
  * edited manifest shows up on the next page load without a restart.
@@ -45,6 +53,7 @@ export function loadTools(): Tool[] {
           steps: readSteps(raw.steps, scripts, files),
           flow: typeof raw.flow === "string" ? raw.flow : undefined,
           roleNotes: raw.roleNotes && typeof raw.roleNotes === "object" ? raw.roleNotes : undefined,
+          reset: readReset(raw.reset),
         });
       } catch {
         // A broken manifest hides that one tool rather than the whole menu.
@@ -128,6 +137,73 @@ export function resolveToolImage(toolId: string, rel: string): { full: string; t
     if (isInside(toolDir, dir) && isInside(dir, full)) return { full, type };
   }
   return null;
+}
+
+/** Folders that hold a file the tool's manifest lists, like data/. Never the tool folder itself. */
+function dataDirs(tool: Tool, toolDir: string) {
+  return [...new Set(tool.files.map((f) => path.dirname(path.resolve(toolDir, f.path))))].filter((dir) => isInside(toolDir, dir));
+}
+
+/**
+ * Clear what the tool's "reset" names, so the next run starts clean.
+ * Anything outside its data folders is skipped rather than trusted, so a
+ * bad manifest can't point this at the scripts or outside the tool.
+ * Returns the paths it removed, relative to the tool.
+ */
+export function resetTool(toolId: string): { removed: string[]; skipped: string[] } | null {
+  const tool = loadTools().find((t) => t.id === toolId);
+  if (!tool?.reset) return null;
+  const toolDir = path.join(TOOLS_DIR, tool.group, tool.folder);
+  const allowed = dataDirs(tool, toolDir);
+  const safe = (full: string) => allowed.some((dir) => isInside(dir, full) || full === dir);
+  const rel = (full: string) => path.relative(toolDir, full).split(path.sep).join("/");
+  const removed: string[] = [];
+  const skipped: string[] = [];
+
+  for (const file of tool.reset.files ?? []) {
+    const full = path.resolve(toolDir, file);
+    if (!safe(full) || full === toolDir) {
+      skipped.push(file);
+      continue;
+    }
+    try {
+      if (fs.statSync(full).isFile()) {
+        fs.rmSync(full);
+        removed.push(rel(full));
+      }
+    } catch {
+      // Already gone, which is what we wanted.
+    }
+  }
+
+  for (const folder of tool.reset.folders ?? []) {
+    const full = path.resolve(toolDir, folder);
+    if (!safe(full)) {
+      skipped.push(folder);
+      continue;
+    }
+    let names: string[] = [];
+    try {
+      names = fs.readdirSync(full);
+    } catch {
+      continue;
+    }
+    // Only files sitting directly in the folder, and never dotfiles, so
+    // .gitkeep and anything nested by hand survive.
+    for (const name of names) {
+      if (name.startsWith(".")) continue;
+      const child = path.join(full, name);
+      try {
+        if (fs.statSync(child).isFile()) {
+          fs.rmSync(child);
+          removed.push(rel(child));
+        }
+      } catch {
+        // Vanished or locked, leave it.
+      }
+    }
+  }
+  return { removed, skipped };
 }
 
 /** Whether the shared .env (or the environment) has a session cookie. */
