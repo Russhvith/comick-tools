@@ -17,7 +17,7 @@
         { "flag": "--comic", "type": "text", "label": "Only from comic", "placeholder": "User uploads only" },
         { "flag": "--select", "type": "text", "label": "Numbers", "placeholder": "1-10, 12.5 or all" },
         { "flag": "--reason", "type": "text", "label": "Reason", "placeholder": "Why these are being deleted" },
-        { "flag": "--dry-run", "type": "bool", "label": "Dry run, delete nothing" }
+        { "flag": "--dry-run", "type": "bool", "label": "Dry run, delete nothing", "hint": "Go through every check and list what would be deleted, without deleting anything." }
       ]
     }
   ],

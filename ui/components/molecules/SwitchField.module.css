@@ -1,0 +1,32 @@
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.25rem;
+  padding: 0.75rem 0.875rem;
+  cursor: pointer;
+  transition: background-color 120ms;
+}
+
+.row:hover {
+  background: rgb(55 65 81 / 0.3);
+}
+
+.text {
+  display: grid;
+  gap: 0.1875rem;
+  min-width: 0;
+}
+
+.label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--foreground-strong);
+}
+
+.hint {
+  max-width: 60ch;
+  font-size: 0.75rem;
+  line-height: 1.45;
+  color: var(--muted-foreground);
+}

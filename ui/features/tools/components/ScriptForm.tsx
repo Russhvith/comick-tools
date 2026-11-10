@@ -4,9 +4,10 @@ import { useRef, useState } from "react";
 import { Play } from "lucide-react";
 import { Button } from "@/components/atoms/Button";
 import { Kbd } from "@/components/atoms/Kbd";
-import { Checkbox, Select, TextInput } from "@/components/atoms/TextInput";
+import { Select, TextInput } from "@/components/atoms/TextInput";
 import { Card } from "@/components/molecules/Card";
 import { Field } from "@/components/molecules/Field";
+import { SwitchField } from "@/components/molecules/SwitchField";
 import { ConfirmDialog } from "@/components/organisms/ConfirmDialog";
 import { shortcuts } from "@/config/shortcuts";
 import { isMac, useHotkey } from "@/hooks/useHotkey";
@@ -84,7 +85,7 @@ export function ScriptForm({ toolId, group, script, busy, onStarted, bare, guard
       {inputs.length > 0 && (
         <div className={styles.grid}>
           {inputs.map((field) => (
-            <Field key={field.flag} label={field.label}>
+            <Field key={field.flag} label={field.label} hint={field.hint}>
               {(id) =>
                 field.type === "select" ? (
                   <Select id={id} value={String(values[field.flag] ?? "")} onChange={(e) => set(field.flag, e.target.value)}>
@@ -111,7 +112,13 @@ export function ScriptForm({ toolId, group, script, busy, onStarted, bare, guard
       {toggles.length > 0 && (
         <div className={styles.toggles}>
           {toggles.map((field) => (
-            <Checkbox key={field.flag} label={field.label} checked={values[field.flag] === true} onChange={(e) => set(field.flag, e.target.checked)} />
+            <SwitchField
+              key={field.flag}
+              label={field.label}
+              hint={field.hint}
+              checked={values[field.flag] === true}
+              onChange={(on) => set(field.flag, on)}
+            />
           ))}
         </div>
       )}

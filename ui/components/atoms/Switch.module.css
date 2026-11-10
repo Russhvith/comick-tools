@@ -1,0 +1,52 @@
+.switch {
+  --track-w: 2.25rem;
+  --track-h: 1.25rem;
+  --pad: 2px;
+  --knob: calc(var(--track-h) - var(--pad) * 2);
+  position: relative;
+  flex: none;
+  width: var(--track-w);
+  height: var(--track-h);
+  margin: 0;
+  border-radius: 999px;
+  background: var(--input);
+  cursor: pointer;
+  appearance: none;
+  transition: background-color 160ms var(--ease-out);
+}
+
+/* The knob, slid across with a transform so the move can be interrupted
+   halfway by a second click. */
+.switch::before {
+  content: "";
+  position: absolute;
+  top: var(--pad);
+  left: var(--pad);
+  width: var(--knob);
+  height: var(--knob);
+  border-radius: 50%;
+  background: var(--foreground-strong);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.35);
+  transition: transform 160ms var(--ease-out);
+}
+
+.switch:hover {
+  background: #6b7280;
+}
+
+.switch:checked {
+  background: var(--primary);
+}
+
+.switch:checked:hover {
+  background: var(--primary-hover);
+}
+
+.switch:checked::before {
+  transform: translateX(calc(var(--track-w) - var(--knob) - var(--pad) * 2));
+}
+
+.switch:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}

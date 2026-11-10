@@ -16,12 +16,3 @@ export function Select({ className, children, ...rest }: SelectHTMLAttributes<HT
     </select>
   );
 }
-
-export function Checkbox({ label, ...rest }: InputHTMLAttributes<HTMLInputElement> & { label: string }) {
-  return (
-    <label className={styles.check}>
-      <input type="checkbox" {...rest} />
-      <span>{label}</span>
-    </label>
-  );
-}

@@ -1,9 +1,10 @@
 export type ToolGroup = "public" | "admin";
 
+/** `hint` is one short line under the field saying what it does. */
 export type Field =
-  | { flag: string; type: "bool"; label: string }
-  | { flag: string; type: "text"; label: string; placeholder?: string }
-  | { flag: string; type: "select"; label: string; options: string[] };
+  | { flag: string; type: "bool"; label: string; hint?: string }
+  | { flag: string; type: "text"; label: string; hint?: string; placeholder?: string }
+  | { flag: string; type: "select"; label: string; hint?: string; options: string[] };
 
 export type Script = {
   id: string;

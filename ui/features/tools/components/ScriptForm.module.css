@@ -22,9 +22,15 @@
 }
 
 .toggles {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.25rem 1.5rem;
+  display: grid;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: rgb(17 24 39 / 0.4);
+}
+
+.toggles > * + * {
+  border-top: 1px solid var(--border);
 }
 
 .footer {
