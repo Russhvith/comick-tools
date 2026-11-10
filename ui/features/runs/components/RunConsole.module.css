@@ -61,6 +61,29 @@
   padding: 0.625rem 0.25rem 0.625rem 0.875rem;
 }
 
+/*
+  xterm's scrollbar comes from VS Code and sizes itself inline, hence the
+  !important to slim the slider down to match the page scrollbars.
+*/
+.terminal :global(.xterm-scrollable-element > .scrollbar > .slider) {
+  border-radius: 999px;
+}
+
+.terminal :global(.xterm-scrollable-element > .scrollbar.vertical > .slider) {
+  left: 2px !important;
+  width: 6px !important;
+}
+
+.terminal :global(.xterm-scrollable-element > .scrollbar.horizontal > .slider) {
+  top: 2px !important;
+  height: 6px !important;
+}
+
+.terminal :global(.xterm-scrollable-element > .scrollbar > .scra),
+.terminal :global(.xterm-scrollable-element > .shadow) {
+  display: none;
+}
+
 .empty {
   display: grid;
   place-content: center;

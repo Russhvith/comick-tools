@@ -26,6 +26,11 @@ const theme = {
   cyan: "#22d3ee",
   white: "#e5e7eb",
   brightBlack: "#6b7280",
+  // xterm draws its own scrollbar rather than using the page's, so it
+  // gets the same greys through the theme.
+  scrollbarSliderBackground: "#4b5563",
+  scrollbarSliderHoverBackground: "#6b7280",
+  scrollbarSliderActiveBackground: "#9ca3af",
 };
 
 /**
