@@ -7,6 +7,9 @@ const nextConfig = {
   // the header only advertises the framework.
   poweredByHeader: false,
   reactStrictMode: true,
+  // The dev server's badge sits bottom left by default, right on top of
+  // the sidebar's footer links.
+  devIndicators: { position: "bottom-right" },
 };
 
 export default nextConfig;

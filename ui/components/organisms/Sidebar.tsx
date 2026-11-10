@@ -4,11 +4,21 @@
 import type { ReactNode } from "react";
 import styles from "./Sidebar.module.css";
 
-export function Sidebar({ children, label }: { children: ReactNode; label: string }) {
+type Props = {
+  children: ReactNode;
+  label: string;
+  /** Pinned to the bottom of the sidebar, under the navigation. */
+  footer?: ReactNode;
+};
+
+export function Sidebar({ children, label, footer }: Props) {
   return (
-    <nav className={styles.sidebar} aria-label={label}>
-      {children}
-    </nav>
+    <div className={styles.sidebar}>
+      <nav className={styles.items} aria-label={label}>
+        {children}
+      </nav>
+      {footer && <footer className={styles.footer}>{footer}</footer>}
+    </div>
   );
 }
 

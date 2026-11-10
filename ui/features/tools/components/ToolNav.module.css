@@ -1,0 +1,37 @@
+/* SPDX-License-Identifier: GPL-3.0-only
+   Copyright (C) 2026 Russhvith */
+
+.legal {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.875rem;
+}
+
+.legalLink {
+  color: var(--muted-foreground);
+  font-size: 0.75rem;
+  font-weight: 500;
+  transition: color 120ms;
+}
+
+.legalLink:hover {
+  color: var(--foreground-strong);
+}
+
+.legalCurrent,
+.legalCurrent:hover {
+  color: var(--foreground-strong);
+  text-decoration: underline;
+  text-decoration-color: var(--link);
+  text-underline-offset: 0.25em;
+}
+
+.credit {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+}
+
+.credit a {
+  font-weight: 600;
+}
