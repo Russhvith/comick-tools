@@ -8,7 +8,10 @@
   width: var(--track-w);
   height: var(--track-h);
   margin: 0;
+  /* The global squircle corners would flatten the pill into a rounded
+     rectangle, so this one stays a true half circle at each end. */
   border-radius: 999px;
+  corner-shape: round;
   background: var(--input);
   cursor: pointer;
   appearance: none;
@@ -25,6 +28,7 @@
   width: var(--knob);
   height: var(--knob);
   border-radius: 50%;
+  corner-shape: round;
   background: var(--foreground-strong);
   box-shadow: 0 1px 2px rgb(0 0 0 / 0.35);
   transition: transform 160ms var(--ease-out);

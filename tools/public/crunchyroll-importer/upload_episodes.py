@@ -217,12 +217,12 @@ def validate(raw, base_dir):
         problems.append("description can't contain links (http://, https:// or www.)")
 
     preview = fields.get("preview", "").strip() or None
-    preview_kind = None
     if preview:
+        # Previews have to be the files the formatter saved. Fetching a link
+        # here would just repeat that download in the middle of an upload.
         if re.match(r"^https?://", preview, re.IGNORECASE):
-            preview_kind = "url"
+            problems.append("preview is still a link, run format_episodes.py again to download it")
         elif (base_dir / preview).is_file():
-            preview_kind = "file"
             preview = str(base_dir / preview)
         else:
             problems.append(f"preview file {preview} not found")
@@ -241,7 +241,6 @@ def validate(raw, base_dir):
         "duration": duration,
         "synopsis": synopsis,
         "preview": preview,
-        "preview_kind": preview_kind,
         "source": source,
     }, []
 
@@ -271,17 +270,6 @@ def put_file(url, data, content_type):
     raise last
 
 
-def fetch_bytes(url):
-    request = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
-    try:
-        with urllib.request.urlopen(request, timeout=TIMEOUT) as response:
-            return response.read(), response.headers.get_content_type()
-    except urllib.error.HTTPError as e:
-        raise ApiError(e.code, f"couldn't download preview (HTTP {e.code})")
-    except (urllib.error.URLError, OSError) as e:
-        raise ApiError(0, f"couldn't download preview ({getattr(e, 'reason', e)})")
-
-
 def temp_url(presigned):
     # Uploads land in the bucket, but ComicK wants them referenced through
     # its temp image host. Same path, different origin, no signature.
@@ -290,14 +278,9 @@ def temp_url(presigned):
 
 
 def load_preview(job):
-    if job["preview_kind"] == "file":
-        path = Path(job["preview"])
-        ext = path.suffix.lower()
-        return path.read_bytes(), ext, IMAGE_TYPES.get(ext, "application/octet-stream")
-    data, content_type = fetch_bytes(job["preview"])
-    ext = next((e for e, t in IMAGE_TYPES.items() if t == content_type), None)
-    ext = ext or Path(urlparse(job["preview"]).path).suffix.lower() or ".jpg"
-    return data, ext, IMAGE_TYPES.get(ext, content_type)
+    path = Path(job["preview"])
+    ext = path.suffix.lower()
+    return path.read_bytes(), ext, IMAGE_TYPES.get(ext, "application/octet-stream")
 
 
 def upload_one(api, slug, mode, note, job):
