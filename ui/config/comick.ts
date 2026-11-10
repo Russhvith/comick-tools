@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: GPL-3.0-only
+// Copyright (C) 2026 Russhvith
+
 /**
  * Sites whose comic and anime links we turn into slugs. The second is a fan
  * made front end over the same API, so its links name the same comics.

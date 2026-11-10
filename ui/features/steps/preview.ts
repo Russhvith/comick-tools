@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: GPL-3.0-only
+// Copyright (C) 2026 Russhvith
+
 /**
  * Where the browser can load an episode's preview from, or null when there
  * is nothing local to show. A link means the formatter skipped or failed

@@ -24,6 +24,17 @@ Bad:
 time.sleep(1.2)
 ```
 
+## License header
+
+Every source file (`.py`, `.ts`, `.tsx`, `.js`, `.mjs`, `.css`) starts with these two lines, in that language's comment style, then a blank line:
+
+```python
+# SPDX-License-Identifier: GPL-3.0-only
+# Copyright (C) 2026 Russhvith
+```
+
+`//` for TypeScript and JavaScript, `/* ... */` for CSS. It goes above `"use client"` and above a module docstring, both of which still work after a comment. JSON, Markdown, SVG and the generated `ui/next-env.d.ts` don't get one.
+
 ## Commits
 
 - Short subject line in imperative mood: `Add dry run flag to mass deleter`.

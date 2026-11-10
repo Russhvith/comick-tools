@@ -1,3 +1,6 @@
+/* SPDX-License-Identifier: GPL-3.0-only
+   Copyright (C) 2026 Russhvith */
+
 .dialog {
   --modal-height: min(52rem, calc(100dvh - 2rem));
   width: min(42rem, calc(100vw - 2rem));

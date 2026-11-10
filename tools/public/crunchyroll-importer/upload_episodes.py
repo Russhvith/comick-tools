@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: GPL-3.0-only
+# Copyright (C) 2026 Russhvith
+
 """Upload the episodes in output.txt to an anime on ComicK.
 
 Reads the file format_episodes.py writes, including any hand edits to the

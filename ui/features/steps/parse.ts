@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: GPL-3.0-only
+// Copyright (C) 2026 Russhvith
+
 export const EPISODE_TYPES = ["main", "recap", "filler"] as const;
 export type EpisodeType = (typeof EPISODE_TYPES)[number];
 

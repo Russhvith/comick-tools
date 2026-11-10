@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: GPL-3.0-only
+// Copyright (C) 2026 Russhvith
+
 import { execFile } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";

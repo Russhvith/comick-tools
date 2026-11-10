@@ -1,3 +1,6 @@
+/* SPDX-License-Identifier: GPL-3.0-only
+   Copyright (C) 2026 Russhvith */
+
 .dialog {
   --palette-height: min(30rem, calc(100vh - 6rem));
   width: min(36rem, calc(100vw - 2rem));

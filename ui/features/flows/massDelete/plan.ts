@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: GPL-3.0-only
+// Copyright (C) 2026 Russhvith
+
 import type { FieldValues } from "@/types/tools";
 
 /** Which list the deletes come from. A comic means chapters, an anime episodes. */

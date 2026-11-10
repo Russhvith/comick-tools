@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: GPL-3.0-only
+// Copyright (C) 2026 Russhvith
+
 export const site = {
   name: "ComicK Tools",
   /** The wordmark in the header, with the accent part in the link blue. */

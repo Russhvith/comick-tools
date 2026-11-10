@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: GPL-3.0-only
+// Copyright (C) 2026 Russhvith
+
 import { useId } from "react";
 import { Switch } from "@/components/atoms/Switch";
 import styles from "./SwitchField.module.css";

@@ -33,6 +33,11 @@ Monorepo of Python tools for ComicK users (not just staff). Each tool lives in i
 - No em-dashes anywhere. Use commas, periods, or parentheses.
 - Skip filler phrasing ("This function is responsible for", "It's worth noting").
 
+## License
+
+- GPL-3.0-only, full text in `LICENSE`.
+- Every new `.py`, `.ts`, `.tsx`, `.js`, `.mjs` and `.css` file starts with `SPDX-License-Identifier: GPL-3.0-only` and `Copyright (C) 2026 Russhvith` as two comment lines, then a blank line. Not JSON, Markdown, SVG or `ui/next-env.d.ts`. Details in `docs/contributing.md`.
+
 ## Commits
 
 - Imperative subject line, short.

@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: GPL-3.0-only
+# Copyright (C) 2026 Russhvith
+
 """Shared config from the root .env."""
 
 import os

@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: GPL-3.0-only
+// Copyright (C) 2026 Russhvith
+
 import { ArrowUpCircle, BookOpen, ExternalLink, FileText, History, Play, RefreshCw, Square } from "lucide-react";
 import type { Command } from "@/components/organisms/CommandPalette";
 import { site } from "@/config/site";

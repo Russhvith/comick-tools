@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: GPL-3.0-only
+// Copyright (C) 2026 Russhvith
+
 // A fixed locale, because the server and the browser rarely agree on one
 // ("PM" against "pm" is enough to fail hydration). The time zone is the
 // local one on both sides when the UI runs on your own machine.

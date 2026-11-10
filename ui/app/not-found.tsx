@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: GPL-3.0-only
+// Copyright (C) 2026 Russhvith
+
 import { redirect } from "next/navigation";
 
 // There's nothing worth a 404 page here: a mistyped address or a tool that

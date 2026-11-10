@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: GPL-3.0-only
+// Copyright (C) 2026 Russhvith
+
 // Runs the production server and brings it back after an in-app update.
 //
 // The update route exits the server with RESTART_EXIT_CODE once it has

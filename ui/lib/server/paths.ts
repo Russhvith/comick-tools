@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: GPL-3.0-only
+// Copyright (C) 2026 Russhvith
+
 import path from "node:path";
 
 // npm scripts run with ui/ as the working directory, so the repo is one

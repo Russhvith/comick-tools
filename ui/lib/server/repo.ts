@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: GPL-3.0-only
+// Copyright (C) 2026 Russhvith
+
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import { REPO_ROOT } from "./paths";

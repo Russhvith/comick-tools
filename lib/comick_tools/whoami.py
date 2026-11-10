@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: GPL-3.0-only
+# Copyright (C) 2026 Russhvith
+
 """Print the ComicK account behind the .env cookie as one line of JSON.
 
 The web UI runs this rather than calling the API itself, since Cloudflare

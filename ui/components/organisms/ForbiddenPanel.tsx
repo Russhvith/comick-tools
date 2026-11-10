@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: GPL-3.0-only
+// Copyright (C) 2026 Russhvith
+
 import type { ReactNode } from "react";
 import { Lock } from "lucide-react";
 import styles from "./ForbiddenPanel.module.css";

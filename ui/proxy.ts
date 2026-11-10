@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: GPL-3.0-only
+// Copyright (C) 2026 Russhvith
+
 import type { NextRequest } from "next/server";
 import { rejectRemote } from "@/lib/server/guard";
 

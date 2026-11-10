@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: GPL-3.0-only
+// Copyright (C) 2026 Russhvith
+
 /**
  * The app's mark, a plain R on ComicK's blue. Kept in step with
  * app/icon.svg, which is the same drawing used as the favicon.

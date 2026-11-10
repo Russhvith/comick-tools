@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: GPL-3.0-only
+// Copyright (C) 2026 Russhvith
+
 // Starting a script twice by accident (double click, a retried request
 // after a flaky network) can mean deleting things twice. The client sends
 // an Idempotency-Key with each start, and a key we've already seen gets

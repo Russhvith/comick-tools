@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: GPL-3.0-only
+// Copyright (C) 2026 Russhvith
+
 import { request } from "@/lib/http";
 import type { RunSummary } from "@/types/runs";
 import type { FieldValues } from "@/types/tools";

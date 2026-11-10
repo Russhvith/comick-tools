@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: GPL-3.0-only
+// Copyright (C) 2026 Russhvith
+
 import type { ButtonHTMLAttributes } from "react";
 import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/cn";

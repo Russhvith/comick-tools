@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: GPL-3.0-only
+// Copyright (C) 2026 Russhvith
+
 // One list so the command menu, hints and handlers can't drift apart.
 export const shortcuts = {
   commandMenu: { combo: "mod+k", keys: ["Mod", "K"] },

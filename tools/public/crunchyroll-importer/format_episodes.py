@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: GPL-3.0-only
+# Copyright (C) 2026 Russhvith
+
 """Turn a Crunchyroll episode list dump into a plain text summary.
 
 Reads the JSON returned by Crunchyroll's season episodes endpoint and writes

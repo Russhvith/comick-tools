@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: GPL-3.0-only
+// Copyright (C) 2026 Russhvith
+
 import { spawn } from "node:child_process";
 import { REPO_ROOT, UI_DIR } from "./paths";
 import { createRun, emit, finish, listRuns, type Run } from "./runs";

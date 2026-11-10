@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: GPL-3.0-only
+# Copyright (C) 2026 Russhvith
+
 """Delete chapters or anime episodes on ComicK in bulk.
 
 Works from one of two lists: a comic's chapters or episodes, or every

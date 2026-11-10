@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: GPL-3.0-only
+// Copyright (C) 2026 Russhvith
+
 import type { ComponentType } from "react";
 import { CrunchyrollInput } from "./CrunchyrollInput";
 import { EpisodeList } from "./EpisodeList";

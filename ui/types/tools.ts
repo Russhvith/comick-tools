@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: GPL-3.0-only
+// Copyright (C) 2026 Russhvith
+
 export type ToolGroup = "public" | "admin";
 
 /** `hint` is one short line under the field saying what it does. */

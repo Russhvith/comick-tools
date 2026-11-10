@@ -1,3 +1,6 @@
+/* SPDX-License-Identifier: GPL-3.0-only
+   Copyright (C) 2026 Russhvith */
+
 .step {
   --marker: 1.75rem;
   /* How far the marker sits below the top of the step, and the space

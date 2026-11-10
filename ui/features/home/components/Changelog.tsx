@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: GPL-3.0-only
+// Copyright (C) 2026 Russhvith
+
 import { ChevronRight, GitCommitHorizontal, Tag } from "lucide-react";
 import type { ChangelogEntry, ChangelogSection } from "@/lib/server/repo";
 import styles from "./Changelog.module.css";

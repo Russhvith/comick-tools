@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: GPL-3.0-only
+// Copyright (C) 2026 Russhvith
+
 import { NextResponse } from "next/server";
 
 // Unknown API paths answer in JSON like the rest of the API. Without this

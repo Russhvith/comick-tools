@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: GPL-3.0-only
+// Copyright (C) 2026 Russhvith
+
 export type RunStatus = "running" | "done" | "failed" | "stopped";
 
 export type RunEvent =

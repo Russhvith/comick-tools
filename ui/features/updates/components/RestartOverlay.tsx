@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: GPL-3.0-only
+// Copyright (C) 2026 Russhvith
+
 import { Spinner } from "@/components/atoms/Spinner";
 import styles from "./RestartOverlay.module.css";
 

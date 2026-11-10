@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: GPL-3.0-only
+# Copyright (C) 2026 Russhvith
+
 """ComicK API client shared by the tools.
 
 Handles the session cookie, keeps every tool inside the API's rate

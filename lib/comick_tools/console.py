@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: GPL-3.0-only
+# Copyright (C) 2026 Russhvith
+
 """Terminal output shared by every tool, plus the small formatters used in
 status lines."""
 

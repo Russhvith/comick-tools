@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: GPL-3.0-only
+// Copyright (C) 2026 Russhvith
+
 import fs from "node:fs/promises";
 import path from "node:path";
 import { NextResponse } from "next/server";

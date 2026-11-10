@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: GPL-3.0-only
+// Copyright (C) 2026 Russhvith
+
 import { Clapperboard, type LucideIcon, Trash2, Wrench } from "lucide-react";
 import type { ToolGroup } from "@/types/tools";
 

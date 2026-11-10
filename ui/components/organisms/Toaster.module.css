@@ -1,3 +1,6 @@
+/* SPDX-License-Identifier: GPL-3.0-only
+   Copyright (C) 2026 Russhvith */
+
 .viewport {
   position: fixed;
   right: max(1rem, env(safe-area-inset-right));

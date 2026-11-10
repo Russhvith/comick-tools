@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: GPL-3.0-only
+// Copyright (C) 2026 Russhvith
+
 import type { Metadata } from "next";
 import { pageTitle } from "@/config/site";
 import { HomePage } from "@/features/home/HomePage";

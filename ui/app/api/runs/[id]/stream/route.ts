@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: GPL-3.0-only
+// Copyright (C) 2026 Russhvith
+
 import { rejectRemote } from "@/lib/server/guard";
 import { getRun, subscribe, type RunEvent } from "@/lib/server/runs";
 

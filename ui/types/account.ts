@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: GPL-3.0-only
+// Copyright (C) 2026 Russhvith
+
 /** The roles ComicK hands out, lowest to highest. Anything else counts as "user". */
 export const ROLES = ["user", "uploader", "trusted", "moderator", "admin"] as const;
 export type Role = (typeof ROLES)[number];
