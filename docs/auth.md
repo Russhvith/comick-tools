@@ -10,7 +10,7 @@ The tools act as a logged in ComicK user by sending the browser session cookie. 
 
 ## Getting the value
 
-1. Log in to ComicK in your browser with the staff account.
+1. Log in to ComicK in your browser with the account the tools should act as.
 2. Open DevTools (F12).
 3. Chrome / Edge: **Application** tab, then **Cookies**, then the ComicK domain.
    Firefox: **Storage** tab, then **Cookies**.

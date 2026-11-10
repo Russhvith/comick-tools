@@ -1,10 +1,12 @@
 import type { ReactNode } from "react";
-import { Search, SquareTerminal } from "lucide-react";
+import { Search } from "lucide-react";
 import { Kbd } from "@/components/atoms/Kbd";
+import { LogoMark } from "@/components/atoms/LogoMark";
 import styles from "./TopBar.module.css";
 
 type Props = {
-  title: string;
+  /** The name, split so the second part can carry the accent. */
+  wordmark: { lead: string; accent: string };
   subtitle: string;
   searchLabel: string;
   searchKeys: readonly string[];
@@ -12,15 +14,17 @@ type Props = {
   end?: ReactNode;
 };
 
-export function TopBar({ title, subtitle, searchLabel, searchKeys, onSearch, end }: Props) {
+export function TopBar({ wordmark, subtitle, searchLabel, searchKeys, onSearch, end }: Props) {
   return (
     <header className={styles.bar}>
       <div className={styles.brand}>
-        <span className={styles.logo} aria-hidden>
-          <SquareTerminal size={18} />
+        <span className={styles.logo}>
+          <LogoMark size={34} />
         </span>
         <span className={styles.names}>
-          <span className={styles.title}>{title}</span>
+          <span className={styles.title}>
+            {wordmark.lead} <span className={styles.accent}>{wordmark.accent}</span>
+          </span>
           <span className={styles.subtitle}>{subtitle}</span>
         </span>
       </div>

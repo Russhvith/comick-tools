@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Banner } from "@/components/molecules/Banner";
 import { NavItem } from "@/components/molecules/NavItem";
 import { SegmentedControl } from "@/components/molecules/SegmentedControl";
@@ -10,7 +10,7 @@ import { useToast } from "@/components/organisms/Toaster";
 import { TopBar } from "@/components/organisms/TopBar";
 import { AppShell } from "@/components/templates/AppShell";
 import { shortcuts } from "@/config/shortcuts";
-import { site } from "@/config/site";
+import { pageTitle, site } from "@/config/site";
 import { groups, toolIcon } from "@/config/tools";
 import { useHotkey } from "@/hooks/useHotkey";
 import { useViewTransition } from "@/hooks/useViewTransition";
@@ -57,6 +57,11 @@ export function Workbench({ tools, cookieSet, version, initialRuns }: Props) {
   // A tool with steps uses all its scripts on one page, otherwise just
   // the one that's selected.
   const needsCookie = !cookieSet && !!tool && (tool.steps ? tool.scripts.some((s) => s.needsCookie) : !!script?.needsCookie);
+
+  // Tools switch without a navigation, so the tab title follows by hand.
+  useEffect(() => {
+    document.title = pageTitle(tool?.name);
+  }, [tool?.name]);
 
   const grouped = useMemo(() => {
     const order: ToolGroup[] = ["public", "admin"];
@@ -143,7 +148,7 @@ export function Workbench({ tools, cookieSet, version, initialRuns }: Props) {
       <AppShell
         header={
           <TopBar
-            title={site.name}
+            wordmark={site.wordmark}
             subtitle={site.tagline}
             searchLabel="Search tools, files and runs"
             searchKeys={shortcuts.commandMenu.keys}

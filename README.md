@@ -1,13 +1,13 @@
 # comick-tools
 
-Staff tools for ComicK. One repo, one folder per tool, one shared `.env`.
+Tools for ComicK users, from anyone uploading episodes to moderators cleaning up. One repo, one folder per tool, one shared `.env`.
 
 ## Tools
 
 Tools are split by who can run them:
 
 - `tools/public/` works with any ComicK account.
-- `tools/admin/` needs a staff account with admin rights, and can do real damage if misused.
+- `tools/admin/` needs a trusted, moderator or admin account, and can do real damage if misused.
 
 | Tool | Group | What it does |
 | --- | --- | --- |

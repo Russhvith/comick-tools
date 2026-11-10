@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-Monorepo of Python staff tools for ComicK. Each tool lives in its own folder under `tools/public/` (any account can use it) or `tools/admin/` (needs admin rights). Today that is `tools/public/crunchyroll-importer/` and `tools/admin/mass-deleter/`. Repo wide guides are in `docs/`. Code more than one tool needs (console output, .env loading, the rate limited ComicK API client) lives in `lib/comick_tools/`, and scripts put `lib/` on `sys.path` themselves since they're run directly.
+Monorepo of Python tools for ComicK users (not just staff). Each tool lives in its own folder under `tools/public/` (any account can use it) or `tools/admin/` (needs admin rights). Today that is `tools/public/crunchyroll-importer/` and `tools/admin/mass-deleter/`. Repo wide guides are in `docs/`. Code more than one tool needs (console output, .env loading, the rate limited ComicK API client) lives in `lib/comick_tools/`, and scripts put `lib/` on `sys.path` themselves since they're run directly.
 
 ## Web UI
 

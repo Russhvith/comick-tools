@@ -203,7 +203,7 @@ def collect(episodes, offset):
 def render(entry, preview):
     ep = entry["ep"]
     # Crunchyroll has nothing that marks filler or recaps, so every episode
-    # starts as main and staff swap the tag by hand where it's wrong.
+    # starts as main and whoever uploads swaps the tag by hand where it's wrong.
     # Descriptions occasionally carry line breaks, which would split the
     # field across lines and confuse the uploader, so flatten them.
     description = " ".join(ep["description"].split())

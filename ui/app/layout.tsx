@@ -8,7 +8,8 @@ const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
 export const metadata: Metadata = {
   title: site.name,
-  description: "Run the ComicK staff tools from the browser",
+  description: site.description,
+  applicationName: site.name,
 };
 
 export const viewport: Viewport = {
