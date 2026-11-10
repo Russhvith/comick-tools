@@ -39,9 +39,27 @@
   fill: rgb(55 65 81 / 0.35);
 }
 
+/* Bars grow up from the baseline, left to right. Scaling a transform keeps
+   it on the compositor, so it costs next to nothing on slow hardware. */
 .bar {
   fill: #3b82f6;
   pointer-events: none;
+  transform-box: fill-box;
+  transform-origin: bottom;
+  animation: grow 520ms var(--ease-out) both;
+  animation-delay: calc(350ms + var(--n, 0) * 12ms);
+}
+
+@keyframes grow {
+  from {
+    transform: scaleY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bar {
+    animation: none;
+  }
 }
 
 .slot:hover .bar {

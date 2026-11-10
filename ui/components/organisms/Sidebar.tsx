@@ -9,6 +9,11 @@ export function Sidebar({ children, label }: { children: ReactNode; label: strin
   );
 }
 
+/** Items with no heading, like Home above the tool groups. */
+export function SidebarList({ children }: { children: ReactNode }) {
+  return <ul className={styles.list}>{children}</ul>;
+}
+
 export function SidebarSection({ title, note, children }: { title: string; note?: string; children: ReactNode }) {
   return (
     <section className={styles.section}>

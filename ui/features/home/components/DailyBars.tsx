@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import styles from "./DailyBars.module.css";
 
 type Props = {
@@ -11,8 +12,8 @@ const H = 120;
 const PAD_LEFT = 24;
 const PAD_BOTTOM = 18;
 const PAD_TOP = 14;
-const SLOT = 18;
-const BAR = 12;
+const SLOT = 15;
+const BAR = 10;
 
 const fromKey = (key: string) => new Date(`${key}T00:00:00Z`);
 const short = (date: Date) => date.toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" });
@@ -74,7 +75,9 @@ export function DailyBars({ days, today, span = 30 }: Props) {
                 <rect x={PAD_LEFT + i * SLOT} y={PAD_TOP} width={SLOT} height={plot} className={styles.hit}>
                   <title>{tip}</title>
                 </rect>
-                {d.count > 0 && <path d={column(x, y(d.count), BAR, y(0) - y(d.count))} className={styles.bar} />}
+                {d.count > 0 && (
+                  <path d={column(x, y(d.count), BAR, y(0) - y(d.count))} className={styles.bar} style={{ "--n": i } as CSSProperties} />
+                )}
               </g>
             );
           })}

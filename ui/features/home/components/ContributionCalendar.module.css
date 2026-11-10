@@ -4,15 +4,40 @@
   margin: 0;
 }
 
-/* A year doesn't fit a phone, so it scrolls sideways inside its card
-   instead of pushing the page wider. */
+/* A year doesn't always fit its half of the page, so it scrolls sideways
+   inside its card. Right to left makes it open on the newest weeks, the
+   end people care about, without a script to set the scroll. */
 .scroll {
   overflow-x: auto;
   padding-bottom: 0.25rem;
+  direction: rtl;
 }
 
 .svg {
   display: block;
+  direction: ltr;
+}
+
+/* Only days with commits animate, a handful of cells rather than all 371,
+   and only with opacity and transform. */
+.filled {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: pop 360ms var(--ease-out) both;
+  animation-delay: calc(300ms + var(--n, 0) * 20ms);
+}
+
+@keyframes pop {
+  from {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .filled {
+    animation: none;
+  }
 }
 
 .axis {

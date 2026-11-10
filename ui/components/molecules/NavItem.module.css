@@ -21,6 +21,10 @@
   color: var(--foreground-strong);
 }
 
+.neutral {
+  color: var(--foreground);
+}
+
 .active {
   background: var(--secondary);
   color: var(--foreground-strong);

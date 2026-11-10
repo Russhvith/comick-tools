@@ -1,19 +1,16 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { Banner } from "@/components/molecules/Banner";
-import { NavItem } from "@/components/molecules/NavItem";
 import { SegmentedControl } from "@/components/molecules/SegmentedControl";
 import { CommandPalette } from "@/components/organisms/CommandPalette";
-import { Sidebar, SidebarSection } from "@/components/organisms/Sidebar";
 import { useToast } from "@/components/organisms/Toaster";
 import { TopBar } from "@/components/organisms/TopBar";
 import { AppShell } from "@/components/templates/AppShell";
 import { shortcuts } from "@/config/shortcuts";
 import { pageTitle, site } from "@/config/site";
 import { flows } from "@/features/flows";
-import { groups, toolIcon } from "@/config/tools";
 import { useHotkey } from "@/hooks/useHotkey";
 import { useViewTransition } from "@/hooks/useViewTransition";
 import { buildCommands } from "@/features/command/buildCommands";
@@ -25,11 +22,12 @@ import { addRunOptimistically, markRun, useRuns } from "@/features/runs/useRuns"
 import { StepFlow } from "@/features/steps/StepFlow";
 import { ScriptForm } from "@/features/tools/components/ScriptForm";
 import { ToolHeader } from "@/features/tools/components/ToolHeader";
+import { ToolNav } from "@/features/tools/components/ToolNav";
 import { RestartOverlay } from "@/features/updates/components/RestartOverlay";
 import { UpdateControl } from "@/features/updates/components/UpdateControl";
 import { startUpdate, useVersion, waitForRestart } from "@/features/updates/useVersion";
 import type { RunStatus, RunSummary } from "@/types/runs";
-import type { Tool, ToolGroup } from "@/types/tools";
+import type { Tool } from "@/types/tools";
 import styles from "./Workbench.module.css";
 
 type Props = {
@@ -74,11 +72,6 @@ export function Workbench({ tools, initialToolId, cookieSet, version, initialRun
   useEffect(() => {
     document.title = pageTitle(tool?.name);
   }, [tool?.name]);
-
-  const grouped = useMemo(() => {
-    const order: ToolGroup[] = ["public", "admin"];
-    return order.map((group) => ({ group, tools: tools.filter((t) => t.group === group) })).filter((g) => g.tools.length);
-  }, [tools]);
 
   const openScript = useCallback(
     (nextTool: string, nextScript: string) => {
@@ -167,23 +160,11 @@ export function Workbench({ tools, initialToolId, cookieSet, version, initialRun
           />
         }
         sidebar={
-          <Sidebar label="Tools">
-            {grouped.map(({ group, tools: list }) => (
-              <SidebarSection key={group} title={groups[group].title} note={groups[group].note}>
-                {list.map((t) => (
-                  <li key={t.id}>
-                    <NavItem
-                      icon={toolIcon(t.id)}
-                      label={t.name}
-                      tone={groups[t.group].tone}
-                      active={t.id === toolId}
-                      onSelect={() => openScript(t.id, t.scripts[0]?.id ?? "")}
-                    />
-                  </li>
-                ))}
-              </SidebarSection>
-            ))}
-          </Sidebar>
+          <ToolNav
+            tools={tools}
+            active={toolId}
+            onSelectTool={(id) => openScript(id, tools.find((t) => t.id === id)?.scripts[0]?.id ?? "")}
+          />
         }
         aside={<RecentRuns runs={runs} activeId={activeRunId} onOpen={openRun} />}
       >

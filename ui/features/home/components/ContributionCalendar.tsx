@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import styles from "./ContributionCalendar.module.css";
 
 type Props = {
@@ -57,6 +58,7 @@ export function ContributionCalendar({ days, today }: Props) {
   const width = LEFT + WEEKS * STEP;
   const height = TOP + 7 * STEP;
   const total = cells.reduce((sum, c) => sum + c.count, 0);
+  let filledIndex = 0;
 
   return (
     <figure className={styles.figure}>
@@ -79,11 +81,24 @@ export function ContributionCalendar({ days, today }: Props) {
               {day}
             </text>
           ))}
-          {cells.map((c) => (
-            <rect key={c.key} x={c.x} y={c.y} width={CELL} height={CELL} rx={2} fill={LEVELS[level(c.count, max)]} className={styles.cell}>
-              <title>{`${c.count === 0 ? "No" : c.count} commit${c.count === 1 ? "" : "s"} on ${label(fromKey(c.key))}`}</title>
-            </rect>
-          ))}
+          {cells.map((c) => {
+            const filled = c.count > 0;
+            return (
+              <rect
+                key={c.key}
+                x={c.x}
+                y={c.y}
+                width={CELL}
+                height={CELL}
+                rx={2}
+                fill={LEVELS[level(c.count, max)]}
+                className={filled ? `${styles.cell} ${styles.filled}` : styles.cell}
+                style={filled ? ({ "--n": filledIndex++ } as CSSProperties) : undefined}
+              >
+                <title>{`${c.count === 0 ? "No" : c.count} commit${c.count === 1 ? "" : "s"} on ${label(fromKey(c.key))}`}</title>
+              </rect>
+            );
+          })}
         </svg>
       </div>
       <figcaption className={styles.caption}>

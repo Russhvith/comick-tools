@@ -1,5 +1,5 @@
 /**
- * The app's mark, a plain K on ComicK's blue. Kept in step with
+ * The app's mark, a plain R on ComicK's blue. Kept in step with
  * app/icon.svg, which is the same drawing used as the favicon.
  */
 export function LogoMark({ size = 32, className }: { size?: number; className?: string }) {
@@ -7,7 +7,7 @@ export function LogoMark({ size = 32, className }: { size?: number; className?: 
     <svg width={size} height={size} viewBox="0 0 32 32" className={className} aria-hidden focusable="false">
       <rect width="32" height="32" rx="7" fill="#2563eb" />
       <path
-        d="M11 8.5v15M21.5 8.5L13 16l8.5 7.5"
+        d="M11.5 23.5v-15h5.25a4.25 4.25 0 0 1 0 8.5H11.5M16 17l5 6.5"
         fill="none"
         stroke="#fff"
         strokeWidth="3.2"
