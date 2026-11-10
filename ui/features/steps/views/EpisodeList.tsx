@@ -45,7 +45,9 @@ export function EpisodeList({ toolId, file, refreshKey, onStatus }: ViewProps) {
   useEffect(() => {
     let status: StepStatus;
     if (loading) status = { state: "pending", text: "Loading", ready: false };
-    else if (!data?.exists) status = { state: "pending", text: "Not generated yet", ready: false };
+    // Blocked rather than pending, so only the step that can act right now
+    // (format) is highlighted.
+    else if (!data?.exists) status = { state: "blocked", text: "Not generated yet", ready: false };
     else if (rows.length === 0) status = { state: "error", text: "No episodes found in the file", ready: false };
     else if (bad) status = { state: "error", text: `Episode ${bad.number} has the type "${bad.type}"`, ready: false };
     else {

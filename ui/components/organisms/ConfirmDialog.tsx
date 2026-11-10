@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, type ReactNode } from "react";
+import { useEffect, useId, useRef, type ReactNode } from "react";
 import { Button } from "@/components/atoms/Button";
 import styles from "./ConfirmDialog.module.css";
 
@@ -16,6 +16,8 @@ type Props = {
 
 export function ConfirmDialog({ open, title, children, confirmLabel, tone = "primary", onConfirm, onCancel }: Props) {
   const dialog = useRef<HTMLDialogElement>(null);
+  // Several forms on one page each have a dialog, so the id can't be fixed.
+  const titleId = useId();
 
   useEffect(() => {
     const el = dialog.current;
@@ -28,13 +30,13 @@ export function ConfirmDialog({ open, title, children, confirmLabel, tone = "pri
     <dialog
       ref={dialog}
       className={styles.dialog}
-      aria-labelledby="confirm-title"
+      aria-labelledby={titleId}
       onClose={onCancel}
       onClick={(event) => event.target === dialog.current && onCancel()}
     >
       {open && (
         <div className={styles.panel}>
-          <h2 id="confirm-title" className={styles.title}>
+          <h2 id={titleId} className={styles.title}>
             {title}
           </h2>
           <div className={styles.body}>{children}</div>
