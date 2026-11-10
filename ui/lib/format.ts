@@ -1,5 +1,8 @@
+// A fixed locale, because the server and the browser rarely agree on one
+// ("PM" against "pm" is enough to fail hydration). The time zone is the
+// local one on both sides when the UI runs on your own machine.
 export function clockTime(ms: number) {
-  return new Date(ms).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  return new Date(ms).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
 }
 
 /** Same steps as the Python side: ms, then s, then m and s. */

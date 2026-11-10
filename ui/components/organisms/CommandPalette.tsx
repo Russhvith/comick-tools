@@ -89,61 +89,65 @@ export function CommandPalette({ open, onClose, commands, placeholder }: Props) 
       onClick={(event) => event.target === dialog.current && onClose()}
       aria-label="Command menu"
     >
-      <div className={styles.panel}>
-        <div className={styles.inputRow}>
-          <Search size={16} aria-hidden />
-          <input
-            className={styles.input}
-            autoFocus
-            value={query}
-            placeholder={placeholder}
-            onChange={(e) => setQuery(e.target.value)}
-            onKeyDown={onKeyDown}
-            role="combobox"
-            aria-expanded
-            aria-controls="command-results"
-            aria-activedescendant={results[active] ? `command-${results[active].id}` : undefined}
-          />
-          <Kbd keys={["Esc"]} />
+      {/* Only mounted while open. Closed, there's nothing to show, and the
+          server shouldn't render a list that mentions run times. */}
+      {open && (
+        <div className={styles.panel}>
+          <div className={styles.inputRow}>
+            <Search size={16} aria-hidden />
+            <input
+              className={styles.input}
+              autoFocus
+              value={query}
+              placeholder={placeholder}
+              onChange={(e) => setQuery(e.target.value)}
+              onKeyDown={onKeyDown}
+              role="combobox"
+              aria-expanded
+              aria-controls="command-results"
+              aria-activedescendant={results[active] ? `command-${results[active].id}` : undefined}
+            />
+            <Kbd keys={["Esc"]} />
+          </div>
+          <ul id="command-results" ref={list} className={styles.results} role="listbox">
+            {results.length === 0 && <li className={styles.empty}>Nothing matches “{query}”.</li>}
+            {results.map((command, index) => {
+              const heading = command.group !== lastGroup ? command.group : null;
+              lastGroup = command.group;
+              const Icon = command.icon;
+              return (
+                <li key={command.id} role="presentation">
+                  {heading && <div className={styles.group}>{heading}</div>}
+                  <div
+                    id={`command-${command.id}`}
+                    role="option"
+                    aria-selected={index === active}
+                    data-index={index}
+                    className={cn(styles.option, index === active && styles.active)}
+                    onMouseMove={() => setActive(index)}
+                    onClick={() => choose(command)}
+                  >
+                    <Icon size={16} aria-hidden className={styles.optionIcon} />
+                    <span className={styles.optionText}>
+                      <span>{command.label}</span>
+                      {command.detail && <span className={styles.detail}>{command.detail}</span>}
+                    </span>
+                    {command.shortcut && <Kbd keys={command.shortcut} />}
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+          <footer className={styles.footer}>
+            <span>
+              <Kbd keys={["↑", "↓"]} /> to move
+            </span>
+            <span>
+              <Kbd keys={["Enter"]} /> to open
+            </span>
+          </footer>
         </div>
-        <ul id="command-results" ref={list} className={styles.results} role="listbox">
-          {results.length === 0 && <li className={styles.empty}>Nothing matches “{query}”.</li>}
-          {results.map((command, index) => {
-            const heading = command.group !== lastGroup ? command.group : null;
-            lastGroup = command.group;
-            const Icon = command.icon;
-            return (
-              <li key={command.id} role="presentation">
-                {heading && <div className={styles.group}>{heading}</div>}
-                <div
-                  id={`command-${command.id}`}
-                  role="option"
-                  aria-selected={index === active}
-                  data-index={index}
-                  className={cn(styles.option, index === active && styles.active)}
-                  onMouseMove={() => setActive(index)}
-                  onClick={() => choose(command)}
-                >
-                  <Icon size={16} aria-hidden className={styles.optionIcon} />
-                  <span className={styles.optionText}>
-                    <span>{command.label}</span>
-                    {command.detail && <span className={styles.detail}>{command.detail}</span>}
-                  </span>
-                  {command.shortcut && <Kbd keys={command.shortcut} />}
-                </div>
-              </li>
-            );
-          })}
-        </ul>
-        <footer className={styles.footer}>
-          <span>
-            <Kbd keys={["↑", "↓"]} /> to move
-          </span>
-          <span>
-            <Kbd keys={["Enter"]} /> to open
-          </span>
-        </footer>
-      </div>
+      )}
     </dialog>
   );
 }
