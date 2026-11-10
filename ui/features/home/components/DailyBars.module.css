@@ -1,0 +1,57 @@
+.figure {
+  margin: 0;
+}
+
+.scroll {
+  overflow-x: auto;
+}
+
+.svg {
+  display: block;
+}
+
+.grid {
+  stroke: var(--border);
+  stroke-width: 1;
+}
+
+.baseline {
+  stroke: #4b5563;
+  stroke-width: 1;
+}
+
+.axis {
+  fill: var(--muted-foreground);
+  font-size: 9px;
+}
+
+.value {
+  fill: var(--foreground-strong);
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.hit {
+  fill: transparent;
+}
+
+.slot:hover .hit {
+  fill: rgb(55 65 81 / 0.35);
+}
+
+.bar {
+  fill: #3b82f6;
+  pointer-events: none;
+}
+
+.slot:hover .bar {
+  fill: #60a5fa;
+}
+
+.empty {
+  margin: 0;
+  padding: 1.5rem 0;
+  text-align: center;
+  font-size: 0.875rem;
+  color: var(--muted-foreground);
+}

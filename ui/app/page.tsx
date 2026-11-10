@@ -1,20 +1,29 @@
 import type { Metadata } from "next";
 import { pageTitle } from "@/config/site";
-import { Workbench } from "@/features/workbench/Workbench";
+import { HomePage } from "@/features/home/HomePage";
+import { changelog, commitCount, commitsByDay } from "@/lib/server/repo";
 import { listRuns } from "@/lib/server/runs";
-import { cookieConfigured, loadTools } from "@/lib/server/tools";
+import { loadTools } from "@/lib/server/tools";
 import { localVersion } from "@/lib/server/version";
 
 export const dynamic = "force-dynamic";
 
-// The page opens on the first tool, so the tab says so from the first
-// paint. The workbench keeps it in step after that.
-export function generateMetadata(): Metadata {
-  return { title: pageTitle(loadTools()[0]?.name) };
-}
+export const metadata: Metadata = { title: pageTitle() };
 
-// Rendered on the server with the tools and runs already in place, so the
-// first paint is the real page rather than a loading state.
-export default function Page() {
-  return <Workbench tools={loadTools()} cookieSet={cookieConfigured()} version={localVersion()} initialRuns={listRuns()} />;
+export default async function Home() {
+  const [days, commits, releases] = await Promise.all([commitsByDay(), commitCount(), changelog()]);
+  // The date in local time, the same calendar git's short dates use.
+  const now = new Date();
+  const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+  return (
+    <HomePage
+      tools={loadTools()}
+      version={localVersion()}
+      runCount={listRuns().length}
+      commitCount={commits}
+      days={days}
+      changelog={releases}
+      today={today}
+    />
+  );
 }

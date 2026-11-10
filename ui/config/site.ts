@@ -4,6 +4,7 @@ export const site = {
   wordmark: { lead: "ComicK", accent: "Tools" },
   tagline: "Bulk tools for ComicK",
   description: "Upload, tidy up and manage things on ComicK from your browser.",
+  author: { name: "Russhvith", url: "https://github.com/Russhvith" },
   repoUrl: "https://github.com/Russhvith/comick-tools",
   docsUrl: "https://github.com/Russhvith/comick-tools#readme",
   comickUrl: "https://comick.dev",

@@ -31,7 +31,14 @@ Then open http://127.0.0.1:4321. The first `npm start` builds the app, which tak
 
 Everything else (session cookie, rate limits) comes from the root `.env`, same as the scripts.
 
-## What's on the page
+## Pages
+
+- `/` is the homepage: what the tools are, who made them, some numbers, a year of commits as a calendar, the last 30 days as a chart and a changelog grouped by release tag. All of it comes from the local git clone, so it works while the repo is private.
+- `/tools/<group>/<tool>`, like `/tools/public/crunchyroll-importer`, is a tool. `/tools` opens the first one. Switching tools changes the address without reloading, so a running console keeps going and the back button works.
+- `/403` is a forbidden page, there for when something needs it.
+- Any other address goes to the homepage. Unknown `/api/...` paths answer with a JSON 404 instead.
+
+## What's on a tool page
 
 The look follows comick.dev: same dark palette, Inter, Lucide icons, the sticky top bar and left sidebar.
 
@@ -103,6 +110,6 @@ Under `npm run dev` there's no restart step. The dev server picks up the new cod
 The server can run scripts that delete things and run git, so:
 
 - It listens on `127.0.0.1` only.
-- Every API route refuses requests whose `Host` isn't localhost (stops DNS rebinding) and writes whose `Origin` is another site (stops a page in the same browser posting to it).
+- Every API route refuses requests whose `Host` isn't localhost (stops DNS rebinding) and writes whose `Origin` is another site (stops a page in the same browser posting to it). `proxy.ts` runs the same check in front of every page too.
 - Only scripts and flags listed in a `tool.json` can run. Values go to the script as single `--flag=value` arguments, never through a shell.
 - Only files a `tool.json` lists can be opened or saved, and only inside that tool's folder.

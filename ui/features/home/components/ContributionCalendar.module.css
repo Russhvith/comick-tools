@@ -1,0 +1,59 @@
+.figure {
+  display: grid;
+  gap: 0.75rem;
+  margin: 0;
+}
+
+/* A year doesn't fit a phone, so it scrolls sideways inside its card
+   instead of pushing the page wider. */
+.scroll {
+  overflow-x: auto;
+  padding-bottom: 0.25rem;
+}
+
+.svg {
+  display: block;
+}
+
+.axis {
+  fill: var(--muted-foreground);
+  font-size: 9px;
+}
+
+.cell {
+  transition: stroke 100ms;
+}
+
+.cell:hover {
+  stroke: var(--foreground-strong);
+  stroke-width: 1;
+}
+
+.caption {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+}
+
+.legend {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+}
+
+.legend .swatch:first-of-type {
+  margin-left: 4px;
+}
+
+.legend .swatch:last-of-type {
+  margin-right: 4px;
+}

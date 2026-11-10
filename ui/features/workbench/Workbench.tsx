@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { usePathname } from "next/navigation";
 import { Banner } from "@/components/molecules/Banner";
 import { NavItem } from "@/components/molecules/NavItem";
 import { SegmentedControl } from "@/components/molecules/SegmentedControl";
@@ -33,14 +34,23 @@ import styles from "./Workbench.module.css";
 
 type Props = {
   tools: Tool[];
+  /** The tool the URL named when the page loaded. */
+  initialToolId: string;
   cookieSet: boolean;
   version: string;
   initialRuns: RunSummary[];
 };
 
-export function Workbench({ tools, cookieSet, version, initialRuns }: Props) {
-  const [toolId, setToolId] = useState(tools[0]?.id);
-  const [scriptId, setScriptId] = useState(tools[0]?.scripts[0]?.id);
+const toolPath = (id: string) => `/tools/${id}`;
+
+export function Workbench({ tools, initialToolId, cookieSet, version, initialRuns }: Props) {
+  // The URL is the source of truth for which tool is open, so the sidebar,
+  // search and the back button all agree. Switching pushes a new entry
+  // without a server round trip, which keeps the console and its run alive.
+  const pathname = usePathname();
+  const fromPath = pathname?.startsWith("/tools/") ? pathname.slice("/tools/".length).replace(/\/$/, "") : null;
+  const toolId = tools.some((t) => t.id === fromPath) ? fromPath! : initialToolId;
+  const [scriptId, setScriptId] = useState(tools.find((t) => t.id === toolId)?.scripts[0]?.id);
   const [activeRunId, setActiveRunId] = useState<string | null>(() => initialRuns.find((r) => r.status === "running")?.id ?? null);
   const [refreshKey, setRefreshKey] = useState(0);
   const [paletteOpen, setPaletteOpen] = useState(false);
@@ -73,11 +83,11 @@ export function Workbench({ tools, cookieSet, version, initialRuns }: Props) {
   const openScript = useCallback(
     (nextTool: string, nextScript: string) => {
       transition(() => {
-        setToolId(nextTool);
+        if (nextTool !== toolId) window.history.pushState(null, "", toolPath(nextTool));
         setScriptId(nextScript);
       });
     },
-    [transition],
+    [transition, toolId],
   );
 
   const openRun = useCallback(
@@ -152,9 +162,7 @@ export function Workbench({ tools, cookieSet, version, initialRuns }: Props) {
           <TopBar
             wordmark={site.wordmark}
             subtitle={site.tagline}
-            searchLabel="Search tools, files and runs"
-            searchKeys={shortcuts.commandMenu.keys}
-            onSearch={() => setPaletteOpen(true)}
+            search={{ label: "Search tools, files and runs", keys: shortcuts.commandMenu.keys, onOpen: () => setPaletteOpen(true) }}
             end={<UpdateControl fallbackVersion={version} onUpdate={() => void update()} />}
           />
         }
