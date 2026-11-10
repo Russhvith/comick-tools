@@ -23,8 +23,6 @@ type Props = {
   onStarted: (run: RunSummary) => void;
   /** Drop the card and title, for a form that sits inside a step. */
   bare?: boolean;
-  /** Why the run can't start yet. Disables the button and says why. */
-  blockedReason?: string | null;
   /** Something to confirm before running, like output the run would replace. */
   guard?: string | null;
   /**
@@ -34,7 +32,7 @@ type Props = {
   hotkey?: boolean;
 };
 
-export function ScriptForm({ toolId, group, script, busy, onStarted, bare, blockedReason, guard, hotkey = true }: Props) {
+export function ScriptForm({ toolId, group, script, busy, onStarted, bare, guard, hotkey = true }: Props) {
   const [values, setValues] = useState<FieldValues>({});
   const [error, setError] = useState<string | null>(null);
   const [starting, setStarting] = useState(false);
@@ -62,7 +60,7 @@ export function ScriptForm({ toolId, group, script, busy, onStarted, bare, block
 
   function submit(event?: React.FormEvent) {
     event?.preventDefault();
-    if (busy || blockedReason || starting) return;
+    if (busy || starting) return;
     if (guard) setConfirming(true);
     else void start();
   }
@@ -80,7 +78,6 @@ export function ScriptForm({ toolId, group, script, busy, onStarted, bare, block
 
   const toggles = script.fields.filter((f) => f.type === "bool");
   const inputs = script.fields.filter((f) => f.type !== "bool");
-  const unavailable = busy || !!blockedReason;
 
   const body = (
     <form ref={form} onSubmit={submit} onKeyDown={onKeyDown} className={styles.form}>
@@ -119,18 +116,14 @@ export function ScriptForm({ toolId, group, script, busy, onStarted, bare, block
         </div>
       )}
       <footer className={styles.footer}>
-        <Button type="submit" size="lg" variant={group === "admin" ? "danger" : "primary"} loading={starting} disabled={unavailable}>
+        <Button type="submit" size="lg" variant={group === "admin" ? "danger" : "primary"} loading={starting} disabled={busy}>
           {!starting && <Play size={14} aria-hidden fill="currentColor" />}
           {starting ? "Starting" : `Run ${script.title.toLowerCase()}`}
         </Button>
         <span className={styles.hint}>
           <Kbd keys={shortcuts.runScript.keys} />
         </span>
-        {blockedReason ? (
-          <span className={styles.note}>{blockedReason}</span>
-        ) : (
-          busy && !starting && <span className={styles.note}>Another run is going. Stop it or wait for it to finish.</span>
-        )}
+        {busy && !starting && <span className={styles.note}>Another run is going. Stop it or wait for it to finish.</span>}
         {error && (
           <span className={styles.error} role="alert">
             {error}

@@ -6,6 +6,13 @@
   list-style: none;
 }
 
+/* Matches the note a held file step shows, so every waiting step reads the same. */
+.waiting {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--muted-foreground);
+}
+
 .missing {
   margin: 0;
   font-size: 0.875rem;

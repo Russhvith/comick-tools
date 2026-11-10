@@ -32,8 +32,8 @@
   ],
   "steps": [
     { "id": "input", "title": "Paste the Crunchyroll response", "file": "data/input.json", "view": "crunchyroll-input" },
-    { "id": "format", "title": "Format the episodes", "script": "format", "needs": "input", "produces": "review", "blockedText": "Paste a valid response first." },
+    { "id": "format", "title": "Format the episodes", "script": "format", "needs": "input", "produces": "review" },
     { "id": "review", "title": "Check the episode types", "file": "data/output.txt", "view": "episode-list" },
-    { "id": "upload", "title": "Upload to ComicK", "script": "upload", "needs": "review", "blockedText": "Format the episodes first." }
+    { "id": "upload", "title": "Upload to ComicK", "script": "upload", "needs": "review" }
   ]
 }

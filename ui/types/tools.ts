@@ -31,8 +31,6 @@ export type Step = {
   needs?: string;
   /** Id of the file step this script writes, used to tell if it's up to date. */
   produces?: string;
-  /** What to tell the person while `needs` isn't ready. */
-  blockedText?: string;
 };
 
 export type Tool = {

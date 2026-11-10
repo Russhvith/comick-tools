@@ -87,7 +87,7 @@ export function StepFlow({ tool, steps, busy, refreshKey, onStarted }: Props) {
           let text = "Ready when you are";
           if (blocked) {
             state = "blocked";
-            text = step.blockedText ?? "An earlier step comes first";
+            text = `Waiting for step ${position(step.needs)}`;
           } else if (step.produces) {
             if (!produced?.ready) text = "Ready to run";
             else if (needs?.modifiedAt && produced.modifiedAt && needs.modifiedAt > produced.modifiedAt) text = "The input changed since this last ran";
@@ -99,18 +99,22 @@ export function StepFlow({ tool, steps, busy, refreshKey, onStarted }: Props) {
 
           return (
             <StepCard key={step.id} index={index} title={step.title} state={state} status={text}>
-              <ScriptForm
-                key={`${tool.id}/${script.id}`}
-                bare
-                hotkey={false}
-                toolId={tool.id}
-                group={tool.group}
-                script={script}
-                busy={busy}
-                onStarted={onStarted}
-                blockedReason={blocked ? (step.blockedText ?? "An earlier step comes first") : null}
-                guard={produced?.replaceWarning}
-              />
+              {/* Same as a held file step: nothing to fill in until the step before is done. */}
+              {blocked ? (
+                <p className={styles.waiting}>Finish step {position(step.needs)} first.</p>
+              ) : (
+                <ScriptForm
+                  key={`${tool.id}/${script.id}`}
+                  bare
+                  hotkey={false}
+                  toolId={tool.id}
+                  group={tool.group}
+                  script={script}
+                  busy={busy}
+                  onStarted={onStarted}
+                  guard={produced?.replaceWarning}
+                />
+              )}
             </StepCard>
           );
         }
