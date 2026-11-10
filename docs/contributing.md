@@ -35,6 +35,12 @@ Every source file (`.py`, `.ts`, `.tsx`, `.js`, `.mjs`, `.css`) starts with thes
 
 `//` for TypeScript and JavaScript, `/* ... */` for CSS. It goes above `"use client"` and above a module docstring, both of which still work after a comment. JSON, Markdown, SVG and the generated `ui/next-env.d.ts` don't get one.
 
+## Legal documents
+
+`legal/terms.txt` and `legal/privacy.txt` are the source for the Terms of Service and Privacy Policy pages in the web interface, and the scripts point people at them when run from a terminal. Keep them plain ASCII, wrapped at 76 characters, in this shape: a title block, `Release date:` and `Effective date:` lines, then `N. Title` headings with paragraphs, `- ` lists and four-space indented drawings.
+
+When a tool starts connecting to a new service or storing something new, update section 5 or 4 of the privacy policy and its dates in the same change. Every claim in it has to match the code.
+
 ## Commits
 
 - Short subject line in imperative mood: `Add dry run flag to mass deleter`.
@@ -73,7 +79,7 @@ Every prompt a script has should also have a flag, and a flag that's passed shou
 
 The UI compares the root `VERSION` file with the latest GitHub release and offers an update when the release is newer.
 
-1. Bump `VERSION` (`0.1.0` to `0.2.0`, say) and commit it.
+1. Bump `VERSION` (`0.1.0` to `0.2.0`, say), run `python legal/packages.py --write` so `legal/packages.txt` matches the dependencies, and commit both.
 2. Tag the commit `v` plus the version and push both:
 
    ```bash

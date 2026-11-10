@@ -335,3 +335,9 @@
   color: var(--muted-foreground);
 }
 
+
+.footerLinks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1rem;
+}

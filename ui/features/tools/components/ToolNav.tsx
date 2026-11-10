@@ -3,7 +3,7 @@
 
 "use client";
 
-import { House } from "lucide-react";
+import { House, Package, ScrollText, ShieldCheck } from "lucide-react";
 import { NavItem } from "@/components/molecules/NavItem";
 import { Sidebar, SidebarList, SidebarSection } from "@/components/organisms/Sidebar";
 import { groups, toolIcon } from "@/config/tools";
@@ -12,7 +12,7 @@ import type { Tool, ToolGroup } from "@/types/tools";
 
 type Props = {
   tools: Tool[];
-  /** "home" on the homepage, otherwise the open tool's id. */
+  /** "home" on the homepage, "legal/terms" and so on for legal pages, otherwise the open tool's id. */
   active: string;
   /** The workbench switches tools in place. Left out, the links navigate. */
   onSelectTool?: (toolId: string) => void;
@@ -52,6 +52,17 @@ export function ToolNav({ tools, active, onSelectTool }: Props) {
           </SidebarSection>
         );
       })}
+      <SidebarSection title="Legal">
+        <li>
+          <NavItem icon={ScrollText} label="Terms of Service" tone="neutral" href="/legal/terms" active={active === "legal/terms"} />
+        </li>
+        <li>
+          <NavItem icon={ShieldCheck} label="Privacy Policy" tone="neutral" href="/legal/privacy" active={active === "legal/privacy"} />
+        </li>
+        <li>
+          <NavItem icon={Package} label="Open-source software" tone="neutral" href="/legal/packages" active={active === "legal/packages"} />
+        </li>
+      </SidebarSection>
     </Sidebar>
   );
 }

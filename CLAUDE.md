@@ -36,6 +36,7 @@ Monorepo of Python tools for ComicK users (not just staff). Each tool lives in i
 ## License
 
 - GPL-3.0-only, full text in `LICENSE`.
+- Terms and privacy policy live in `legal/terms.txt` and `legal/privacy.txt`, shown in the UI under Legal. Any new network call or stored data means updating the privacy policy and its dates in the same change. `python legal/packages.py --write` refreshes `legal/packages.txt`.
 - Every new `.py`, `.ts`, `.tsx`, `.js`, `.mjs` and `.css` file starts with `SPDX-License-Identifier: GPL-3.0-only` and `Copyright (C) 2026 Russhvith` as two comment lines, then a blank line. Not JSON, Markdown, SVG or `ui/next-env.d.ts`. Details in `docs/contributing.md`.
 
 ## Commits

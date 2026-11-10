@@ -1,0 +1,186 @@
+ComicK Tools
+Privacy Policy
+
+Release date: November 10, 2026
+Effective date: November 10, 2026
+
+1. About this policy
+
+This Privacy Policy explains what ComicK Tools does with your data. ComicK
+Tools is made and maintained by Russhvith ("we", "us"), and is made up of
+scripts and a web interface that run on your own computer (the "Tools").
+
+The Tools have no server of ours behind them. Everything they store stays on
+your computer, and the only places they connect to are the services
+described in section 5. Our Terms of Service in legal/terms.txt also apply
+to your use of the Tools.
+
+2. The short version
+
+- We do not receive any of your data. There is no account with us, no
+  telemetry, no analytics and no crash reporting.
+- Your ComicK session cookie stays in the .env file on your computer and is
+  sent only to ComicK's API, never anywhere else. Section 3 shows exactly
+  how.
+- Your files, run history and settings stay on your computer until you
+  delete them.
+- The Tools connect to ComicK, ComicK's upload storage, Crunchyroll's image
+  servers, Gravatar and GitHub, each for a specific reason listed in section
+  5.
+
+3. Your ComicK session cookie
+
+The Tools sign in to ComicK with the __Secure-comick-auth.session_token
+cookie of your ComicK account, which you put in the .env file at the root of
+the ComicK Tools folder as COMICK_SESSION_TOKEN. That file is excluded from
+git, so it is never committed or uploaded with the code.
+
+The cookie is read from .env by the Tools' Python client, the shared code
+every tool uses to talk to ComicK. That client attaches it to requests to
+ComicK's API at https://api.comick.dev, and to nowhere else:
+
+    .env on your computer
+            |
+            v
+    Python client (lib/comick_tools)
+            |  Cookie: __Secure-comick-auth.session_token=...
+            v
+    api.comick.dev   <- the only place the cookie is sent
+
+    Never sent to: your browser, ComicK's upload storage,
+    Crunchyroll, Gravatar, GitHub, or us
+
+In particular:
+
+- The web interface never sends the cookie to your browser, and never shows
+  it on a page. Its server only checks whether a cookie is set and asks the
+  Python client which account it belongs to.
+- When a preview image is uploaded, it goes to a storage address ComicK
+  provides for that upload, without the cookie, because that address carries
+  its own one-time permission.
+- The cookie is never printed in the console, never written to the run
+  history and never included in error messages.
+- If you change COMICK_API_BASE in .env, the cookie goes to the address you
+  set instead of https://api.comick.dev. Only change it to point at a ComicK
+  server you trust.
+
+Anyone who can read the .env file on your computer can read the cookie. Keep
+your computer and that file to yourself.
+
+4. Data stored on your computer
+
+The Tools keep the following on your computer, in the ComicK Tools folder:
+
+- Settings: the .env file, with your cookie and any limits you set.
+- Tool data: each tool's data folder, such as the Crunchyroll Importer's
+  input.json, output.txt and downloaded preview images. Start over in the
+  web interface deletes these for that tool.
+- Run history: the .state/runs folder keeps the last 100 runs started from
+  the web interface, with what each run printed and any answers you typed
+  into it. This can include your ComicK username, episode details, moderator
+  notes and deletion reasons, but never the cookie.
+
+All of these are excluded from git. The web interface does not set any
+cookies or use any other storage in your browser.
+
+5. Where the Tools connect
+
+The Tools connect only to these services, and only when you use the feature
+that needs them. Each one handles what it receives under its own privacy
+policy.
+
+- ComicK's API (api.comick.dev): to check which account the cookie belongs
+  to, check your permissions, read existing episodes and chapters, and
+  upload or delete them when you run a tool. This is the only service that
+  receives the cookie. ComicK sees these requests as coming from your
+  account and your computer.
+- ComicK's upload storage: to upload preview images when you upload
+  episodes. It receives the images, without the cookie.
+- Crunchyroll's image servers: to download preview images when the
+  Crunchyroll Importer formats episodes. They receive a normal download
+  request from your computer, without any ComicK data.
+- Gravatar (secure.gravatar.com): to show your profile picture on the
+  homepage, the same way comick.dev does. Your browser asks Gravatar for the
+  picture using an MD5 hash of your ComicK account's email address, worked
+  out on your computer. Gravatar receives that hash and your IP address, but
+  never the email itself. A hash like this can be matched to an email
+  address by anyone who already knows the address.
+- GitHub: to check for a newer version of the Tools, through GitHub's public
+  API without any login, or through git using the login git already has on
+  your computer. If you choose to update from the web interface, it also
+  downloads the new version from GitHub and the packages it needs from the
+  npm registry.
+
+When the web interface is built, the build downloads the Inter font files
+once and serves them from your computer, so your browser does not contact
+Google to display the pages.
+
+6. What we receive
+
+Nothing. The Tools do not send any data to us, and we cannot see how, when
+or whether you use them.
+
+If you contact us by opening an issue on GitHub, what you write is public
+and GitHub's own privacy policy applies to it. Do not include your cookie,
+your .env file or other private details in an issue.
+
+7. Your ComicK account details
+
+To show which account the Tools are using, the web interface asks ComicK's
+API who the cookie belongs to. ComicK returns your account details, and the
+Python client passes on only your username, role, profile numbers, account
+dates, profile link and the Gravatar hash. Your email address goes no
+further than that client. The result is kept in the web interface's memory
+for up to five minutes and is never written to disk.
+
+What ComicK does with your account and your uploads is covered by ComicK's
+own privacy policy, not this one.
+
+8. Your choices
+
+- To stop the Tools acting as your account, remove the cookie from .env, or
+  sign out of ComicK, which ends the session it belongs to.
+- To delete what the Tools have stored, use Start over, or delete the .env
+  file, the data folders and the .state folder.
+- To avoid the request to Gravatar, block secure.gravatar.com in your
+  browser. The rest of the web interface works without it.
+- To stop the Tools connecting anywhere, stop using them. Nothing runs in
+  the background when you are not using them.
+
+9. Security
+
+The web interface only listens on your own computer and refuses requests
+that come from other websites or addresses. Its server checks every request
+before it reads or changes anything, and it only runs the scripts and
+changes the files the tools declare.
+
+No software is completely secure, so we cannot guarantee absolute security.
+The most important protection is your own: keep your computer, your user
+account and the .env file private.
+
+10. Children
+
+The Tools are for people who are allowed to use ComicK under its own terms.
+We do not collect any data from anyone, including children.
+
+11. How these documents were written
+
+This Privacy Policy and our Terms of Service were written by us. AI tools
+were used to help format them, set out their lines and sections, and make
+their wording formal. We reviewed the result, and what the documents say is
+what applies.
+
+12. Changes to this policy
+
+We may update this Privacy Policy, for example when a new tool connects to a
+new service. We will publish the new version in legal/privacy.txt with its
+release and effective dates at the top. The section on where the Tools
+connect will always list every service they use.
+
+13. Contact
+
+For questions about this policy, open an issue at
+https://github.com/Russhvith/comick-tools/issues. For questions about your
+ComicK account or the data ComicK holds about you, contact ComicK.
+
+Also read our Terms of Service in legal/terms.txt.

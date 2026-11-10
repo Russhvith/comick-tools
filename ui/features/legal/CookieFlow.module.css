@@ -1,0 +1,125 @@
+/* SPDX-License-Identifier: GPL-3.0-only
+   Copyright (C) 2026 Russhvith */
+
+.figure {
+  display: grid;
+  gap: 1rem;
+  margin: 1rem 0;
+  padding: 1.25rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--card);
+}
+
+.flow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.node {
+  display: grid;
+  justify-items: center;
+  gap: 0.25rem;
+  padding: 0.875rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: rgb(55 65 81 / 0.25);
+  text-align: center;
+}
+
+.target {
+  border-color: rgb(16 185 129 / 0.5);
+  background: rgb(16 185 129 / 0.08);
+}
+
+.icon {
+  display: grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: var(--radius-md);
+  background: var(--secondary);
+  color: var(--link);
+}
+
+.target .icon {
+  background: rgb(16 185 129 / 0.15);
+  color: #6ee7b7;
+}
+
+.name {
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--foreground-strong);
+}
+
+.where {
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+}
+
+.link {
+  display: grid;
+  justify-items: center;
+  gap: 0.125rem;
+  color: var(--muted-foreground);
+}
+
+.linkLabel {
+  font-size: 0.6875rem;
+  white-space: nowrap;
+}
+
+.never {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+  padding-top: 1rem;
+  border-top: 1px dashed var(--border);
+}
+
+.neverLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--destructive);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.chips li {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3125rem;
+  padding: 0.1875rem 0.5rem;
+  border: 1px solid rgb(248 113 113 / 0.3);
+  border-radius: 999px;
+  corner-shape: round;
+  font-size: 0.75rem;
+  color: var(--foreground);
+  text-decoration: line-through;
+  text-decoration-color: rgb(248 113 113 / 0.7);
+}
+
+/* The arrows turn to point down once the boxes stack on a phone. */
+@media (max-width: 640px) {
+  .flow {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .link svg {
+    transform: rotate(90deg);
+  }
+}

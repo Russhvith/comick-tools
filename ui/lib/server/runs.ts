@@ -189,6 +189,9 @@ export function startScript(
       PYTHONUNBUFFERED: "1",
       PYTHONIOENCODING: "utf-8",
       COMICK_TOOLS_FORCE_TTY: "1",
+      // Started from the UI, which shows the legal pages itself, so the
+      // scripts skip their command line notice about them.
+      COMICK_TOOLS_UI: "1",
     },
     windowsHide: true,
   });

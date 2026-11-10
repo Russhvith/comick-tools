@@ -173,9 +173,14 @@ export function HomePage({ tools, version, runCount, commitCount, days, changelo
           </a>
           .
         </span>
-        <a href={site.repoUrl} target="_blank" rel="noreferrer">
-          Source on GitHub
-        </a>
+        <span className={styles.footerLinks}>
+          <Link href="/legal/terms">Terms</Link>
+          <Link href="/legal/privacy">Privacy</Link>
+          <Link href="/legal/packages">Open source</Link>
+          <a href={site.repoUrl} target="_blank" rel="noreferrer">
+            Source on GitHub
+          </a>
+        </span>
       </footer>
     </AppShell>
   );

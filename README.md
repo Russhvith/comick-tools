@@ -50,6 +50,7 @@ comick-tools/
   LICENSE               GNU GPL v3
   VERSION               current version, compared against GitHub releases
   docs/                 repo wide guides
+  legal/                terms, privacy policy, open-source package list
   lib/comick_tools/     code shared by the tools (console, .env, API client)
   tools/
     admin/              needs admin rights
@@ -58,6 +59,10 @@ comick-tools/
       crunchyroll-importer/
   ui/                   Next.js web UI for running the tools
 ```
+
+## Legal
+
+By using ComicK Tools you agree to the [Terms of Service](legal/terms.txt) and the [Privacy Policy](legal/privacy.txt). In short, everything runs on your computer, nothing is sent to us, and your ComicK cookie is only ever sent to ComicK's API. [legal/packages.txt](legal/packages.txt) lists the open-source packages the tools use. The web interface shows all three under Legal in the sidebar, with the package list always read live.
 
 ## License
 

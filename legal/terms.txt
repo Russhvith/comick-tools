@@ -1,0 +1,194 @@
+ComicK Tools
+Terms of Service
+
+Release date: November 10, 2026
+Effective date: November 10, 2026
+
+1. About these Terms
+
+These Terms of Service ("Terms") are an agreement between you and Russhvith,
+who makes and maintains ComicK Tools ("we", "us"). They apply when you use
+the ComicK Tools scripts and the web interface that runs them, from the
+command line or in your browser (the "Tools").
+
+By using the Tools, you agree to these Terms and to our Privacy Policy in
+legal/privacy.txt. If you do not agree, do not use the Tools.
+
+The source code of the Tools is free software under the GNU General Public
+License, version 3, in the LICENSE file. These Terms cover how you use the
+Tools with ComicK. Nothing in them limits any right the licence gives you to
+run, study, copy, change or share the code, and where the two conflict, the
+licence applies.
+
+2. What the Tools are
+
+The Tools run on your own computer. They read files you give them, such as
+an episode list copied from Crunchyroll, and talk to ComicK on your behalf
+using the session cookie of your ComicK account. They can upload episodes,
+read your account details and, for accounts with the right role, delete
+chapters and episodes.
+
+ComicK, comick.dev and related names and logos belong to their owners. Using
+the Tools with ComicK is also subject to ComicK's own terms, rules and
+policies. We do not run ComicK, and we cannot change what it allows, how it
+reviews uploads or what it does with your account.
+
+3. Your account and your cookie
+
+The Tools act as whichever ComicK account owns the cookie in your .env file.
+You are responsible for that account and for everything the Tools do with
+it, as if you had done it yourself on comick.dev.
+
+Use only the cookie of an account you are allowed to use. Keep the .env file
+to yourself and do not share it, paste it into chats or commit it anywhere.
+Anyone who has your cookie can act as you on ComicK until it expires. If you
+think it has leaked, sign out of ComicK, which ends that session, and put a
+fresh cookie in .env.
+
+4. Using the Tools
+
+You may use the Tools only in ways that ComicK's terms and these Terms
+allow. You must not, and must not help anyone else to:
+
+- break any law or regulation, or anyone's intellectual property, privacy or
+  other rights
+- upload or change content you do not have the right to share
+- spam ComicK, flood its review queues or upload content you know is wrong
+  or misleading
+- get around ComicK's permissions, roles, review process, rate limits or
+  other safeguards, or use an account that is not yours
+- run the Tools faster than ComicK allows, including by raising the rate
+  limits in .env beyond what ComicK permits
+- use the admin tools without the role ComicK requires, or for anything
+  other than genuine moderation of ComicK
+
+5. Your content
+
+What you give the Tools, such as a Crunchyroll response, episode details,
+moderator notes and deletion reasons, is your "Input". What the Tools
+produce from it, such as formatted episodes and the requests they send to
+ComicK, is "Output". Together they are your "Content".
+
+You are responsible for your Content. You confirm that you have every right
+needed to use your Inputs and to send your Outputs to ComicK, and that doing
+so follows these Terms, ComicK's rules and the law. Material that comes from
+other sites, such as episode titles, descriptions and preview images from
+Crunchyroll, belongs to its owners and is subject to their terms.
+
+Your Content stays on your computer, apart from what the Tools send to
+ComicK when you run them. Our Privacy Policy explains this in full.
+
+6. Some actions cannot be undone
+
+The Tools make real changes on ComicK. Depending on your role, uploaded
+episodes go straight live or into community review. Deletions made with the
+Mass Deleter are permanent. Start over permanently deletes a tool's working
+files on your computer.
+
+Check what a run will do before you start it. Use the dry run options where
+a tool offers them, and read the confirmation the console asks for before
+you answer it.
+
+7. Outputs can be wrong
+
+The Tools work from the data you give them and from what ComicK and
+Crunchyroll return. Their Outputs, such as episode numbers, types, titles,
+dates and durations, can be wrong or incomplete. Check them before you
+upload, and correct anything that is wrong. Outputs are not advice of any
+kind.
+
+8. Third-party services and software
+
+The Tools connect to services we do not control, such as ComicK,
+Crunchyroll's image servers, Gravatar and GitHub. Using them is at your own
+risk and under their own terms and policies, and we are not responsible for
+their availability, accuracy or anything that results from using them.
+
+The Tools include and depend on open-source software, which is licensed
+under its own terms. The current list, with each package's version and
+licence, is in legal/packages.txt and on the Open-source software page of
+the web interface. Nothing in these Terms limits your rights under those
+licences.
+
+9. How these documents were written
+
+These Terms and our Privacy Policy were written by us. AI tools were used to
+help format them, set out their lines and sections, and make their wording
+formal. We reviewed the result, and what the documents say is what applies.
+
+10. Ownership
+
+The code of the Tools is copyright Russhvith and its other contributors, and
+is licensed to you under the GNU General Public License, version 3. ComicK's
+names, logos and content belong to their owners and are not licensed to you
+by these Terms.
+
+11. Disclaimers
+
+You use the Tools, their Outputs and any changes they make at your own risk.
+To the fullest extent the law allows, the Tools are provided "as is" and "as
+available", without warranties of any kind, express or implied, including
+warranties of merchantability, fitness for a particular purpose, accuracy
+and non-infringement. We do not promise that the Tools will meet your needs,
+keep working with ComicK, or be free of errors.
+
+12. Limitation of liability
+
+The Tools are free. To the fullest extent the law allows, we will not be
+liable for any indirect, incidental, special, consequential or punitive
+damages, or for any loss of data, content, account access, profits or
+goodwill, arising from or related to the Tools, your Content or these Terms,
+even if we were told such damages were possible.
+
+Some laws do not allow these exclusions or limits. Nothing in these Terms
+limits any right you have under the Consumer Protection Act, 2019, the
+consumer laws of your country, or any other law that cannot be limited by
+agreement.
+
+13. Indemnity
+
+To the extent the law allows, you agree to cover us for claims, losses and
+costs, including reasonable legal fees, that arise from your breach of these
+Terms, your Content, your use of the Tools against ComicK's rules, or your
+breach of any law or anyone else's rights.
+
+14. Stopping and changes
+
+You can stop using the Tools at any time. To remove what they keep on your
+computer, delete the .env file, each tool's data folder and the .state
+folder, or delete the whole ComicK Tools folder.
+
+The Tools will change. New versions are published as releases on GitHub, and
+features may be added, changed or removed, sometimes because ComicK has
+changed.
+
+We may update these Terms. We will publish the new version in
+legal/terms.txt with its release and effective dates at the top. If you keep
+using the Tools after an update takes effect, you accept the updated Terms.
+If you do not agree, stop using the Tools.
+
+15. Governing law and disputes
+
+These Terms are governed by the laws of India. If you have a concern, please
+raise it with us first, as section 16 describes, so we can try to resolve it
+informally.
+
+Subject to any right you have to approach a consumer commission or other
+forum under the Consumer Protection Act, 2019, the courts in Bengaluru,
+Karnataka, India have exclusive jurisdiction over any dispute arising from
+or related to these Terms or the Tools. If you live outside India, choosing
+Indian law does not take away the protection of any mandatory consumer laws
+of your country.
+
+16. Contact
+
+For questions about these Terms, or to report a problem with the Tools, open
+an issue at https://github.com/Russhvith/comick-tools/issues. For anything
+about your ComicK account or content on ComicK, contact ComicK.
+
+These Terms, with the Privacy Policy and the licence they refer to, are the
+whole agreement between you and us about the Tools. If any part is found
+unenforceable, the rest still applies. If we do not enforce a term straight
+away, we can still enforce it later.
+
+Also read our Privacy Policy in legal/privacy.txt.
