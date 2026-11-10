@@ -83,6 +83,9 @@ target/
 .env.*
 !.env.example
 
+# Run history the web UI keeps on this machine (console output included).
+/.state/
+
 # AI assistant local state
 .claude/
 .cursor/

@@ -44,7 +44,7 @@ The look follows comick.dev: same dark palette, Inter, Lucide icons, the sticky 
   4. Upload. Locked until there are formatted episodes.
 - **Data files** of a tool without steps open in an editor next to the form. Steps that show a file also have a raw text option.
 - **Console** running the script. Click in it and type to answer a prompt, press Enter to send. `Ctrl + C` or the Stop button ends the run.
-- **Recent runs** on the right. Clicking one replays its output, including the answers typed into it.
+- **Recent runs** on the right. Clicking one replays its output, including the answers typed into it. The last 100 are kept in `.state/runs/` at the repo root (gitignored, or wherever `COMICK_TOOLS_STATE_DIR` points), one small `.json` per run plus a `.log` of its output, so they survive restarts. A run that was going when the server stopped shows as stopped.
 - **Command menu** on `Ctrl K` (`⌘ K` on a Mac) to jump to any tool, file or recent run, stop the current run, or check for updates.
 
 | Shortcut | Does |
