@@ -40,7 +40,19 @@ export function CommandPalette({ open, onClose, commands, placeholder }: Props) 
   const dialog = useRef<HTMLDialogElement>(null);
   const list = useRef<HTMLUListElement>(null);
 
-  const results = useMemo(() => commands.filter((c) => matches(c, query)), [commands, query]);
+  // Commands arrive per tool (its scripts, then its files), so the same
+  // group can come up more than once. Pull each group together, in the
+  // order groups first appear, so every heading shows once.
+  const results = useMemo(() => {
+    const byGroup = new Map<string, Command[]>();
+    for (const command of commands) {
+      if (!matches(command, query)) continue;
+      const list = byGroup.get(command.group);
+      if (list) list.push(command);
+      else byGroup.set(command.group, [command]);
+    }
+    return [...byGroup.values()].flat();
+  }, [commands, query]);
 
   useEffect(() => {
     const el = dialog.current;

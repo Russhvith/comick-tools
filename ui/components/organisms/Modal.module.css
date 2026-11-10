@@ -1,6 +1,7 @@
 .dialog {
+  --modal-height: min(52rem, calc(100dvh - 2rem));
   width: min(42rem, calc(100vw - 2rem));
-  max-height: min(52rem, calc(100dvh - 2rem));
+  max-height: var(--modal-height);
   margin: auto;
   padding: 0;
   overflow: hidden;
@@ -31,11 +32,12 @@
 }
 
 /* The panel fills the dialog so only the body scrolls and the header and
-   footer stay put on a long episode. */
+   footer stay put on a long episode. Its height leaves out the dialog's
+   1px border, or the footer's bottom edge gets clipped. */
 .panel {
   display: grid;
   grid-template-rows: auto minmax(0, 1fr) auto;
-  max-height: inherit;
+  max-height: calc(var(--modal-height) - 2px);
 }
 
 .header {

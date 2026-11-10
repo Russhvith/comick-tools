@@ -1,8 +1,12 @@
 .dialog {
+  --palette-height: min(30rem, calc(100vh - 6rem));
   width: min(36rem, calc(100vw - 2rem));
-  max-height: min(30rem, calc(100vh - 6rem));
+  max-height: var(--palette-height);
   margin: 12vh auto auto;
   padding: 0;
+  /* Only the results list scrolls. The dialog clipping its own content
+     keeps a stray second scrollbar from ever showing up beside it. */
+  overflow: hidden;
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   background: var(--card);
@@ -28,10 +32,17 @@
   background: rgb(3 7 18 / 0.6);
 }
 
+/* The dialog's 1px border sits inside its max-height, so the panel gets
+   that height minus the border. With the full height it ran 2px over and
+   the dialog grew a scrollbar of its own next to the results'. */
 .panel {
   display: flex;
   flex-direction: column;
-  max-height: inherit;
+  max-height: calc(var(--palette-height) - 2px);
+}
+
+.results {
+  min-height: 0;
 }
 
 .inputRow {
