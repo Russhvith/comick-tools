@@ -128,24 +128,26 @@ export function HomePage({ tools, version, runCount, commitCount, days, changelo
               </div>
             ))}
           </dl>
-
-          {days && (
-            <section id="activity" className={cn(styles.section, styles.reveal)} style={order(3)} aria-labelledby="activity-heading">
-              <h2 id="activity-heading" className={styles.heading}>
-                Activity
-              </h2>
-              <div className={styles.panel}>
-                <h3 className={styles.panelTitle}>Commits over the last year</h3>
-                <ContributionCalendar days={days} today={today} />
-              </div>
-              <div className={styles.panel}>
-                <h3 className={styles.panelTitle}>Commits a day, last 30 days</h3>
-                <DailyBars days={days} today={today} />
-              </div>
-            </section>
-          )}
         </div>
       </div>
+
+      {days && (
+        <section id="activity" className={cn(styles.section, styles.wide, styles.reveal)} style={order(3)} aria-labelledby="activity-heading">
+          <h2 id="activity-heading" className={styles.heading}>
+            Activity
+          </h2>
+          <div className={styles.charts}>
+            <div className={styles.panel}>
+              <h3 className={styles.panelTitle}>Commits over the last year</h3>
+              <ContributionCalendar days={days} today={today} />
+            </div>
+            <div className={styles.panel}>
+              <h3 className={styles.panelTitle}>Commits a day, last 30 days</h3>
+              <DailyBars days={days} today={today} />
+            </div>
+          </div>
+        </section>
+      )}
 
       {changelog && changelog.length > 0 && (
         <section id="changelog" className={cn(styles.section, styles.changelog, styles.reveal)} style={order(4)} aria-labelledby="changelog-heading">

@@ -8,6 +8,12 @@
   align-items: start;
 }
 
+/* Pages without a right column (the homepage) give its width to the main
+   area instead of leaving an empty strip. */
+.body[data-aside="false"] {
+  grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
+}
+
 .sidebar {
   position: sticky;
   top: var(--header-height);
@@ -42,7 +48,8 @@
 }
 
 @media (max-width: 760px) {
-  .body {
+  .body,
+  .body[data-aside="false"] {
     grid-template-columns: 1fr;
   }
   .sidebar {

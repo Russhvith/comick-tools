@@ -298,9 +298,26 @@
 
 
 
-/* Full width under both halves, so its length doesn't stretch one side. */
+/* Activity and the changelog run full width under both halves, so their
+   length never leaves one half hanging below the other. */
+.wide,
 .changelog {
   margin-top: 2rem;
+}
+
+/* The calendar takes the width a whole year needs, the daily chart scales
+   into the rest. Stacked once there isn't room for both side by side. */
+.charts {
+  display: grid;
+  grid-template-columns: auto minmax(16rem, 1fr);
+  align-items: stretch;
+  gap: 1rem;
+}
+
+@media (max-width: 1280px) {
+  .charts {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 .footer {

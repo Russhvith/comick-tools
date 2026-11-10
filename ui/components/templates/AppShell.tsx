@@ -13,7 +13,7 @@ export function AppShell({ header, sidebar, aside, children }: Props) {
   return (
     <div className={styles.shell}>
       {header}
-      <div className={styles.body}>
+      <div className={styles.body} data-aside={aside ? "true" : "false"}>
         <div className={styles.sidebar}>{sidebar}</div>
         <main className={styles.main}>{children}</main>
         {aside && <aside className={styles.aside}>{aside}</aside>}

@@ -6,8 +6,12 @@
   overflow-x: auto;
 }
 
+/* Scales with its panel, so it fills whatever width it's given. */
 .svg {
   display: block;
+  width: 100%;
+  height: auto;
+  min-width: 18rem;
 }
 
 .grid {
