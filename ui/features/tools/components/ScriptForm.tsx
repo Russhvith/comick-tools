@@ -4,10 +4,11 @@ import { useRef, useState } from "react";
 import { Play } from "lucide-react";
 import { Button } from "@/components/atoms/Button";
 import { Kbd } from "@/components/atoms/Kbd";
-import { Select, TextInput } from "@/components/atoms/TextInput";
+import { Select } from "@/components/atoms/TextInput";
 import { Card } from "@/components/molecules/Card";
 import { Field } from "@/components/molecules/Field";
 import { SwitchField } from "@/components/molecules/SwitchField";
+import { overLimit, ScriptTextField } from "./ScriptTextField";
 import { ConfirmDialog } from "@/components/organisms/ConfirmDialog";
 import { shortcuts } from "@/config/shortcuts";
 import { isMac, useHotkey } from "@/hooks/useHotkey";
@@ -59,9 +60,17 @@ export function ScriptForm({ toolId, group, script, busy, onStarted, bare, guard
     }
   }
 
+  // The script would refuse it anyway, after starting up and checking the
+  // cookie, so stop it here where the counter already shows why.
+  const tooLong = script.fields.find((f) => f.type === "text" && overLimit(f, String(values[f.flag] ?? "")));
+
   function submit(event?: React.FormEvent) {
     event?.preventDefault();
     if (busy || starting) return;
+    if (tooLong) {
+      setError(`${tooLong.label} is too long`);
+      return;
+    }
     if (guard) setConfirming(true);
     else void start();
   }
@@ -84,10 +93,10 @@ export function ScriptForm({ toolId, group, script, busy, onStarted, bare, guard
     <form ref={form} onSubmit={submit} onKeyDown={onKeyDown} className={styles.form}>
       {inputs.length > 0 && (
         <div className={styles.grid}>
-          {inputs.map((field) => (
-            <Field key={field.flag} label={field.label} hint={field.hint}>
-              {(id) =>
-                field.type === "select" ? (
+          {inputs.map((field) =>
+            field.type === "select" ? (
+              <Field key={field.flag} label={field.label} hint={field.hint}>
+                {(id) => (
                   <Select id={id} value={String(values[field.flag] ?? "")} onChange={(e) => set(field.flag, e.target.value)}>
                     <option value="">Ask in the console</option>
                     {field.options.map((option) => (
@@ -96,17 +105,12 @@ export function ScriptForm({ toolId, group, script, busy, onStarted, bare, guard
                       </option>
                     ))}
                   </Select>
-                ) : (
-                  <TextInput
-                    id={id}
-                    placeholder={field.type === "text" ? field.placeholder : undefined}
-                    value={String(values[field.flag] ?? "")}
-                    onChange={(e) => set(field.flag, e.target.value)}
-                  />
-                )
-              }
-            </Field>
-          ))}
+                )}
+              </Field>
+            ) : field.type === "text" ? (
+              <ScriptTextField key={field.flag} field={field} value={String(values[field.flag] ?? "")} onChange={(v) => set(field.flag, v)} />
+            ) : null,
+          )}
         </div>
       )}
       {toggles.length > 0 && (

@@ -23,7 +23,7 @@ from urllib.parse import quote
 # import path until we put it there.
 sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "lib"))
 
-from comick_tools.api import ApiError, comic_hid, connect, list_entries, normalize_number, number_key  # noqa: E402
+from comick_tools.api import ApiError, comic_hid, connect, list_entries, normalize_number, number_key, slug_from  # noqa: E402
 from comick_tools.console import err, human_time, out, plural  # noqa: E402
 from comick_tools.env import SettingsError, comick_settings  # noqa: E402
 
@@ -40,13 +40,13 @@ WORKERS = 4
 
 def parse_args():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--slug", help="comic or anime slug, to work from that comic's list")
+    parser.add_argument("--slug", type=slug_from, help="comic or anime slug or ComicK link, to work from that comic's list")
     parser.add_argument("--user", help="user id or profile URL, to work from everything that user uploaded")
     parser.add_argument("--type", choices=("chapter", "episode"), help="what to delete when using --slug")
     parser.add_argument("--lang", help="chapter language code, or 'all'. Ignored for episodes")
     parser.add_argument("--select", help="numbers and ranges like '1-10, 12.5', or 'all'")
     parser.add_argument("--group", help="only chapters from this scanlation group (--slug only)")
-    parser.add_argument("--comic", help="only chapters from this comic slug (--user only)")
+    parser.add_argument("--comic", type=slug_from, help="only chapters from this comic slug or link (--user only)")
     parser.add_argument("--reason", help="why these are being deleted, asked for if left out")
     parser.add_argument("--dry-run", action="store_true", help="go through everything but send no deletes")
     return parser.parse_args()
@@ -421,7 +421,7 @@ def main():
         if before != len(entries):
             out.step(f"Skipping {plural(before - len(entries), 'chapter')} already removed")
     else:
-        slug = (args.slug or ask_until("Comic or anime slug:", lambda a: None if a.strip() else "a slug is needed")).strip()
+        slug = slug_from(args.slug or ask_until("Comic or anime slug or link:", lambda a: None if a.strip() else "a slug is needed"))
         kind = args.type or ask_until(
             "Delete chapters or episodes?",
             lambda a: None if a.lower() in ("c", "e", "chapter", "episode") else "type c or e",
@@ -457,7 +457,7 @@ def main():
             lang = (args.lang or ask("Language code, or 'all' for every language:", default="all")).strip().lower()
             if lang != "all":
                 entries = [e for e in entries if (e.get("lang") or "").lower() == lang]
-        comic = narrow(entries, comic_of, "comic", args.comic, "Only from comic slug (blank for any):")
+        comic = slug_from(narrow(entries, comic_of, "comic", args.comic, "Only from comic slug or link (blank for any):"))
         if comic:
             entries = [e for e in entries if comic_of(e).lower() == comic.lower()]
     elif mode == "chapter":

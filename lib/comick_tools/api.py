@@ -14,7 +14,7 @@ import urllib.request
 from collections import deque
 from decimal import Decimal, InvalidOperation
 from email.utils import parsedate_to_datetime
-from urllib.parse import quote
+from urllib.parse import quote, unquote, urlparse
 
 COOKIE_NAME = "__Secure-comick-auth.session_token"
 USER_AGENT = "comick-tools"
@@ -212,6 +212,34 @@ def number_key(value):
     except InvalidOperation:
         pass
     return (1, Decimal(0), str(value))
+
+
+# comick-localhost.russhvithdesign.in is a fan made front end over the same
+# API, so its links name the same comics as comick.dev ones.
+COMICK_HOSTS = ("comick.dev", "comick-localhost.russhvithdesign.in")
+SLUG_SECTIONS = ("comic", "anime")
+
+
+def slug_from(text):
+    """Pull the slug out of a ComicK comic or anime link.
+
+    Anything that isn't one of those links comes back as typed (minus
+    surrounding slashes), so a bare slug passes straight through.
+    """
+    text = (text or "").strip()
+    if "/" not in text:
+        return text
+    url = urlparse(text if "://" in text else "https://" + text)
+    host = (url.hostname or "").lower()
+    if host.startswith("www."):
+        host = host[4:]
+    if not any(host == h or host.endswith("." + h) for h in COMICK_HOSTS):
+        return text.strip("/")
+    parts = [p for p in url.path.split("/") if p]
+    for i, part in enumerate(parts[:-1]):
+        if part.lower() in SLUG_SECTIONS:
+            return unquote(parts[i + 1])
+    return text.strip("/")
 
 
 def comic_hid(api, slug, anime=False):

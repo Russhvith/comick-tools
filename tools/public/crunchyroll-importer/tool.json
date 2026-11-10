@@ -19,8 +19,25 @@
       "summary": "Sends the episodes to an anime. Episodes already on ComicK are skipped and listed.",
       "needsCookie": true,
       "fields": [
-        { "flag": "--slug", "type": "text", "label": "Anime slug", "placeholder": "tensei-shitara-slime-datta-ken-3rd-season" },
-        { "flag": "--note", "type": "text", "label": "Extra moderator note", "placeholder": "Added after the importer credit, review mode only" },
+        {
+          "flag": "--slug",
+          "type": "text",
+          "label": "Anime",
+          "prefix": "comick.dev/anime/",
+          "slugFrom": ["anime"],
+          "placeholder": "tensei-shitara-slime-datta-ken-3rd-season",
+          "hint": "Paste the anime's ComicK link or type its slug."
+        },
+        {
+          "flag": "--note",
+          "type": "text",
+          "label": "Moderator note",
+          "multiline": true,
+          "maxLength": 2000,
+          "appended": "Auto Uploaded using ComicK Crunchyroll Importer. (https://github.com/Russhvith/comick-tools)",
+          "placeholder": "Anything reviewers should know about this batch",
+          "hint": "Only sent in review mode."
+        },
         { "flag": "--dry-run", "type": "bool", "label": "Dry run, upload nothing", "hint": "Run every check and list what would be uploaded, without sending anything to ComicK." },
         { "flag": "--yes", "type": "bool", "label": "Upload without asking first", "hint": "Skip the confirmation in the console and start uploading straight away." }
       ]

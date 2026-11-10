@@ -3,7 +3,26 @@ export type ToolGroup = "public" | "admin";
 /** `hint` is one short line under the field saying what it does. */
 export type Field =
   | { flag: string; type: "bool"; label: string; hint?: string }
-  | { flag: string; type: "text"; label: string; hint?: string; placeholder?: string }
+  | {
+      flag: string;
+      type: "text";
+      label: string;
+      hint?: string;
+      placeholder?: string;
+      /** Shown in a grey box before the input, like "comick.dev/anime/". */
+      prefix?: string;
+      /**
+       * Turn a pasted ComicK link into its slug. Lists the path sections
+       * that come before a slug, like ["anime"] for /anime/<slug>.
+       */
+      slugFrom?: string[];
+      /** A text area on its own row instead of a one line input. */
+      multiline?: boolean;
+      /** Limit on what the script ends up sending, appended text included. */
+      maxLength?: number;
+      /** Text the script adds after the value (with a space), shown in grey. */
+      appended?: string;
+    }
   | { flag: string; type: "select"; label: string; hint?: string; options: string[] };
 
 export type Script = {

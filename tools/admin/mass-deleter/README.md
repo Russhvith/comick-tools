@@ -88,12 +88,12 @@ python tools/admin/mass-deleter/mass_delete.py --user=https://comick.dev/user/<i
 
 | Flag | Notes |
 | --- | --- |
-| `--slug` | work from this comic or anime |
+| `--slug` | work from this comic or anime. A slug or its whole ComicK link (comick.dev or comick-localhost.russhvithdesign.in) |
 | `--user` | work from this user's uploads. A user id or any profile URL containing one |
 | `--type` | `chapter` or `episode`, with `--slug`. `--user` is chapters only |
 | `--lang` | chapter language code, or `all`. Ignored for episodes |
 | `--group` | only chapters from this scanlation group, with `--slug`. Matched case insensitively |
-| `--comic` | only chapters from this comic slug, with `--user`. Matched case insensitively |
+| `--comic` | only chapters from this comic slug or link, with `--user`. Matched case insensitively |
 | `--select` | numbers and ranges like `1-10, 12.5 15`, or `all` |
 | `--reason` | why they're being deleted |
 | `--dry-run` | go through everything, including the permission checks, but send no deletes |

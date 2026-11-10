@@ -24,7 +24,7 @@ from urllib.parse import quote, urlparse, urlunparse
 # import path until we put it there.
 sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "lib"))
 
-from comick_tools.api import ApiError, comic_hid, connect, list_entries, normalize_number  # noqa: E402
+from comick_tools.api import ApiError, comic_hid, connect, list_entries, normalize_number, slug_from  # noqa: E402
 from comick_tools.console import err, human_size, human_time, out, plural, short  # noqa: E402
 from comick_tools.env import SettingsError, comick_settings  # noqa: E402
 
@@ -36,7 +36,8 @@ USER_AGENT = "comick-tools/crunchyroll-importer"
 TIMEOUT = 30
 
 # Goes on every review mode request so moderators know where a batch came
-# from. Anything passed with --note gets added after it.
+# from. It goes after anything passed with --note, the same way the
+# mass deleter tags its reasons, and the UI shows it there too.
 MODERATOR_NOTE = "Auto Uploaded using ComicK Crunchyroll Importer. (https://github.com/Russhvith/comick-tools)"
 MAX_NOTE = 2000
 
@@ -86,12 +87,12 @@ URL_IN_TEXT_RE = re.compile(r"https?://|www\.", re.IGNORECASE)
 
 def parse_args():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--slug", help="the anime's slug on ComicK, asked for if left out")
+    parser.add_argument("--slug", type=slug_from, help="the anime's slug or ComicK link, asked for if left out")
     parser.add_argument("-i", "--input", type=Path, default=DATA_DIR / "output.txt")
     parser.add_argument(
         "--note",
         default="",
-        help="extra moderator note added after the importer credit, only sent in request mode",
+        help="moderator note, sent with the importer credit after it, only in request mode",
     )
     parser.add_argument("--dry-run", action="store_true", help="check everything but upload nothing")
     parser.add_argument("-y", "--yes", action="store_true", help="skip the confirmation prompt")
@@ -377,7 +378,7 @@ def ask_slug():
     # fill in what's missing.
     while True:
         try:
-            answer = input(f"  {out.paint('?', '1;36')} Anime slug on ComicK: ").strip()
+            answer = slug_from(input(f"  {out.paint('?', '1;36')} Anime slug or link on ComicK: "))
         except EOFError:
             out.say()
             err.fail("No anime slug", [("Fix", "pass --slug or run it from a terminal")])
@@ -405,7 +406,11 @@ def main():
         err.fail(e.title, e.rows)
         sys.exit(1)
 
-    note = " ".join(part for part in (MODERATOR_NOTE, args.note.strip()) if part)
+    note = args.note.strip()
+    # Close the sentence so the credit doesn't read as part of it.
+    if note and note[-1] not in ".!?":
+        note += "."
+    note = " ".join(part for part in (note, MODERATOR_NOTE) if part)
     if len(note) > MAX_NOTE:
         err.fail("Moderator note is too long", [
             ("Limit", f"{MAX_NOTE} characters including the importer credit"),

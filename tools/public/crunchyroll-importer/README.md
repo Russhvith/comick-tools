@@ -150,11 +150,11 @@ python tools/public/crunchyroll-importer/upload_episodes.py --slug that-time-i-g
 
 | Flag | Default |
 | --- | --- |
-| `--slug` | the anime's slug on ComicK. Asked for if left out |
+| `--slug` | the anime's slug, or its whole link (`https://comick.dev/anime/<slug>`, or the same path on comick-localhost.russhvithdesign.in). Asked for if left out |
 | `-i`, `--input` | `data/output.txt` |
 | `--dry-run` | off. Checks everything and shows what would go up, sends nothing |
 | `-y`, `--yes` | off, so it asks before uploading |
-| `--note` | empty. Extra moderator note, added after the importer credit |
+| `--note` | empty. Moderator note, sent with the importer credit after it |
 
 What a run does, in order:
 
@@ -188,7 +188,7 @@ At the end it lists anything that failed, anything not sent, and the episodes th
 
 **Rate limits.** Requests are spaced to stay under `COMICK_UPLOADS_PER_SECOND` and `COMICK_REQUESTS_PER_MINUTE`. The API also sends `x-ratelimit-remaining` and `x-ratelimit-reset`. When remaining hits zero everything pauses until the reset, and a 429 gets one retry after `Retry-After` (or the reset window when that header is missing). If ComicK answers with a limit message (a daily request cap, say) the run stops, says so, and lists what wasn't sent so it can be picked up later. Rerunning is safe since anything that made it is now an existing episode.
 
-**Moderator note.** Every review mode request carries `Auto Uploaded using ComicK Crunchyroll Importer. (https://github.com/Russhvith/comick-tools)` so moderators know where it came from. `--note` adds text after it, and the whole note has to stay under 2,000 characters. Direct adds don't send a note.
+**Moderator note.** Every review mode request carries `Auto Uploaded using ComicK Crunchyroll Importer. (https://github.com/Russhvith/comick-tools)` so moderators know where it came from. Text from `--note` goes in front of it, closed with a full stop if it has none, and the whole note has to stay under 2,000 characters. Direct adds don't send a note.
 
 **Titles.** `English Title` is required. `Japanese Title` and a `Romaji Title` line (add it by hand) fill the `ja` and `ja-ro` boxes. Other languages the formatter writes, like `German Title`, go in as extra rows.
 
