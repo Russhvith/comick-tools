@@ -19,9 +19,11 @@ type Props = {
   children: ReactNode;
   /**
    * Esc, the backdrop and the close button all land here instead of
-   * closing outright, so a caller with unsaved edits can ask first.
+   * closing outright, so a caller with unsaved edits can ask first. Left
+   * out, the dialog can't be closed at all: no close button, and Esc and
+   * the backdrop do nothing. Only something inside it can end it.
    */
-  onRequestClose: () => void;
+  onRequestClose?: () => void;
 };
 
 export function Modal({ open, title, subtitle, actions, footer, children, onRequestClose }: Props) {
@@ -42,7 +44,12 @@ export function Modal({ open, title, subtitle, actions, footer, children, onRequ
       aria-labelledby={titleId}
       onCancel={(event) => {
         event.preventDefault();
-        onRequestClose();
+        onRequestClose?.();
+      }}
+      // Browsers only let a page block Esc so many times before closing a
+      // dialog anyway. One that mustn't close simply opens again.
+      onClose={() => {
+        if (open && !onRequestClose) dialog.current?.showModal();
       }}
       // Pressing inside and letting go on the backdrop (selecting text, say)
       // shouldn't count as a click outside.
@@ -50,7 +57,7 @@ export function Modal({ open, title, subtitle, actions, footer, children, onRequ
         event.currentTarget.dataset.downOnBackdrop = String(event.target === dialog.current);
       }}
       onClick={(event) => {
-        if (event.target === dialog.current && event.currentTarget.dataset.downOnBackdrop === "true") onRequestClose();
+        if (event.target === dialog.current && event.currentTarget.dataset.downOnBackdrop === "true") onRequestClose?.();
       }}
     >
       {open && (
@@ -64,7 +71,7 @@ export function Modal({ open, title, subtitle, actions, footer, children, onRequ
             </div>
             <div className={styles.actions}>
               {actions}
-              <IconButton icon={X} label="Close" onClick={onRequestClose} />
+              {onRequestClose && <IconButton icon={X} label="Close" onClick={onRequestClose} />}
             </div>
           </header>
           <div className={styles.body}>{children}</div>

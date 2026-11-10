@@ -1,0 +1,56 @@
+/* SPDX-License-Identifier: GPL-3.0-only
+   Copyright (C) 2026 Russhvith */
+
+.body {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.points {
+  display: grid;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.points li {
+  position: relative;
+  padding-left: 1.5rem;
+  line-height: 1.6;
+  color: var(--foreground);
+}
+
+.points li::before {
+  content: "";
+  position: absolute;
+  top: 0.8em;
+  left: 0.25rem;
+  width: 0.625rem;
+  height: 1.5px;
+  background: var(--link);
+}
+
+.read {
+  margin: 0;
+  padding: 0.875rem 1rem;
+  border-radius: var(--radius-md);
+  background: rgb(55 65 81 / 0.3);
+  font-size: 0.8125rem;
+  line-height: 1.6;
+  color: var(--muted-foreground);
+}
+
+.read a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-weight: 600;
+}
+
+.error {
+  margin-right: auto;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--destructive);
+}

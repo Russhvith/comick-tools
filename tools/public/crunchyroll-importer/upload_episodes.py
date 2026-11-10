@@ -29,6 +29,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "lib"))
 
 from comick_tools.api import ApiError, comic_hid, connect, list_entries, normalize_number, slug_from  # noqa: E402
 from comick_tools.console import err, human_size, human_time, out, plural, short  # noqa: E402
+from comick_tools.terms import require_terms  # noqa: E402
 from comick_tools.env import SettingsError, comick_settings  # noqa: E402
 
 TOOL_DIR = Path(__file__).resolve().parent
@@ -99,6 +100,7 @@ def parse_args():
     )
     parser.add_argument("--dry-run", action="store_true", help="check everything but upload nothing")
     parser.add_argument("-y", "--yes", action="store_true", help="skip the confirmation prompt")
+    parser.add_argument("--accept-terms", action="store_true", help="accept the Terms of Service without being asked")
     return parser.parse_args()
 
 
@@ -399,6 +401,7 @@ def main():
     args = parse_args()
     started = time.perf_counter()
     out.header("crunchyroll-importer", "upload episodes to ComicK")
+    require_terms(args.accept_terms)
     if not args.slug:
         args.slug = ask_slug()
         out.say()

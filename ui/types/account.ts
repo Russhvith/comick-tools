@@ -26,6 +26,7 @@ export type Account =
       lastActive: string | null;
       checkedAt: number;
     }
+  | { state: "not-agreed"; checkedAt: number }
   | { state: "no-cookie"; checkedAt: number }
   | { state: "rejected"; checkedAt: number }
   | { state: "inactive"; username: string | null; checkedAt: number }

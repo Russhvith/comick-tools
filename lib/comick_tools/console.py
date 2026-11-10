@@ -74,11 +74,6 @@ class Console:
     def header(self, tool, action):
         self.say()
         self.say(f"  {self.paint(f' {tool} ', '1;30;43')} {self.dim(action)}")
-        # The web UI links its own legal pages, so the notice is for people
-        # running the scripts straight from a terminal.
-        if os.environ.get("COMICK_TOOLS_UI") != "1":
-            self.say(self.dim("  By using ComicK Tools you agree to the Terms of Service in"))
-            self.say(self.dim("  legal/terms.txt and the Privacy Policy in legal/privacy.txt."))
         self.say()
 
     def step(self, text, detail=""):

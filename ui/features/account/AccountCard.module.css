@@ -209,3 +209,22 @@
     animation: none;
   }
 }
+
+.problemBody {
+  display: grid;
+  gap: 0.125rem;
+}
+
+.problemAction {
+  margin-top: 0.625rem;
+}
+
+.problemLink {
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.problemIcon[data-tone="info"] {
+  background: rgb(37 99 235 / 0.15);
+  color: var(--link);
+}

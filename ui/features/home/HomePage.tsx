@@ -10,6 +10,7 @@ import { site } from "@/config/site";
 import { groups, toolIcon } from "@/config/tools";
 import { AccountCard } from "@/features/account/AccountCard";
 import { AdminLockMark } from "@/features/account/AdminLockMark";
+import { Onboarding } from "@/features/settings/Onboarding";
 import { ToolNav } from "@/features/tools/components/ToolNav";
 import { cn } from "@/lib/cn";
 import type { ChangelogSection } from "@/lib/server/repo";
@@ -122,6 +123,7 @@ export function HomePage({ tools, version, runCount, commitCount, days, changelo
 
         <div className={styles.column}>
           <AccountCard className={styles.reveal} />
+          <Onboarding />
 
           <dl className={cn(styles.stats, styles.reveal)} style={order(1)}>
             {stats.map((s) => (

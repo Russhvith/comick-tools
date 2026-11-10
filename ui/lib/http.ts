@@ -5,6 +5,8 @@ export class HttpError extends Error {
   constructor(
     message: string,
     readonly status: number,
+    /** The whole error body, for routes that say more than one message, like problems by field. */
+    readonly body: Record<string, unknown> = {},
   ) {
     super(message);
   }
@@ -18,6 +20,6 @@ export async function request<T>(url: string, init?: RequestInit): Promise<T> {
     cache: "no-store",
   });
   const body = await res.json().catch(() => ({}));
-  if (!res.ok) throw new HttpError(body.error || `Server answered ${res.status}`, res.status);
+  if (!res.ok) throw new HttpError(body.error || `Server answered ${res.status}`, res.status, body);
   return body as T;
 }

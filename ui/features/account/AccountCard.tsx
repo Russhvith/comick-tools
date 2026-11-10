@@ -3,11 +3,13 @@
 
 "use client";
 
-import { useState } from "react";
-import { ExternalLink, KeyRound, RefreshCw, TriangleAlert } from "lucide-react";
+import { useState, type ReactNode } from "react";
+import Link from "next/link";
+import { ExternalLink, KeyRound, RefreshCw, ScrollText, TriangleAlert } from "lucide-react";
+import { Button } from "@/components/atoms/Button";
 import { IconButton } from "@/components/atoms/IconButton";
 import { Skeleton } from "@/components/atoms/Skeleton";
-import { site } from "@/config/site";
+import { TermsDialog } from "@/features/settings/TermsDialog";
 import { cn } from "@/lib/cn";
 import type { Account, Role } from "@/types/account";
 import { useAccount } from "./useAccount";
@@ -37,36 +39,49 @@ function ago(iso: string | null) {
 
 const count = (n: number | null) => (n === null ? "?" : n.toLocaleString("en-US"));
 
-function Problem({ title, text, docs }: { title: string; text: string; docs?: boolean }) {
+function Problem({ title, text, docs, action }: { title: string; text: string; docs?: boolean; action?: ReactNode }) {
   return (
     <div className={styles.problem}>
       <span className={styles.problemIcon} aria-hidden>
         {docs ? <KeyRound size={18} /> : <TriangleAlert size={18} />}
       </span>
-      <div>
+      <div className={styles.problemBody}>
         <p className={styles.problemTitle}>{title}</p>
-        <p className={styles.problemText}>
-          {text}
-          {docs && (
-            <>
-              {" "}
-              <a href={`${site.repoUrl}/blob/main/docs/auth.md`} target="_blank" rel="noreferrer">
-                How to get it
-              </a>
-              .
-            </>
-          )}
-        </p>
+        <p className={styles.problemText}>{text}</p>
+        {action && <div className={styles.problemAction}>{action}</div>}
       </div>
     </div>
   );
 }
 
-function Body({ account }: { account: Account }) {
+const toSettings = (label: string) => (
+  <Link href="/settings" className={styles.problemLink}>
+    {label}
+  </Link>
+);
+
+function Body({ account, onAccept }: { account: Account; onAccept: () => void }) {
+  if (account.state === "not-agreed")
+    return (
+      <div className={styles.problem}>
+        <span className={styles.problemIcon} data-tone="info" aria-hidden>
+          <ScrollText size={18} />
+        </span>
+        <div className={styles.problemBody}>
+          <p className={styles.problemTitle}>Accept the Terms to connect</p>
+          <p className={styles.problemText}>Nothing is sent to ComicK, not even this account check, until you accept the Terms of Service.</p>
+          <div className={styles.problemAction}>
+            <Button variant="primary" size="sm" onClick={onAccept}>
+              Review and accept
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
   if (account.state === "no-cookie")
-    return <Problem docs title="Not connected to ComicK" text="Set COMICK_SESSION_TOKEN in .env to see which account the tools use." />;
+    return <Problem docs title="Not connected to ComicK" text="Add your ComicK session cookie to see which account the tools use." action={toSettings("Add it in Settings")} />;
   if (account.state === "rejected")
-    return <Problem docs title="ComicK refused the cookie" text="The one in .env has expired or been signed out. Copy a fresh one." />;
+    return <Problem docs title="ComicK refused the cookie" text="The saved one has expired or been signed out. Copy a fresh one." action={toSettings("Replace it in Settings")} />;
   if (account.state === "inactive")
     return <Problem title={`${account.username ?? "This account"} isn't active`} text="ComicK says the account behind the cookie can't be used right now." />;
   if (account.state === "error") return <Problem title="Couldn't check the account" text={account.message} />;
@@ -116,6 +131,7 @@ function Body({ account }: { account: Account }) {
 export function AccountCard({ className }: { className?: string }) {
   const { data, loading, recheck } = useAccount();
   const [checking, setChecking] = useState(false);
+  const [asking, setAsking] = useState(false);
 
   return (
     <section className={cn(styles.card, className)} aria-label="ComicK account">
@@ -144,10 +160,11 @@ export function AccountCard({ className }: { className?: string }) {
           <Skeleton height="4rem" />
         </div>
       ) : data ? (
-        <Body account={data} />
+        <Body account={data} onAccept={() => setAsking(true)} />
       ) : (
         <Problem title="Couldn't check the account" text="The tools server didn't answer." />
       )}
+      <TermsDialog open={asking} onClose={() => setAsking(false)} />
     </section>
   );
 }

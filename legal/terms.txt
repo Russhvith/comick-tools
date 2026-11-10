@@ -14,6 +14,10 @@ command line or in your browser (the "Tools").
 By using the Tools, you agree to these Terms and to our Privacy Policy in
 legal/privacy.txt. If you do not agree, do not use the Tools.
 
+The Tools ask you to accept these Terms before you first use them, in the
+web interface or on the command line, and remember your answer in the .env
+file. Until you accept, the tools do not run and nothing is sent to ComicK.
+
 The source code of the Tools is free software under the GNU General Public
 License, version 3, in the LICENSE file. These Terms cover how you use the
 Tools with ComicK. Nothing in them limits any right the licence gives you to

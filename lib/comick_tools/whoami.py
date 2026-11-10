@@ -18,7 +18,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from comick_tools.api import ApiError, connect  # noqa: E402
-from comick_tools.env import SettingsError, comick_settings  # noqa: E402
+from comick_tools.env import SettingsError, comick_settings, terms_accepted  # noqa: E402
 
 WHOAMI_PATH = "/v2.0/sessions/whoami"
 
@@ -28,6 +28,11 @@ def as_dict(value):
 
 
 def main():
+    # Nothing goes to ComicK before the Terms are accepted. The UI checks
+    # first, this is the backstop.
+    if not terms_accepted():
+        print(json.dumps({"state": "not-agreed"}))
+        return
     try:
         settings = comick_settings()
     except SettingsError:

@@ -15,13 +15,17 @@ The tools act as a logged in ComicK user by sending the browser session cookie. 
 3. Chrome / Edge: **Application** tab, then **Cookies**, then the ComicK domain.
    Firefox: **Storage** tab, then **Cookies**.
 4. Find `__Secure-comick-auth.session_token` and copy the **Value** column.
-5. Paste it into `.env`:
+5. Paste it into **Settings** in the web interface, which writes it to `.env` for you. The first page load offers to do this if there's no cookie yet. Or put it in `.env` yourself:
 
    ```
    COMICK_SESSION_TOKEN=paste-it-here
    ```
 
-No quotes needed.
+No quotes needed. Settings also accepts it pasted with its name in front (`__Secure-comick-auth.session_token=...`) and strips that off.
+
+## Terms of Service
+
+Nothing runs and nothing is sent to ComicK until the Terms of Service are accepted. The web interface asks in a window on the tool pages, and the command line asks `[Y/n]` the first time a tool runs. Either way the answer is saved as `COMICK_AGREED_TO_TERMS=true` in `.env`, so it's asked once. Scripts also take `--accept-terms` to accept without the question, for runs with no terminal to answer in.
 
 ## Sending it
 

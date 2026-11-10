@@ -30,6 +30,7 @@ from urllib.parse import urlparse
 sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "lib"))
 
 from comick_tools.console import err, human_size, human_time, out, plural, short  # noqa: E402
+from comick_tools.terms import require_terms  # noqa: E402
 
 DATA_DIR = Path(__file__).resolve().parent / "data"
 
@@ -86,6 +87,7 @@ def parse_args():
         action="store_false",
         help="skip downloading previews and link Crunchyroll's URLs instead",
     )
+    parser.add_argument("--accept-terms", action="store_true", help="accept the Terms of Service without being asked")
     return parser.parse_args()
 
 
@@ -329,6 +331,7 @@ def main():
     args = parse_args()
     started = time.perf_counter()
     out.header("crunchyroll-importer", "format episodes")
+    require_terms(args.accept_terms)
 
     try:
         raw = args.input.read_bytes()

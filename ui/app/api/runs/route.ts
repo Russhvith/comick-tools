@@ -2,6 +2,7 @@
 // Copyright (C) 2026 Russhvith
 
 import { NextResponse } from "next/server";
+import { termsAccepted } from "@/lib/server/env";
 import { rejectRemote } from "@/lib/server/guard";
 import { claim, hashRequest } from "@/lib/server/idempotency";
 import { getRun, listRuns, startScript, summary } from "@/lib/server/runs";
@@ -20,6 +21,11 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
   const refused = rejectRemote(req);
   if (refused) return refused;
+  // Checked before the idempotency key is claimed, so a refused start
+  // doesn't leave a key waiting on a run that never happens.
+  if (!termsAccepted()) {
+    return NextResponse.json({ error: "Accept the Terms of Service before running a tool" }, { status: 403 });
+  }
 
   let body: { tool?: string; script?: string; values?: Record<string, unknown> };
   try {

@@ -31,8 +31,9 @@ to your use of the Tools.
 3. Your ComicK session cookie
 
 The Tools sign in to ComicK with the __Secure-comick-auth.session_token
-cookie of your ComicK account, which you put in the .env file at the root of
-the ComicK Tools folder as COMICK_SESSION_TOKEN. That file is excluded from
+cookie of your ComicK account, which is saved in the .env file at the root
+of the ComicK Tools folder as COMICK_SESSION_TOKEN, either by editing that
+file or through Settings in the web interface. That file is excluded from
 git, so it is never committed or uploaded with the code.
 
 The cookie is read from .env by the Tools' Python client, the shared code
@@ -53,8 +54,10 @@ ComicK's API at https://api.comick.dev, and to nowhere else:
 In particular:
 
 - The web interface never sends the cookie to your browser, and never shows
-  it on a page. Its server only checks whether a cookie is set and asks the
-  Python client which account it belongs to.
+  it on a page. If you paste the cookie into Settings, your browser sends it
+  once to the web interface's server on your own computer, which writes it
+  to .env. After that the server only says whether a cookie is set and how
+  long it is.
 - When a preview image is uploaded, it goes to a storage address ComicK
   provides for that upload, without the cookie, because that address carries
   its own one-time permission.
@@ -71,7 +74,8 @@ your computer and that file to yourself.
 
 The Tools keep the following on your computer, in the ComicK Tools folder:
 
-- Settings: the .env file, with your cookie and any limits you set.
+- Settings: the .env file, with your cookie, any limits you set, and whether
+  you have accepted the Terms of Service.
 - Tool data: each tool's data folder, such as the Crunchyroll Importer's
   input.json, output.txt and downloaded preview images. Start over in the
   web interface deletes these for that tool.
@@ -86,7 +90,8 @@ cookies or use any other storage in your browser.
 5. Where the Tools connect
 
 The Tools connect only to these services, and only when you use the feature
-that needs them. Each one handles what it receives under its own privacy
+that needs them. Nothing connects to ComicK until you have accepted the
+Terms of Service. Each one handles what it receives under its own privacy
 policy.
 
 - ComicK's API (api.comick.dev): to check which account the cookie belongs
@@ -126,12 +131,13 @@ your .env file or other private details in an issue.
 
 7. Your ComicK account details
 
-To show which account the Tools are using, the web interface asks ComicK's
-API who the cookie belongs to. ComicK returns your account details, and the
-Python client passes on only your username, role, profile numbers, account
-dates, profile link and the Gravatar hash. Your email address goes no
-further than that client. The result is kept in the web interface's memory
-for up to five minutes and is never written to disk.
+Once you have accepted the Terms of Service, the web interface shows which
+account the Tools are using by asking ComicK's API who the cookie belongs
+to. ComicK returns your account details, and the Python client passes on
+only your username, role, profile numbers, account dates, profile link and
+the Gravatar hash. Your email address goes no further than that client. The
+result is kept in the web interface's memory for up to five minutes and is
+never written to disk.
 
 What ComicK does with your account and your uploads is covered by ComicK's
 own privacy policy, not this one.

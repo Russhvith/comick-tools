@@ -1,0 +1,100 @@
+/* SPDX-License-Identifier: GPL-3.0-only
+   Copyright (C) 2026 Russhvith */
+
+.form {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.group {
+  display: grid;
+  gap: 0.875rem;
+}
+
+.group + .group {
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border);
+}
+
+.groupHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.625rem;
+  color: var(--link);
+}
+
+.groupHead h3 {
+  font-size: 0.9375rem;
+  font-weight: 700;
+}
+
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3125rem;
+  margin-left: auto;
+  padding: 0.125rem 0.5rem;
+  border-radius: 999px;
+  corner-shape: round;
+  background: rgb(234 179 8 / 0.12);
+  color: var(--warning);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.status[data-ok="true"] {
+  background: rgb(16 185 129 / 0.12);
+  color: #6ee7b7;
+}
+
+.help {
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.55;
+  color: var(--muted-foreground);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+  gap: 0.875rem 1rem;
+}
+
+.advanced {
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--border);
+}
+
+.advanced summary {
+  margin-bottom: 0.875rem;
+  color: var(--muted-foreground);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.advanced:not([open]) summary {
+  margin-bottom: 0;
+}
+
+.footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+.error {
+  margin-right: auto;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--destructive);
+}
+
+.saved {
+  margin-right: auto;
+  font-size: 0.8125rem;
+  color: #6ee7b7;
+}

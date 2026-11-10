@@ -5,7 +5,7 @@ import { execFile } from "node:child_process";
 import path from "node:path";
 import { promisify } from "node:util";
 import { ROLES, type Account, type Role } from "@/types/account";
-import { readEnv } from "./env";
+import { readEnv, termsAccepted } from "./env";
 import { REPO_ROOT } from "./paths";
 import { pythonCommand } from "./runs";
 
@@ -22,7 +22,7 @@ const CACHE_MS = 5 * 60 * 1000;
 const store = globalThis as unknown as { __comickAccount?: { at: number; token: string; account: Account } };
 
 type Raw = {
-  state: "ok" | "no-cookie" | "rejected" | "error";
+  state: "ok" | "not-agreed" | "no-cookie" | "rejected" | "error";
   message?: string;
   active?: boolean;
   id?: string | null;
@@ -46,6 +46,7 @@ function toRole(value: unknown): Role {
 }
 
 function shape(raw: Raw, now: number): Account {
+  if (raw.state === "not-agreed") return { state: "not-agreed", checkedAt: now };
   if (raw.state === "no-cookie") return { state: "no-cookie", checkedAt: now };
   if (raw.state === "rejected") return { state: "rejected", checkedAt: now };
   if (raw.state === "error") return { state: "error", message: raw.message || "ComicK didn't answer", checkedAt: now };
@@ -70,10 +71,18 @@ function shape(raw: Raw, now: number): Account {
   };
 }
 
+/** Drop the cached answer, after the cookie or the terms change. */
+export function forgetAccount() {
+  store.__comickAccount = undefined;
+}
+
 /** Who the cookie in .env belongs to. Never throws, failures come back as a state. */
 export async function currentAccount(force = false): Promise<Account> {
-  const token = readEnv().COMICK_SESSION_TOKEN?.trim() ?? "";
   const now = Date.now();
+  // Nothing is sent to ComicK, not even this check, until the Terms are
+  // accepted. Every page asks for the account, so this is the gate.
+  if (!termsAccepted()) return { state: "not-agreed", checkedAt: now };
+  const token = readEnv().COMICK_SESSION_TOKEN?.trim() ?? "";
   if (!token) return { state: "no-cookie", checkedAt: now };
 
   // A new cookie in .env is a new account, so the cache is per token.

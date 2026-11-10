@@ -4,7 +4,8 @@
 import fs from "node:fs";
 import path from "node:path";
 import type { Script, Step, Tool } from "@/types/tools";
-import { GROUPS, REPO_ROOT, TOOLS_DIR, isInside } from "./paths";
+import { readEnv } from "./env";
+import { GROUPS, TOOLS_DIR, isInside } from "./paths";
 
 /**
  * Keep only steps that point at something real, so a typo in a manifest
@@ -211,11 +212,5 @@ export function resetTool(toolId: string): { removed: string[]; skipped: string[
 
 /** Whether the shared .env (or the environment) has a session cookie. */
 export function cookieConfigured(): boolean {
-  if (process.env.COMICK_SESSION_TOKEN?.trim()) return true;
-  try {
-    const text = fs.readFileSync(path.join(REPO_ROOT, ".env"), "utf8");
-    return /^\s*(export\s+)?COMICK_SESSION_TOKEN\s*=\s*["']?[^"'\s#]+/m.test(text);
-  } catch {
-    return false;
-  }
+  return !!readEnv().COMICK_SESSION_TOKEN?.trim();
 }

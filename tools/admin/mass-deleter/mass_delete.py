@@ -28,6 +28,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "lib"))
 
 from comick_tools.api import ApiError, comic_hid, connect, list_entries, normalize_number, number_key, slug_from  # noqa: E402
 from comick_tools.console import err, human_time, out, plural  # noqa: E402
+from comick_tools.terms import require_terms  # noqa: E402
 from comick_tools.env import SettingsError, comick_settings  # noqa: E402
 
 USER_AGENT = "comick-tools/mass-deleter"
@@ -52,6 +53,7 @@ def parse_args():
     parser.add_argument("--comic", type=slug_from, help="only chapters from this comic slug or link (--user only)")
     parser.add_argument("--reason", help="why these are being deleted, asked for if left out")
     parser.add_argument("--dry-run", action="store_true", help="go through everything but send no deletes")
+    parser.add_argument("--accept-terms", action="store_true", help="accept the Terms of Service without being asked")
     return parser.parse_args()
 
 
@@ -374,6 +376,7 @@ def main():
     args = parse_args()
     started = time.perf_counter()
     out.header("mass-deleter", "delete chapters or episodes on ComicK")
+    require_terms(args.accept_terms)
 
     try:
         settings = comick_settings()

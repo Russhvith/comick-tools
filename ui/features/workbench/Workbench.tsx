@@ -29,6 +29,9 @@ import { StartOver } from "@/features/tools/components/StartOver";
 import { ToolNav } from "@/features/tools/components/ToolNav";
 import { AdminGate } from "@/features/account/AdminGate";
 import { RoleNote } from "@/features/account/RoleNote";
+import { Onboarding } from "@/features/settings/Onboarding";
+import { useSettings } from "@/features/settings/useSettings";
+import Link from "next/link";
 import { RestartOverlay } from "@/features/updates/components/RestartOverlay";
 import { UpdateControl } from "@/features/updates/components/UpdateControl";
 import { startUpdate, useVersion, waitForRestart } from "@/features/updates/useVersion";
@@ -72,7 +75,11 @@ export function Workbench({ tools, initialToolId, cookieSet, version, initialRun
   const activeRun = runs.find((r) => r.id === activeRunId) ?? null;
   // A tool with steps uses all its scripts on one page, otherwise just
   // the one that's selected.
-  const needsCookie = !cookieSet && !!tool && (tool.steps ? tool.scripts.some((s) => s.needsCookie) : !!script?.needsCookie);
+  // The live answer once it has loaded, so saving a cookie in Settings
+  // clears the warning without a reload.
+  const { data: settings } = useSettings();
+  const hasCookie = settings ? settings.cookie.set : cookieSet;
+  const needsCookie = !hasCookie && !!tool && (tool.steps ? tool.scripts.some((s) => s.needsCookie) : !!script?.needsCookie);
 
   // Tools switch without a navigation, so the tab title follows by hand.
   useEffect(() => {
@@ -179,14 +186,11 @@ export function Workbench({ tools, initialToolId, cookieSet, version, initialRun
             <ToolHeader tool={tool} actions={<StartOver tool={tool} busy={busy} onCleared={() => setRefreshKey((k) => k + 1)} />} />
             <RoleNote tool={tool} />
             <AdminGate tool={tool} />
+            <Onboarding requireTerms />
 
             {needsCookie && (
               <Banner tone="warning">
-                No session cookie in <code>.env</code> yet. Set <code>COMICK_SESSION_TOKEN</code> there before running this, see{" "}
-                <a href={`${site.repoUrl}/blob/main/docs/auth.md`} target="_blank" rel="noreferrer">
-                  docs/auth.md
-                </a>
-                .
+                No ComicK session cookie saved yet, and this tool needs one. <Link href="/settings">Add it in Settings</Link>.
               </Banner>
             )}
 

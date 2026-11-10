@@ -4,7 +4,7 @@
 "use client";
 
 import Link from "next/link";
-import { House } from "lucide-react";
+import { House, Settings } from "lucide-react";
 import { NavItem } from "@/components/molecules/NavItem";
 import { Sidebar, SidebarList, SidebarSection } from "@/components/organisms/Sidebar";
 import { site } from "@/config/site";
@@ -60,6 +60,9 @@ export function ToolNav({ tools, active, onSelectTool }: Props) {
       <SidebarList>
         <li>
           <NavItem icon={House} label="Home" tone="neutral" href="/" active={active === "home"} />
+        </li>
+        <li>
+          <NavItem icon={Settings} label="Settings" tone="neutral" href="/settings" active={active === "settings"} />
         </li>
       </SidebarList>
       {order.map((group) => {
