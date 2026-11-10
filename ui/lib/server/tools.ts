@@ -43,6 +43,7 @@ export function loadTools(): Tool[] {
           scripts,
           files,
           steps: readSteps(raw.steps, scripts, files),
+          flow: typeof raw.flow === "string" ? raw.flow : undefined,
         });
       } catch {
         // A broken manifest hides that one tool rather than the whole menu.

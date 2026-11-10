@@ -8,11 +8,11 @@ import { Select } from "@/components/atoms/TextInput";
 import { Card } from "@/components/molecules/Card";
 import { Field } from "@/components/molecules/Field";
 import { SwitchField } from "@/components/molecules/SwitchField";
-import { overLimit, ScriptTextField } from "./ScriptTextField";
+import { ScriptTextField } from "./ScriptTextField";
+import { useScriptRun } from "../useScriptRun";
 import { ConfirmDialog } from "@/components/organisms/ConfirmDialog";
 import { shortcuts } from "@/config/shortcuts";
 import { isMac, useHotkey } from "@/hooks/useHotkey";
-import { startRun } from "@/features/runs/api";
 import type { RunSummary } from "@/types/runs";
 import type { FieldValues, Script, ToolGroup } from "@/types/tools";
 import styles from "./ScriptForm.module.css";
@@ -36,43 +36,24 @@ type Props = {
 
 export function ScriptForm({ toolId, group, script, busy, onStarted, bare, guard, hotkey = true }: Props) {
   const [values, setValues] = useState<FieldValues>({});
-  const [error, setError] = useState<string | null>(null);
-  const [starting, setStarting] = useState(false);
   const [confirming, setConfirming] = useState(false);
   const form = useRef<HTMLFormElement>(null);
-  // One key per attempt. A double submit before the first answer comes
-  // back reuses it, so the server starts the script once.
-  const attemptKey = useRef<string | null>(null);
+  const { starting, error, setError, problem, start } = useScriptRun(toolId, script, onStarted);
 
   const set = (flag: string, value: string | boolean) => setValues((v) => ({ ...v, [flag]: value }));
-
-  async function start() {
-    attemptKey.current ??= crypto.randomUUID();
-    setError(null);
-    setStarting(true);
-    try {
-      onStarted(await startRun(toolId, script.id, values, attemptKey.current));
-    } catch (e) {
-      setError((e as Error).message);
-    } finally {
-      attemptKey.current = null;
-      setStarting(false);
-    }
-  }
-
-  // The script would refuse it anyway, after starting up and checking the
-  // cookie, so stop it here where the counter already shows why.
-  const tooLong = script.fields.find((f) => f.type === "text" && overLimit(f, String(values[f.flag] ?? "")));
 
   function submit(event?: React.FormEvent) {
     event?.preventDefault();
     if (busy || starting) return;
-    if (tooLong) {
-      setError(`${tooLong.label} is too long`);
+    // Caught before the confirm dialog, which would otherwise ask about a
+    // run that can't start.
+    const blocked = problem(values);
+    if (blocked) {
+      setError(blocked);
       return;
     }
     if (guard) setConfirming(true);
-    else void start();
+    else void start(values);
   }
 
   useHotkey(shortcuts.runScript.combo, () => form.current?.requestSubmit(), hotkey);
@@ -153,7 +134,7 @@ export function ScriptForm({ toolId, group, script, busy, onStarted, bare, guard
       onCancel={() => setConfirming(false)}
       onConfirm={() => {
         setConfirming(false);
-        void start();
+        void start(values);
       }}
     >
       <p>{guard}</p>

@@ -64,6 +64,12 @@ export type Tool = {
   files: ToolFile[];
   /** Present for tools that run in order. Without it the UI shows scripts as tabs. */
   steps?: Step[];
+  /**
+   * A purpose built page for the tool, by name, for forms the manifest
+   * can't describe (fields that depend on each other). An unknown name
+   * falls back to the plain form.
+   */
+  flow?: string;
 };
 
 export type FieldValues = Record<string, string | boolean>;

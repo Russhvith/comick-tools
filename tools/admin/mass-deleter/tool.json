@@ -1,6 +1,7 @@
 {
   "name": "Mass Deleter",
   "summary": "Delete chapters or episodes in bulk, from a comic or from one user's uploads.",
+  "flow": "mass-delete",
   "scripts": [
     {
       "id": "delete",
@@ -9,13 +10,39 @@
       "summary": "Anything left blank gets asked in the console. Deleting always needs DELETE typed in the console.",
       "needsCookie": true,
       "fields": [
-        { "flag": "--slug", "type": "text", "label": "Comic or anime", "slugFrom": ["comic", "anime"], "placeholder": "Slug or ComicK link, empty when using a user" },
-        { "flag": "--user", "type": "text", "label": "User id or profile link", "placeholder": "https://comick.dev/user/.../uploaded-chapters" },
+        {
+          "flag": "--slug",
+          "type": "text",
+          "label": "Comic or anime",
+          "slugFrom": ["comic", "anime"],
+          "placeholder": "solo-leveling, or its ComicK link",
+          "hint": "Paste its ComicK link or type the slug."
+        },
+        {
+          "flag": "--user",
+          "type": "text",
+          "label": "User",
+          "placeholder": "https://comick.dev/user/<id>/uploaded-chapters",
+          "hint": "Their profile link, or just the user id."
+        },
         { "flag": "--type", "type": "select", "label": "What to delete", "options": ["chapter", "episode"] },
-        { "flag": "--lang", "type": "text", "label": "Language", "placeholder": "en, or all" },
-        { "flag": "--group", "type": "text", "label": "Only from group", "placeholder": "Comic chapters only" },
-        { "flag": "--comic", "type": "text", "label": "Only from comic", "slugFrom": ["comic", "anime"], "placeholder": "User uploads only" },
-        { "flag": "--select", "type": "text", "label": "Numbers", "placeholder": "1-10, 12.5 or all" },
+        { "flag": "--lang", "type": "text", "label": "Language", "placeholder": "en, or all", "hint": "A language code, or all. Blank asks in the console." },
+        { "flag": "--group", "type": "text", "label": "Only from group", "placeholder": "Any group", "hint": "Blank keeps every group." },
+        {
+          "flag": "--comic",
+          "type": "text",
+          "label": "Only from comic",
+          "slugFrom": ["comic", "anime"],
+          "placeholder": "Any comic",
+          "hint": "A slug or link, to keep to one comic's chapters."
+        },
+        {
+          "flag": "--select",
+          "type": "text",
+          "label": "Which numbers",
+          "placeholder": "1-10, 12.5 or all",
+          "hint": "Blank lists them in the console first and asks there."
+        },
         {
           "flag": "--reason",
           "type": "text",
@@ -23,7 +50,8 @@
           "multiline": true,
           "maxLength": 500,
           "appended": "Mass deleted by ComicK MassDeleter. (https://github.com/Russhvith/comick-tools)",
-          "placeholder": "Why these are being deleted"
+          "placeholder": "Why these are being deleted",
+          "hint": "Reviewers and the audit log see this."
         },
         { "flag": "--dry-run", "type": "bool", "label": "Dry run, delete nothing", "hint": "Go through every check and list what would be deleted, without deleting anything." }
       ]

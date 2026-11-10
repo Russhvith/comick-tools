@@ -11,6 +11,7 @@ import { TopBar } from "@/components/organisms/TopBar";
 import { AppShell } from "@/components/templates/AppShell";
 import { shortcuts } from "@/config/shortcuts";
 import { pageTitle, site } from "@/config/site";
+import { flows } from "@/features/flows";
 import { groups, toolIcon } from "@/config/tools";
 import { useHotkey } from "@/hooks/useHotkey";
 import { useViewTransition } from "@/hooks/useViewTransition";
@@ -52,6 +53,7 @@ export function Workbench({ tools, cookieSet, version, initialRuns }: Props) {
   const transition = useViewTransition();
 
   const tool = tools.find((t) => t.id === toolId);
+  const Flow = tool?.flow ? flows[tool.flow] : undefined;
   const script = tool?.scripts.find((s) => s.id === scriptId) ?? tool?.scripts[0];
   const activeRun = runs.find((r) => r.id === activeRunId) ?? null;
   // A tool with steps uses all its scripts on one page, otherwise just
@@ -191,7 +193,9 @@ export function Workbench({ tools, cookieSet, version, initialRuns }: Props) {
               </Banner>
             )}
 
-            {tool.steps ? (
+            {Flow ? (
+              <Flow key={tool.id} tool={tool} busy={busy} onStarted={onStarted} />
+            ) : tool.steps ? (
               <StepFlow key={tool.id} tool={tool} steps={tool.steps} busy={busy} refreshKey={refreshKey} onStarted={onStarted} />
             ) : (
               <>
