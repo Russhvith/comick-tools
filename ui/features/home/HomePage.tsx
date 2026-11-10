@@ -164,6 +164,10 @@ export function HomePage({ tools, version, runCount, commitCount, days, changelo
           <a href={site.author.url} target="_blank" rel="noreferrer">
             {site.author.name}
           </a>
+          . Free software under the{" "}
+          <a href={`${site.repoUrl}/blob/main/LICENSE`} target="_blank" rel="noreferrer">
+            GNU GPL v3
+          </a>
           .
         </span>
         <a href={site.repoUrl} target="_blank" rel="noreferrer">

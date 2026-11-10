@@ -47,6 +47,7 @@ The web UI needs Node 20.9 or newer, which doesn't install on Windows 7. The too
 ```
 comick-tools/
   .env.example          shared config template, copy to .env
+  LICENSE               GNU GPL v3
   VERSION               current version, compared against GitHub releases
   docs/                 repo wide guides
   lib/comick_tools/     code shared by the tools (console, .env, API client)
@@ -57,3 +58,11 @@ comick-tools/
       crunchyroll-importer/
   ui/                   Next.js web UI for running the tools
 ```
+
+## License
+
+Copyright (C) 2026 Russhvith
+
+ComicK Tools is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License, version 3, as published by the Free Software Foundation. It comes with no warranty. The full text is in [LICENSE](LICENSE).
+
+In short, anyone can use, change and share it, and anyone who shares a modified version has to share its source under the same license.

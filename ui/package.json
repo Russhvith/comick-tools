@@ -2,6 +2,8 @@
   "name": "comick-tools-ui",
   "private": true,
   "description": "Local web UI for the comick-tools scripts",
+  "license": "GPL-3.0-only",
+  "author": "Russhvith",
   "scripts": {
     "dev": "next dev --port 4321",
     "build": "next build",
