@@ -8,7 +8,8 @@
       "title": "Format episodes",
       "summary": "Writes data/output.txt from the response, and downloads the preview images next to it.",
       "fields": [
-        { "flag": "--keep-numbers", "type": "bool", "label": "Keep Crunchyroll's episode numbers", "hint": "Use the numbers Crunchyroll shows, like 49 to 72, instead of restarting the season at 1." }
+        { "flag": "--keep-numbers", "type": "bool", "label": "Keep Crunchyroll's episode numbers", "hint": "Use the numbers Crunchyroll shows, like 49 to 72, instead of restarting the season at 1." },
+        { "flag": "--no-images", "type": "bool", "label": "Skip downloading preview images", "hint": "Faster, but the episodes get uploaded without a preview image. Previews are optional on ComicK." }
       ]
     },
     {

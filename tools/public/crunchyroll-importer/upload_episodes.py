@@ -217,11 +217,13 @@ def validate(raw, base_dir):
         problems.append("description can't contain links (http://, https:// or www.)")
 
     preview = fields.get("preview", "").strip() or None
+    linked = False
     if preview:
-        # Previews have to be the files the formatter saved. Fetching a link
-        # here would just repeat that download in the middle of an upload.
+        # A link means the formatter didn't download it (--no-images or a
+        # failed download). Previews are optional on ComicK, so the episode
+        # goes up without one instead of us fetching it mid upload.
         if re.match(r"^https?://", preview, re.IGNORECASE):
-            problems.append("preview is still a link, run format_episodes.py again to download it")
+            preview, linked = None, True
         elif (base_dir / preview).is_file():
             preview = str(base_dir / preview)
         else:
@@ -241,6 +243,7 @@ def validate(raw, base_dir):
         "duration": duration,
         "synopsis": synopsis,
         "preview": preview,
+        "preview_linked": linked,
         "source": source,
     }, []
 
@@ -438,6 +441,9 @@ def main():
     types = {t: sum(1 for j in jobs if j["type"] == t) for t in EPISODE_TYPES}
     breakdown = ", ".join(f"{n} {t}" for t, n in types.items() if n)
     out.step(f"Read {plural(len(jobs), 'episode')} from {short(args.input)}", breakdown)
+    linked = [j["number"] for j in jobs if j["preview_linked"]]
+    if linked:
+        out.step(f"{plural(len(linked), 'episode')} without a preview", "previews weren't downloaded, " + compact(linked))
 
     api = connect(settings, USER_AGENT,
                   on_wait=lambda secs: out.progress(f"Rate limited, waiting {human_time(secs)}"))

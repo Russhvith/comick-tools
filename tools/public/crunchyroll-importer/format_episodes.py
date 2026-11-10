@@ -3,7 +3,8 @@
 Reads the JSON returned by Crunchyroll's season episodes endpoint and writes
 one block per episode with its number, title, duration, description and a
 preview image. Previews get downloaded next to the output and the text points
-at the local files, which is what the uploader sends to ComicK.
+at the local files, unless --no-images asks for Crunchyroll's URLs instead.
+The uploader skips previews that are still links.
 """
 
 import argparse
@@ -75,6 +76,12 @@ def parse_args():
         "--keep-numbers",
         action="store_true",
         help="use Crunchyroll's episode numbers as is instead of restarting the season at 1",
+    )
+    parser.add_argument(
+        "--no-images",
+        dest="images",
+        action="store_false",
+        help="skip downloading previews and link Crunchyroll's URLs instead",
     )
     return parser.parse_args()
 
@@ -292,8 +299,7 @@ def download_all(entries, folder):
     """Fetch every preview in parallel.
 
     Returns ({index: relative path}, failures, total bytes). A failed image
-    keeps its Crunchyroll URL in the output rather than sinking the run, and
-    the uploader refuses that episode until a rerun gets the file.
+    keeps its Crunchyroll URL in the output rather than sinking the run.
     """
     folder.mkdir(parents=True, exist_ok=True)
     taken = set()
@@ -355,24 +361,27 @@ def main():
     else:
         out.step("Numbering already starts at 0 or 1", "left as is")
 
-    # Wiping happens on every run that gets this far, so a stale folder never
-    # sits next to an output.txt that no longer points at it. A run that
-    # failed validation above leaves the previous images alone.
+    # Wiping happens on every run that gets this far, --no-images runs
+    # included, so a stale folder never sits next to an output.txt that no
+    # longer points at it. A run that failed validation above leaves the
+    # previous images alone.
     images_dir = args.output.parent / "images"
     removed = clear_images(images_dir)
     if removed:
         out.step(f"Deleted {plural(removed, 'old image')}", short(images_dir))
 
-    t0 = time.perf_counter()
-    local, failures, total = download_all(entries, images_dir)
-    took = time.perf_counter() - t0
-    if local:
-        out.step(
-            f"Downloaded {plural(len(local), 'image')}",
-            f"{short(images_dir)}, {human_size(total)}, {human_time(took)}",
-        )
-    if failures:
-        out.warn(f"{plural(len(failures), 'image')} failed, run again before uploading", failures)
+    local = {}
+    if args.images:
+        t0 = time.perf_counter()
+        local, failures, total = download_all(entries, images_dir)
+        took = time.perf_counter() - t0
+        if local:
+            out.step(
+                f"Downloaded {plural(len(local), 'image')}",
+                f"{short(images_dir)}, {human_size(total)}, {human_time(took)}",
+            )
+        if failures:
+            out.warn(f"{plural(len(failures), 'image')} failed, these upload without a preview", failures)
 
     blocks = [render(e, local.get(i, e["preview"])) for i, e in enumerate(entries)]
     args.output.parent.mkdir(parents=True, exist_ok=True)
