@@ -10,6 +10,18 @@
   transition: border-color 120ms;
 }
 
+.area {
+  height: auto;
+  min-height: 6rem;
+  padding: 0.5rem 0.75rem;
+  line-height: 1.5;
+  resize: vertical;
+}
+
+.control[aria-invalid="true"] {
+  border-color: rgb(248 113 113 / 0.7);
+}
+
 .control::placeholder {
   color: var(--muted-foreground);
 }

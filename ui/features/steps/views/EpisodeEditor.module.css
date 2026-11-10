@@ -1,0 +1,125 @@
+.form {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.section {
+  display: grid;
+  gap: 0.875rem;
+}
+
+.section + .section {
+  padding-top: 1.25rem;
+  border-top: 1px solid rgb(55 65 81 / 0.6);
+}
+
+.sectionTitle {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+}
+
+.split {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.875rem 1rem;
+}
+
+.typeField {
+  display: grid;
+  align-content: start;
+  gap: 0.375rem;
+}
+
+.fakeLabel {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--foreground);
+}
+
+.typeField [role="radiogroup"] {
+  justify-self: start;
+  height: 2.375rem;
+}
+
+.fieldError {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--destructive);
+}
+
+.titleRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 0.5rem;
+}
+
+/* Lines the bin up with the input rather than the label above it. */
+.remove {
+  margin-top: 1.5rem;
+}
+
+.addTitle {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-self: start;
+  color: var(--link);
+}
+
+.addTitle svg {
+  position: absolute;
+  left: 0.625rem;
+  pointer-events: none;
+}
+
+.addTitle select {
+  width: auto;
+  padding-left: 1.875rem;
+  border-style: dashed;
+  background-color: transparent;
+  color: var(--link);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+  padding: 0.625rem 0.75rem;
+  border: 1px solid rgb(234 179 8 / 0.4);
+  border-radius: var(--radius-md);
+  background: rgb(234 179 8 / 0.08);
+  font-size: 0.8125rem;
+  color: var(--warning);
+}
+
+.position {
+  margin-right: 0.25rem;
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.footNote {
+  margin-right: auto;
+  font-size: 0.8125rem;
+  color: var(--muted-foreground);
+}
+
+.error {
+  color: var(--destructive);
+}
+
+@media (max-width: 520px) {
+  .split {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

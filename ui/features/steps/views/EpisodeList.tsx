@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { FileText } from "lucide-react";
+import { FileText, Pencil } from "lucide-react";
 import { Button } from "@/components/atoms/Button";
 import { Skeleton } from "@/components/atoms/Skeleton";
 import { ChoiceGroup } from "@/components/molecules/ChoiceGroup";
@@ -11,6 +11,7 @@ import { useToolFile } from "@/features/files/useToolFile";
 import { plural } from "@/lib/format";
 import type { StepStatus } from "@/types/steps";
 import { EPISODE_TYPES, isEpisodeType, parseEpisodes, setEpisodeType, type EpisodeRow, type EpisodeType } from "../parse";
+import { EpisodeEditor } from "./EpisodeEditor";
 import type { ViewProps } from "./types";
 import styles from "./EpisodeList.module.css";
 
@@ -36,6 +37,7 @@ export function EpisodeList({ toolId, file, refreshKey, held, onStatus }: ViewPr
   }, [refreshKey, revalidate]);
   const [raw, setRaw] = useState(false);
   const [rawDirty, setRawDirty] = useState(false);
+  const [open, setOpen] = useState<number | null>(null);
   const toast = useToast();
 
   const counts = EPISODE_TYPES.map((type) => ({ type, n: rows.filter((r) => r.type === type).length }));
@@ -56,14 +58,25 @@ export function EpisodeList({ toolId, file, refreshKey, held, onStatus }: ViewPr
         state: "done",
         text: `${plural(rows.length, "episode")}: ${summary.join(", ")}`,
         ready: true,
+        // Any hand edit is lost on a rerun, and we can't tell which episodes
+        // had one, so always ask. Types are the common case, so name those.
         replaceWarning: edited.length
-          ? `This replaces the formatted episodes, so ${names(edited)} ${edited.length === 1 ? "goes" : "go"} back to main.`
-          : null,
+          ? `This rewrites output.txt, so ${names(edited)} ${edited.length === 1 ? "goes" : "go"} back to main and any edits to the episodes are lost.`
+          : "This rewrites output.txt, so any edits made to the episodes are lost.",
       };
     }
     onStatus({ ...status, modifiedAt: data?.modifiedAt ?? null });
     // counts and edited derive from rows, which already triggers this.
   }, [loading, data?.exists, data?.modifiedAt, rows, bad, onStatus]);
+
+  async function saveEpisode(next: string, number: string) {
+    const previous = await save(next);
+    toast({
+      tone: "success",
+      message: `Saved episode ${number}`,
+      action: { label: "Undo", run: () => void save(previous).catch(() => {}) },
+    });
+  }
 
   async function change(row: EpisodeRow, type: EpisodeType) {
     const before = row.type;
@@ -100,44 +113,51 @@ export function EpisodeList({ toolId, file, refreshKey, held, onStatus }: ViewPr
   return (
     <div className={styles.body}>
       {rows.length > 0 && (
-        <div className={styles.list} role="table" aria-label="Episodes">
-          <div className={styles.head} role="row">
-            <span role="columnheader">Episode</span>
-            <span role="columnheader">Title</span>
-            <span role="columnheader" className={styles.aired}>
-              Aired
-            </span>
-            <span role="columnheader">Type</span>
+        <div className={styles.list}>
+          <div className={styles.head} aria-hidden>
+            <span>Episode</span>
+            <span>Title</span>
+            <span className={styles.aired}>Aired</span>
+            <span>Type</span>
           </div>
-          <div className={styles.rows}>
+          <ul className={styles.rows} aria-label="Episodes">
             {rows.map((row) => (
-              <div key={row.index} className={styles.row} role="row">
-                <span className={styles.number} role="cell">
-                  {row.number}
-                </span>
-                <span className={styles.title} role="cell" title={row.title}>
-                  {row.title || "No title"}
-                </span>
-                <span className={styles.aired} role="cell">
-                  {row.aired ?? "No date"}
-                </span>
-                <span role="cell">
-                  <ChoiceGroup
-                    label={`Type of episode ${row.number}`}
-                    options={options}
-                    value={row.type}
-                    invalid={!isEpisodeType(row.type)}
-                    disabled={rawDirty}
-                    onChange={(type) => void change(row, type)}
-                  />
-                </span>
-              </div>
+              <li key={row.index} className={styles.row}>
+                <button
+                  type="button"
+                  className={styles.open}
+                  disabled={rawDirty}
+                  aria-label={`Edit episode ${row.number}, ${row.title || "no title"}`}
+                  onClick={() => setOpen(row.index)}
+                >
+                  <span className={styles.number}>{row.number}</span>
+                  <span className={styles.title} title={row.title}>
+                    {row.title || "No title"}
+                    <Pencil size={13} aria-hidden className={styles.pencil} />
+                  </span>
+                  <span className={styles.aired}>{row.aired ?? "No date"}</span>
+                </button>
+                <ChoiceGroup
+                  label={`Type of episode ${row.number}`}
+                  options={options}
+                  value={row.type}
+                  invalid={!isEpisodeType(row.type)}
+                  disabled={rawDirty}
+                  onChange={(type) => void change(row, type)}
+                />
+              </li>
             ))}
-          </div>
+          </ul>
         </div>
       )}
 
-      {rawDirty && <p className={styles.note}>Save or reload the raw text below before changing types here.</p>}
+      {rawDirty ? (
+        <p className={styles.note}>Save or reload the raw text below before editing episodes here.</p>
+      ) : (
+        rows.length > 0 && <p className={styles.tip}>Click an episode to edit its titles, dates, description and links.</p>
+      )}
+
+      <EpisodeEditor content={content} rows={rows} index={open} onIndexChange={setOpen} onSave={saveEpisode} />
 
       <div className={styles.actions}>
         <Button variant="ghost" onClick={() => setRaw((v) => !v)} aria-expanded={raw}>
