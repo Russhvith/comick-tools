@@ -1,6 +1,6 @@
 .cards {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
   gap: 0.75rem;
 }
 
@@ -76,6 +76,8 @@
   margin-top: 0.125rem;
   border: 1.5px solid #6b7280;
   border-radius: 50%;
+  /* The app's squircle corners would square this off. */
+  corner-shape: round;
   transition: border-color 120ms, box-shadow 120ms;
 }
 
