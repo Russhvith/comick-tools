@@ -1,8 +1,21 @@
 /* SPDX-License-Identifier: GPL-3.0-only
    Copyright (C) 2026 Russhvith */
 
+/* Contents on the left, the document right beside it, both kept to a
+   comfortable reading width rather than spread across the screen. */
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 46rem);
+  gap: 2.5rem;
+}
+
+.withToc {
+  grid-template-columns: 15rem minmax(0, 46rem);
+}
+
 /* A comfortable reading width, legal text gets long. */
 .doc {
+  min-width: 0;
   max-width: 46rem;
 }
 
@@ -124,9 +137,41 @@
   font-size: 0.8125rem;
 }
 
+/* Stays in view while the document scrolls past it. */
 .toc {
+  position: sticky;
+  top: calc(var(--header-height) + 1.5rem);
   display: grid;
+  align-content: start;
   gap: 0.5rem;
+  max-height: calc(100vh - var(--header-height) - 3rem);
+  overflow-y: auto;
+  padding-right: 0.5rem;
+  border-right: 1px solid var(--border);
+}
+
+.tocNumber {
+  flex: none;
+  min-width: 1.5rem;
+  color: rgb(156 163 175 / 0.6);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Too narrow for two columns: the contents go above the document. */
+@media (max-width: 1100px) {
+  .withToc {
+    grid-template-columns: minmax(0, 46rem);
+  }
+  .toc {
+    position: static;
+    max-height: none;
+    padding: 0 0 1rem;
+    border-right: 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .toc ol {
+    grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
+  }
 }
 
 .tocTitle {
@@ -146,8 +191,11 @@
   list-style: none;
 }
 
+/* Number and title side by side, so a title that wraps lines up with
+   itself instead of running back under the number. */
 .toc a {
-  display: block;
+  display: flex;
+  gap: 0.25rem;
   padding: 0.25rem 0.5rem;
   border-radius: var(--radius-sm);
   color: var(--muted-foreground);

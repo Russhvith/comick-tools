@@ -61,26 +61,29 @@ export function LegalPage({ tools, current, doc, figures = [], body }: Props) {
   let figure = 0;
   const nextFigure = { next: () => figures[figure++] };
   const file = legalPages.find((p) => p.name === current)!.file;
+  const toc = doc.sections.length > 0 && !body;
 
   return (
     <AppShell
       header={<TopBar wordmark={site.wordmark} subtitle={site.tagline} />}
       sidebar={<ToolNav tools={tools} active={`legal/${current}`} />}
-      aside={
-        doc.sections.length > 0 && !body ? (
+    >
+      <div className={cn(styles.layout, toc && styles.withToc)}>
+        {toc && (
           <nav className={styles.toc} aria-label="On this page">
             <p className={styles.tocTitle}>On this page</p>
             <ol>
               {doc.sections.map((s) => (
                 <li key={s.id}>
-                  <a href={`#${s.id}`}>{s.title}</a>
+                  <a href={`#${s.id}`}>
+                    <span className={styles.tocNumber}>{s.number}</span>
+                    {s.title}
+                  </a>
                 </li>
               ))}
             </ol>
           </nav>
-        ) : undefined
-      }
-    >
+        )}
       <article className={styles.doc}>
         <nav className={styles.tabs} aria-label="Legal">
           {legalPages.map((p) => (
@@ -127,6 +130,7 @@ export function LegalPage({ tools, current, doc, figures = [], body }: Props) {
           </>
         )}
       </article>
+      </div>
     </AppShell>
   );
 }
