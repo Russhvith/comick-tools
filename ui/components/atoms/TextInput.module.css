@@ -7,6 +7,10 @@
   background: var(--secondary);
   color: var(--foreground-strong);
   font-size: 0.875rem;
+  /* Chromium clips an input's text to its line box. At 1.5 the tails of
+     g and p got cut on scaled displays, so give them room. The box height
+     is fixed above, so this only moves the clip edge, not the layout. */
+  line-height: 1.75;
   transition: border-color 120ms;
 }
 
