@@ -27,6 +27,30 @@
   gap: 0.875rem 1rem;
 }
 
+.dateRow {
+  display: grid;
+  gap: 0.875rem;
+}
+
+/* A date never needs the full width, and a short box reads as one. */
+.dateRow > :first-child {
+  max-width: 15rem;
+}
+
+.date {
+  cursor: pointer;
+  font-variant-numeric: tabular-nums;
+}
+
+.date::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  opacity: 0.7;
+}
+
+.date::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+}
+
 .typeField {
   display: grid;
   align-content: start;
@@ -39,9 +63,18 @@
   color: var(--foreground);
 }
 
+/* Same height as the inputs beside it, with the options filling it
+   instead of sitting at the top. */
 .typeField [role="radiogroup"] {
   justify-self: start;
   height: 2.375rem;
+  align-items: stretch;
+}
+
+.typeField [role="radio"] {
+  height: auto;
+  padding: 0 0.875rem;
+  font-size: 0.8125rem;
 }
 
 .fieldError {

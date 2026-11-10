@@ -92,6 +92,25 @@ textarea {
   color: inherit;
 }
 
+/* Options inherit the select's colours on Windows, so a select tinted for
+   effect (like a link coloured one) would otherwise open a white list
+   with blue text. */
+option {
+  background: var(--card);
+  color: var(--foreground);
+  font-weight: 400;
+}
+
+/* Nothing behind an open modal should scroll. The gutter stays reserved
+   so hiding the scrollbar doesn't shift the page sideways. */
+html {
+  scrollbar-gutter: stable;
+}
+
+html:has(dialog[open]) {
+  overflow: hidden;
+}
+
 :focus-visible {
   outline: 2px solid var(--ring);
   outline-offset: 2px;

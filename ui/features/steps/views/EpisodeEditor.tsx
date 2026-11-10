@@ -6,6 +6,7 @@ import { Button } from "@/components/atoms/Button";
 import { IconButton } from "@/components/atoms/IconButton";
 import { Select, TextArea, TextInput } from "@/components/atoms/TextInput";
 import { ChoiceGroup } from "@/components/molecules/ChoiceGroup";
+import { DurationInput } from "@/components/molecules/DurationInput";
 import { Field } from "@/components/molecules/Field";
 import { Modal } from "@/components/organisms/Modal";
 import {
@@ -38,6 +39,12 @@ type Props = {
 };
 
 const same = (a: EpisodeDetails | null, b: EpisodeDetails | null) => JSON.stringify(a) === JSON.stringify(b);
+
+/** Digits and a single decimal point, which is all an episode number can be. */
+function numberOnly(value: string) {
+  const [whole, ...rest] = value.replace(/[^\d.]/g, "").split(".");
+  return rest.length ? `${whole}.${rest.join("")}` : whole;
+}
 
 export function EpisodeEditor({ content, rows, index, onIndexChange, onSave }: Props) {
   const [draft, setDraft] = useState<EpisodeDetails | null>(null);
@@ -211,7 +218,7 @@ export function EpisodeEditor({ content, rows, index, onIndexChange, onSave }: P
                   value={draft.number}
                   aria-invalid={!!problems.number}
                   aria-describedby={note}
-                  onChange={(e) => edit({ number: e.target.value })}
+                  onChange={(e) => edit({ number: numberOnly(e.target.value) })}
                 />
               )}
             </Field>
@@ -286,31 +293,24 @@ export function EpisodeEditor({ content, rows, index, onIndexChange, onSave }: P
 
         <section className={styles.section}>
           <h3 className={styles.sectionTitle}>Details</h3>
-          <div className={styles.split}>
-            <Field label="Aired" hint="yyyy-mm-dd" error={problems.aired}>
+          <div className={styles.dateRow}>
+            <Field label="Aired date" error={problems.aired}>
               {(id, note) => (
                 <TextInput
                   id={id}
-                  placeholder="2024-01-31"
+                  type="date"
+                  className={styles.date}
                   value={draft.aired}
                   aria-invalid={!!problems.aired}
                   aria-describedby={note}
+                  // The calendar only opens from the small icon by default,
+                  // so open it from anywhere in the box.
+                  onClick={(e) => e.currentTarget.showPicker?.()}
                   onChange={(e) => edit({ aired: e.target.value })}
                 />
               )}
             </Field>
-            <Field label="Duration" hint="m:ss or h:mm:ss" error={problems.duration}>
-              {(id, note) => (
-                <TextInput
-                  id={id}
-                  placeholder="23:40"
-                  value={draft.duration}
-                  aria-invalid={!!problems.duration}
-                  aria-describedby={note}
-                  onChange={(e) => edit({ duration: e.target.value })}
-                />
-              )}
-            </Field>
+            <DurationInput label="Duration" value={draft.duration} error={problems.duration} onChange={(duration) => edit({ duration })} />
           </div>
           <Field
             label="Description"
