@@ -6,6 +6,10 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-11-11
+
+A security release, plus faster uploads and deletes. Every update is worth taking, this one especially.
+
 ### Changed
 
 - **Uploads and deletes keep up with your rate limit.** The Crunchyroll Importer and the Mass Deleter used to send at most four requests at once, so a higher **Requests a second** setting made no difference. They now run as many in parallel as that setting allows (twice the rate, up to 32), and the rate limit still holds.
@@ -79,7 +83,8 @@ The first release.
 - **Step by step importing**: paste the response, format, check each episode's type (or edit it in full), then upload.
 - Windows 7 support for every tool on the command line.
 
-[Unreleased]: https://github.com/Russhvith/comick-tools/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/Russhvith/comick-tools/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/Russhvith/comick-tools/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/Russhvith/comick-tools/compare/v0.2.0...v1.0.0
 [0.2.0]: https://github.com/Russhvith/comick-tools/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/Russhvith/comick-tools/releases/tag/v0.1.0

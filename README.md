@@ -6,7 +6,7 @@
 
 Upload a whole anime season in minutes, tidy up chapters in bulk, and do it all from a simple page in your browser.
 
-[![Version](https://img.shields.io/badge/version-1.0.0-2563eb)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-1.1.0-2563eb)](CHANGELOG.md)
 [![License: GPL v3](https://img.shields.io/badge/license-GPL--3.0-2563eb)](LICENSE)
 [![Python 3.8+](https://img.shields.io/badge/python-3.8%2B-3776ab)](https://www.python.org/downloads/)
 [![Node 20.9+](https://img.shields.io/badge/node-20.9%2B-339933)](https://nodejs.org/en/download)
