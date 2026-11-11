@@ -2,6 +2,7 @@
    Copyright (C) 2026 Russhvith */
 
 .dot {
+  position: relative;
   width: 0.5rem;
   height: 0.5rem;
   border-radius: 50%;
@@ -12,7 +13,19 @@
 .dot[data-status="running"],
 .dot[data-status="pending"] {
   background: var(--link);
-  box-shadow: 0 0 0 0 rgb(96 165 250 / 0.6);
+}
+
+/* The ring grows from the dot out to 6px past its edge (8px to 20px) and
+   fades. Scaling a copy of the dot instead of animating a box-shadow lets
+   the compositor run it, since it keeps going for as long as a run does. */
+.dot[data-status="running"]::after,
+.dot[data-status="pending"]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: rgb(96 165 250);
+  opacity: 0.6;
   animation: ping 1.4s ease-out infinite;
 }
 
@@ -30,6 +43,7 @@
 
 @keyframes ping {
   to {
-    box-shadow: 0 0 0 6px rgb(96 165 250 / 0);
+    transform: scale(2.5);
+    opacity: 0;
   }
 }
