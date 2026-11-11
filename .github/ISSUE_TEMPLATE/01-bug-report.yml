@@ -67,7 +67,7 @@ body:
     attributes:
       label: Version
       description: Shown at the top right of the web page, or in the VERSION file.
-      placeholder: "0.2.0"
+      placeholder: "1.0.0"
     validations:
       required: true
 

@@ -6,12 +6,17 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-11-11
+
+The first stable release. Everything needed to install, use, get help with and contribute to ComicK Tools is in place, on every system.
+
 ### Added
 
 - **Starters for every system** in `run/`. They check that Python, Node.js and git are installed in versions that work, link to whatever is missing, and start the web page. Windows 11 is the default, with versions for Windows 10 and Windows 7 (which gets a command line menu, since the web page needs Windows 10 or newer), macOS and Linux.
 - **Network mode**, off unless you turn it on. Other devices on your network can then open the web page at your computer's address. Switch it on and off under **Network access** in Settings, which shows the address and can restart the page for you.
 - **Smooth scrolling** across the page, including Page Up, Page Down, Space, the arrow keys, Home and End.
 - **Friendlier docs**: a new README with screenshots, guides to [how it works](docs/architecture.md) and the [design](docs/design.md), a rewritten contributing guide, this changelog, a code of conduct, security and support pages, issue forms for bugs, features and improvements, and a pull request template.
+- **A [wiki](https://github.com/Russhvith/comick-tools/wiki)** with step by step guides for installing, the cookie, both tools, settings, network mode, updating, the command line and troubleshooting.
 
 ### Changed
 
@@ -58,6 +63,7 @@ The first release.
 - **Step by step importing**: paste the response, format, check each episode's type (or edit it in full), then upload.
 - Windows 7 support for every tool on the command line.
 
-[Unreleased]: https://github.com/Russhvith/comick-tools/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/Russhvith/comick-tools/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/Russhvith/comick-tools/compare/v0.2.0...v1.0.0
 [0.2.0]: https://github.com/Russhvith/comick-tools/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/Russhvith/comick-tools/releases/tag/v0.1.0

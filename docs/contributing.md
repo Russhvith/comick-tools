@@ -165,18 +165,18 @@ A tool that runs in order can add `steps`, and the page shows them as a numbered
 
 The web page compares the `VERSION` file with the newest GitHub release and offers an update when the release is newer.
 
-1. Add the version to [CHANGELOG.md](../CHANGELOG.md), bump `VERSION` (`0.2.0` to `0.3.0`, say), run `python legal/packages.py --write`, and commit.
+1. Add the version to [CHANGELOG.md](../CHANGELOG.md), bump `VERSION` (`1.0.0` to `1.1.0`, say), run `python legal/packages.py --write`, and commit.
 2. Tag the commit and push both:
 
    ```bash
-   git tag v0.3.0
+   git tag v1.1.0
    git push origin main --tags
    ```
 
 3. Publish a GitHub release for the tag, with the changelog entry as its notes:
 
    ```bash
-   gh release create v0.3.0 --title "v0.3.0" --notes-file notes.md
+   gh release create v1.1.0 --title "v1.1.0" --notes-file notes.md
    ```
 
 Drafts and prereleases don't count as the newest release, so they don't trigger the update prompt.

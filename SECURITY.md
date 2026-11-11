@@ -38,7 +38,7 @@ Only the newest release gets security fixes. The web page tells you when a new o
 
 | Version | Supported |
 | --- | --- |
-| 0.2.x | Yes |
+| 1.0.x | Yes |
 | Older | No, please update |
 
 ## What counts
