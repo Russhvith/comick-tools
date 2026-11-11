@@ -6,6 +6,16 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ## [Unreleased]
 
+### Security
+
+- **Other devices are refused by their real address**, not by what they claim. Before, a device on your network could still get in after network mode was turned off, until the next restart.
+- **Other websites can't load the web page in a hidden frame**, and can't call its API or the developer server's built-in endpoints, not even with a plain link.
+- **`npm run dev` listens on this computer only** and goes through the same checks, so a website can't reach Next.js's debugger or editor endpoints.
+- **The Crunchyroll Importer only downloads previews from Crunchyroll over https**, checks they're images, and caps their size. The uploader only uploads previews from its own data folder, and line breaks in episode fields can't add fake lines to `output.txt`.
+- **The ComicK cookie never follows a redirect** to another site or to plain http, and image uploads only go to https storage.
+- **Text from ComicK can't move the cursor** or repaint the Mass Deleter's table before you type DELETE.
+- **Account checks are limited** to one every 15 seconds, so another site can't use up your ComicK request allowance mid upload.
+
 ## [1.0.0] - 2026-11-11
 
 The first stable release. Everything needed to install, use, get help with and contribute to ComicK Tools is in place, on every system.

@@ -112,7 +112,8 @@ Under `npm run dev` there's no restart step. The dev server picks up the new cod
 
 The server can run scripts that delete things and run git, so:
 
-- It listens on this computer only, unless `COMICK_TOOLS_NETWORK=true` is set in `.env`. Then it listens on every interface, `npm start` prints the network address, and other devices on the network can use it. There's no login, so anyone who can reach it can run the tools with the saved cookie. Only turn it on for a network you trust.
+- It listens on this computer only, unless `COMICK_TOOLS_NETWORK=true` is set in `.env`. Then it listens on every interface, `npm start` prints the network address, and other devices on the network can use it. There's no login, so anyone who can reach it can run the tools with the saved cookie. Only turn it on for a network you trust. Turning it off refuses other devices straight away, before the restart.
+- `scripts/server.mjs` runs Next inside its own server (for `npm run dev` too), so `scripts/gate.mjs` checks every request first: who is really connecting, the `Host`, and that no other site is loading the API or Next's dev endpoints.
 - Every API route refuses requests whose `Host` isn't localhost, or in network mode one of this computer's own names or addresses (stops DNS rebinding), and writes whose `Origin` is another site (stops a page in the same browser posting to it). `proxy.ts` runs the same check in front of every page too.
 - Only scripts and flags listed in a `tool.json` can run. Values go to the script as single `--flag=value` arguments, never through a shell.
 - Only files a `tool.json` lists can be opened or saved, and only inside that tool's folder.

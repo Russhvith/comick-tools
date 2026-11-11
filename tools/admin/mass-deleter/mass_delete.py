@@ -27,7 +27,7 @@ from urllib.parse import quote
 sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "lib"))
 
 from comick_tools.api import ApiError, comic_hid, connect, list_entries, normalize_number, number_key, slug_from  # noqa: E402
-from comick_tools.console import err, human_time, out, plural  # noqa: E402
+from comick_tools.console import clean, err, human_time, out, plural  # noqa: E402
 from comick_tools.terms import require_terms  # noqa: E402
 from comick_tools.env import SettingsError, comick_settings  # noqa: E402
 
@@ -241,7 +241,9 @@ def print_table(rows, header):
     widths[3] = min(widths[3], 40)
 
     def fit(value, width):
-        value = str(value)
+        # Cells come straight from ComicK, and this is the table the owner
+        # reads before typing DELETE.
+        value = clean(value)
         return (value[: width - 3] + "...") if len(value) > width else value.ljust(width)
 
     out.say("    " + out.dim("  ".join(fit(h, w) for h, w in zip(header, widths))))

@@ -8,47 +8,17 @@
 // real crashes behave the way they would with plain `next start`.
 
 import { spawn, spawnSync } from "node:child_process";
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync } from "node:fs";
 import { createRequire } from "node:module";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { networkMode } from "./gate.mjs";
 
 const RESTART_EXIT_CODE = 75;
 const uiDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const nextBin = createRequire(import.meta.url).resolve("next/dist/bin/next");
+const serverScript = path.join(uiDir, "scripts", "server.mjs");
 const port = process.env.COMICK_TOOLS_PORT || "4321";
-
-/**
- * COMICK_TOOLS_NETWORK from the environment or the root .env, read the
- * same way the server reads .env. Only this one key is needed here, before
- * Next has started.
- */
-function networkMode() {
-  if (process.env.COMICK_TOOLS_NETWORK) return process.env.COMICK_TOOLS_NETWORK.trim().toLowerCase() === "true";
-  const file = process.env.COMICK_TOOLS_ENV_FILE
-    ? path.resolve(process.env.COMICK_TOOLS_ENV_FILE)
-    : path.join(uiDir, "..", ".env");
-  let text = "";
-  try {
-    text = readFileSync(file, "utf8").replace(/^\uFEFF/, "");
-  } catch {
-    return false;
-  }
-  let value = "";
-  for (const line of text.split(/\r?\n/)) {
-    const match = /^\s*(?:export\s+)?COMICK_TOOLS_NETWORK\s*=\s*(.*?)\s*$/.exec(line);
-    if (match) value = match[1].replace(/^(["'])(.*)\1$/, "$2");
-  }
-  return value.trim().toLowerCase() === "true";
-}
-
-// This computer only, unless network mode is on. The server can run scripts
-// that delete things with the saved cookie, so anyone who can reach it can
-// do that too. Network mode leaves the hostname out: Next then listens on
-// every interface and prints this machine's real address, where passing
-// 0.0.0.0 would print that instead.
-// Read again on every start, so a restart from Settings picks up a change.
-let network = networkMode();
 
 if (!existsSync(path.join(uiDir, ".next", "BUILD_ID"))) {
   console.log("No production build yet, building first...");
@@ -59,13 +29,12 @@ if (!existsSync(path.join(uiDir, ".next", "BUILD_ID"))) {
 let child;
 
 function start() {
-  network = networkMode();
-  const hostArgs = network ? [] : ["--hostname", "localhost"];
-  child = spawn(process.execPath, [nextBin, "start", ...hostArgs, "--port", port], {
+  // server.mjs reads network mode again on every start, so a restart from
+  // Settings picks up a change, and decides from it where to listen.
+  child = spawn(process.execPath, [serverScript], {
     cwd: uiDir,
     stdio: "inherit",
-    // Settings compares this with .env to say when a restart is needed.
-    env: { ...process.env, COMICK_TOOLS_SUPERVISED: "1", COMICK_TOOLS_LISTENING: network ? "network" : "local" },
+    env: { ...process.env, COMICK_TOOLS_PORT: port, COMICK_TOOLS_SUPERVISED: "1" },
   });
   child.on("exit", (code, signal) => {
     if (code === RESTART_EXIT_CODE) {
@@ -85,7 +54,7 @@ for (const signal of ["SIGINT", "SIGTERM"]) {
 }
 
 console.log(`comick-tools UI on http://localhost:${port}`);
-if (network) {
+if (networkMode(uiDir)) {
   console.log("Network mode is on: anyone on your network can open it and run the tools with your ComicK cookie.");
   console.log("Set COMICK_TOOLS_NETWORK=false in .env to keep it on this computer only.");
 }

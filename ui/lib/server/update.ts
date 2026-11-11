@@ -6,7 +6,7 @@ import { REPO_ROOT, UI_DIR } from "./paths";
 import { createRun, emit, finish, listRuns, type Run } from "./runs";
 import { localVersion } from "./version";
 
-// scripts/serve.mjs restarts `next start` when the server exits with this.
+// scripts/serve.mjs restarts the server when it exits with this.
 export const RESTART_EXIT_CODE = 75;
 
 const BOLD = "\x1b[1m";

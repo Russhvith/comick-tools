@@ -5,7 +5,7 @@
   "license": "GPL-3.0-only",
   "author": "Russhvith",
   "scripts": {
-    "dev": "next dev --port 4321",
+    "dev": "node scripts/server.mjs --dev",
     "build": "next build",
     "start": "node scripts/serve.mjs",
     "typecheck": "tsc --noEmit"

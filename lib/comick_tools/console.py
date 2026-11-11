@@ -5,6 +5,7 @@
 status lines."""
 
 import os
+import re
 import sys
 from pathlib import Path
 
@@ -12,6 +13,16 @@ from pathlib import Path
 # raster font has no glyphs for the tick and cross, so both get skipped
 # there rather than printing boxes and escape junk.
 LEGACY_WINDOWS = os.name == "nt" and sys.getwindowsversion().major < 10
+
+# Every C0 and C1 control except tab, plus DEL. ESC is the one that matters:
+# with it a group name or title from ComicK could move the cursor and paint
+# over the table someone is about to confirm a delete from.
+CONTROL_RE = re.compile(r"[\x00-\x08\x0a-\x1f\x7f-\x9f]")
+
+
+def clean(text):
+    """Text from outside (ComicK, input files) made safe to print."""
+    return CONTROL_RE.sub("?", str(text))
 
 
 def enable_windows_vt(stream):
@@ -92,6 +103,7 @@ class Console:
             self.stream.write("\r" + " " * 70 + "\r")
 
     def rows(self, rows, color="33"):
+        rows = [(clean(label), clean(detail)) for label, detail in rows]
         width = max(len(label) for label, _ in rows)
         for label, detail in rows:
             self.say(f"    {self.dim(self.arrow)} {label.ljust(width)}  {self.paint(detail, color)}")

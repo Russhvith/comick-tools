@@ -10,6 +10,7 @@ from the root .env.
 """
 
 import argparse
+import ipaddress
 import os
 import re
 import sys
@@ -27,8 +28,8 @@ from urllib.parse import quote, urlparse, urlunparse
 # import path until we put it there.
 sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "lib"))
 
-from comick_tools.api import ApiError, comic_hid, connect, list_entries, normalize_number, slug_from  # noqa: E402
-from comick_tools.console import err, human_size, human_time, out, plural, short  # noqa: E402
+from comick_tools.api import ApiError, comic_hid, connect, https_opener, list_entries, normalize_number, slug_from  # noqa: E402
+from comick_tools.console import clean, err, human_size, human_time, out, plural, short  # noqa: E402
 from comick_tools.terms import require_terms  # noqa: E402
 from comick_tools.env import SettingsError, comick_settings  # noqa: E402
 
@@ -230,10 +231,11 @@ def validate(raw, base_dir):
         # goes up without one instead of us fetching it mid upload.
         if re.match(r"^https?://", preview, re.IGNORECASE):
             preview, linked = None, True
-        elif (base_dir / preview).is_file():
-            preview = str(base_dir / preview)
         else:
-            problems.append(f"preview file {preview} not found")
+            path, problem = local_preview(base_dir, preview)
+            if problem:
+                problems.append(problem)
+            preview = path
 
     source = fields.get("source", "").strip() or None
     if source and not re.match(r"^https?://\S+$", source, re.IGNORECASE):
@@ -254,10 +256,56 @@ def validate(raw, base_dir):
     }, []
 
 
+def local_preview(base_dir, preview):
+    """The preview file the formatter saved, as (path, problem).
+
+    output.txt can come from someone else, so a Preview line is only
+    trusted to name an image inside the input file's own folder. Anything
+    else, like ../../.env or an absolute path, would get read and uploaded.
+    """
+    folder = base_dir.resolve()
+    path = (folder / preview).resolve()
+    try:
+        path.relative_to(folder)
+    except ValueError:
+        return None, f"preview {preview} is outside {short(folder)}"
+    if path.suffix.lower() not in IMAGE_TYPES:
+        return None, f"preview {preview} isn't an image file"
+    if not path.is_file():
+        return None, f"preview file {preview} not found"
+    return str(path), None
+
+
 # Talking to ComicK
 
 
+def storage_url_ok(url):
+    """Whether a presigned URL from ComicK looks like a storage bucket.
+
+    put_file sends the preview wherever this URL points, so a bad response
+    could otherwise aim it at a local file, a Windows network share or a
+    service on the owner's own network.
+    """
+    parts = urlparse(url)
+    host = (parts.hostname or "").lower()
+    if parts.scheme.lower() != "https" or not host or host == "localhost" or host.endswith(".localhost"):
+        return False
+    try:
+        ipaddress.ip_address(host)
+    except ValueError:
+        return True
+    # Buckets are reached by name. A bare address is either a mistake or
+    # an attempt to reach something on the local network.
+    return False
+
+
+# PUTs never follow redirects in urllib, and an upload has no reason to.
+STORAGE_OPENER = https_opener(lambda old, new: False)
+
+
 def put_file(url, data, content_type):
+    if not isinstance(url, str) or not storage_url_ok(url):
+        raise ApiError(0, "presign returned an upload URL that isn't https storage, refused")
     # Presigned bucket URLs carry their own auth in the query string, and
     # sending the ComicK cookie there would leak it to the storage host.
     request = urllib.request.Request(url, data=data, method="PUT", headers={
@@ -267,7 +315,7 @@ def put_file(url, data, content_type):
     last = None
     for attempt in range(3):
         try:
-            with urllib.request.urlopen(request, timeout=TIMEOUT * 2):
+            with STORAGE_OPENER.open(request, timeout=TIMEOUT * 2):
                 return
         except urllib.error.HTTPError as e:
             if e.code < 500:
@@ -488,9 +536,9 @@ def main():
         sys.exit(1)
     if existing:
         latest = max(existing, key=Decimal)
-        out.step(f"ComicK already has {plural(len(existing), 'episode')}", f"latest is {latest}, hid {hid}")
+        out.step(f"ComicK already has {plural(len(existing), 'episode')}", f"latest is {clean(latest)}, hid {clean(hid)}")
     else:
-        out.step("ComicK has no episodes for this anime yet", f"hid {hid}")
+        out.step("ComicK has no episodes for this anime yet", f"hid {clean(hid)}")
 
     pending, same, changed = [], [], []
     for job in jobs:

@@ -4,7 +4,7 @@ The ones that matter most:
 
 - Python tools must run on Python 3.8 (Windows 7). Nothing newer in syntax or stdlib. Check with `vermin -t=3.8- --violations <file>`.
 - Every tool keeps working from the command line. Every script prompt has a flag that skips it.
-- The UI server stays local only and checks Host and Origin on every route. Network mode (COMICK_TOOLS_NETWORK=true) is the user's opt-in exception.
+- The UI server stays local only. ui/scripts/server.mjs gates every request on peer address, Host and Sec-Fetch-Site before Next, and guard.ts checks Host and Origin on every route. Network mode (COMICK_TOOLS_NETWORK=true) is the user's opt-in exception.
 - The ComicK session cookie is never logged and never sent to the browser.
 - Write .env only through set_env_values (Python) or writeEnv (UI). A new .env variable also goes into .env.example, the Settings page and the docs.
 - New network calls or stored data mean updating legal/privacy.txt and its dates in the same change.

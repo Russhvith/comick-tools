@@ -53,6 +53,50 @@ class ApiError(Exception):
         return self.status == 429 or bool(LIMIT_WORDS_RE.search(self.message or ""))
 
 
+class GuardedRedirect(urllib.request.HTTPRedirectHandler):
+    """Follows a redirect only when allowed(old_url, new_url) says so.
+
+    urllib's default handler follows a redirect to any host and copies
+    every header across, the Cookie included, so a redirect off ComicK
+    would hand the session cookie to whoever it points at.
+    """
+
+    def __init__(self, allowed):
+        self.allowed = allowed
+
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        if not self.allowed(req.full_url, newurl):
+            raise urllib.error.URLError(f"redirected to {urlparse(newurl).netloc or newurl}, refused")
+        return super().redirect_request(req, fp, code, msg, headers, newurl)
+
+
+def same_origin(old, new):
+    a, b = urlparse(old), urlparse(new)
+    return (a.scheme.lower(), a.netloc.lower()) == (b.scheme.lower(), b.netloc.lower())
+
+
+def https_opener(allow_redirect):
+    """An opener that speaks https only.
+
+    The default one also opens file:, ftp: and data: URLs, so a URL from
+    a file or a server response could read local files or, on Windows,
+    reach out to a network share.
+    """
+    opener = urllib.request.OpenerDirector()
+    for handler in (
+        urllib.request.ProxyHandler(),
+        urllib.request.HTTPSHandler(),
+        # Without this an http: or file: URL makes open() return None
+        # instead of raising, which would look like a silent success.
+        urllib.request.UnknownHandler(),
+        urllib.request.HTTPDefaultErrorHandler(),
+        urllib.request.HTTPErrorProcessor(),
+        GuardedRedirect(allow_redirect),
+    ):
+        opener.add_handler(handler)
+    return opener
+
+
 def error_text(body, status):
     if isinstance(body, dict):
         text = body.get("message") or body.get("error")
@@ -103,6 +147,9 @@ class Comick:
         self.next_slot = 0.0
         self.blocked_until = 0.0
         self.recent = deque()
+        # Redirects stay on the API's own scheme and host, the cookie
+        # never goes anywhere else.
+        self.opener = urllib.request.build_opener(GuardedRedirect(same_origin))
 
     def _wait_turn(self):
         # Spacing is measured from when a request really went out, not when
@@ -148,7 +195,7 @@ class Comick:
             "User-Agent": self.user_agent,
         })
         try:
-            with urllib.request.urlopen(request, timeout=TIMEOUT) as response:
+            with self.opener.open(request, timeout=TIMEOUT) as response:
                 return response.status, response.headers, response.read()
         except urllib.error.HTTPError as e:
             return e.code, e.headers, e.read()

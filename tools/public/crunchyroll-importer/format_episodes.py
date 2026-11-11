@@ -23,12 +23,13 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime
 from decimal import Decimal, InvalidOperation
 from pathlib import Path
-from urllib.parse import urlparse
+from urllib.parse import quote, urlparse
 
 # Scripts run straight from their folder, so the shared lib isn't on the
 # import path until we put it there.
 sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "lib"))
 
+from comick_tools.api import https_opener  # noqa: E402
 from comick_tools.console import err, human_size, human_time, out, plural, short  # noqa: E402
 from comick_tools.terms import require_terms  # noqa: E402
 
@@ -47,6 +48,9 @@ CONTENT_TYPES = {
 DOWNLOAD_WORKERS = 8
 DOWNLOAD_TIMEOUT = 20
 DOWNLOAD_RETRIES = 2
+# Thumbnails are a few hundred KB. Anything far bigger isn't one.
+MAX_IMAGE_BYTES = 20 * 1024 * 1024
+CONTROL_RE = re.compile(r"[\x00-\x1f\x7f-\x9f]")
 
 # Anything less than this and the output block can't be built, so we bail
 # before writing a half finished file.
@@ -160,15 +164,26 @@ def season_offset(episodes):
     return lowest - 1
 
 
+def one_line(value):
+    """A field squeezed onto one line.
+
+    output.txt is line based and the uploader reads the last "Preview:"
+    line it sees, so a line break hidden in a title or slug could add a
+    Preview of its own pointing at any file.
+    """
+    return " ".join(CONTROL_RE.sub(" ", str(value)).split())
+
+
 def title_lines(ep):
     # Crunchyroll only sends the title in whatever locale the request asked
     # for. If that isn't English we label it with the language instead of
     # pretending it's the English title.
-    locale = (ep.get("language_presentation") or {}).get("text_locale") or "en-US"
+    locale = one_line((ep.get("language_presentation") or {}).get("text_locale") or "en-US")
+    title = one_line(ep["title"])
     if locale.startswith("en"):
-        return f"English Title: {ep['title']}"
+        return f"English Title: {title}"
     language = LOCALE_NAMES.get(locale, locale)
-    return f"English Title:\n{language} Title: {ep['title']}"
+    return f"English Title:\n{language} Title: {title}"
 
 
 def collect(episodes, offset):
@@ -200,7 +215,7 @@ def collect(episodes, offset):
         if not problems:
             # Non numeric labels like "SP" pass through untouched.
             n = to_number(ep["episode"])
-            number = show_number(n - offset) if n is not None else str(ep["episode"])
+            number = show_number(n - offset) if n is not None else one_line(ep["episode"])
             entries.append({"number": number, "ep": ep, "aired": aired, "preview": preview})
     return entries, problems
 
@@ -211,20 +226,21 @@ def render(entry, preview):
     # starts as main and whoever uploads swaps the tag by hand where it's wrong.
     # Descriptions occasionally carry line breaks, which would split the
     # field across lines and confuse the uploader, so flatten them.
-    description = " ".join(ep["description"].split())
+    description = one_line(ep["description"])
     block = (
         f"Episode {entry['number']}: (main)\n"
         f"{title_lines(ep)}\n"
         f"Duration: {format_duration(ep['duration_ms'])}\n"
         f"Aired: {entry['aired']}\n"
         f"Description: {description}\n"
-        f"Preview: {preview}"
+        f"Preview: {one_line(preview)}"
     )
     # Reviewers on ComicK want a link to check request mode episodes
     # against, and the watch page is the obvious one.
     if ep.get("id"):
-        slug = ep.get("slug_title") or ""
-        block += f"\nSource: https://www.crunchyroll.com/watch/{ep['id']}/{slug}".rstrip("/")
+        watch_id = quote(one_line(ep["id"]), safe="")
+        slug = quote(one_line(ep.get("slug_title") or ""), safe="")
+        block += f"\nSource: https://www.crunchyroll.com/watch/{watch_id}/{slug}".rstrip("/")
     return block
 
 
@@ -258,14 +274,36 @@ def clear_images(folder):
     return removed
 
 
+def crunchyroll_image_url(url):
+    """Whether a preview URL points at Crunchyroll over https.
+
+    input.json is pasted in and could come from anyone. Without this a
+    "source" of file:.env would be copied into data/images and uploaded
+    as the episode's preview.
+    """
+    parts = urlparse(url)
+    host = (parts.hostname or "").lower()
+    return parts.scheme.lower() == "https" and (host == "crunchyroll.com" or host.endswith(".crunchyroll.com"))
+
+
+IMAGE_OPENER = https_opener(lambda old, new: crunchyroll_image_url(new))
+
+
 def fetch(url):
+    if not crunchyroll_image_url(url):
+        raise ValueError("not a Crunchyroll https image link, skipped")
     request = urllib.request.Request(url, headers={"User-Agent": "comick-tools/crunchyroll-importer"})
     last_error = None
     for attempt in range(DOWNLOAD_RETRIES + 1):
         try:
-            with urllib.request.urlopen(request, timeout=DOWNLOAD_TIMEOUT) as response:
+            with IMAGE_OPENER.open(request, timeout=DOWNLOAD_TIMEOUT) as response:
                 content_type = response.headers.get_content_type()
-                return response.read(), content_type
+                if not content_type.startswith("image/"):
+                    raise ValueError(f"got {content_type} instead of an image")
+                data = response.read(MAX_IMAGE_BYTES + 1)
+                if len(data) > MAX_IMAGE_BYTES:
+                    raise ValueError("image is over 20 MB")
+                return data, content_type
         except urllib.error.HTTPError as e:
             # 4xx won't fix itself on a retry, so don't waste time on it.
             if e.code < 500:

@@ -18,6 +18,14 @@ const SCRIPT = path.join(REPO_ROOT, "lib", "comick_tools", "whoami.py");
 // The page asks on every load. Five minutes keeps that to one call to
 // ComicK in a normal session while still noticing a role change soon.
 const CACHE_MS = 5 * 60 * 1000;
+// A refresh asked for this soon after the last check gets that check's
+// answer. Each check is a call to ComicK outside the tools' rate limiter,
+// so a page (or a loop of them) mustn't be able to fire them back to back
+// and push a running upload or delete over the per-IP limit.
+const MIN_FORCE_MS = 15 * 1000;
+// Failures are kept briefly for the same reason: once ComicK is limiting
+// us, every page load would otherwise start another check.
+const ERROR_CACHE_MS = 15 * 1000;
 
 const store = globalThis as unknown as {
   __comickAccount?: { at: number; token: string; account: Account };
@@ -94,7 +102,11 @@ export async function currentAccount(force = false): Promise<Account> {
 
   // A new cookie in .env is a new account, so the cache is per token.
   const cached = store.__comickAccount;
-  if (!force && cached && cached.token === token && now - cached.at < CACHE_MS) return cached.account;
+  if (cached && cached.token === token) {
+    const age = now - cached.at;
+    const limit = cached.account.state === "error" ? ERROR_CACHE_MS : force ? MIN_FORCE_MS : CACHE_MS;
+    if (age < limit) return cached.account;
+  }
 
   const pending = store.__comickAccountPending;
   // A forced check can ride on another forced one, never on a plain one
@@ -122,8 +134,8 @@ async function checkAccount(token: string, now: number): Promise<Account> {
   } catch (error) {
     account = { state: "error", message: `Couldn't check the account (${(error as Error).message.split("\n")[0].slice(0, 120)})`, checkedAt: now };
   }
-  // Keep answers ComicK gave for a while, but try again on the next load
-  // after a failure, since that's usually a blip.
-  if (account.state !== "error") store.__comickAccount = { at: now, token, account };
+  // Keep answers ComicK gave for a while. Failures are usually a blip, so
+  // they only hold for ERROR_CACHE_MS before the next load tries again.
+  store.__comickAccount = { at: now, token, account };
   return account;
 }

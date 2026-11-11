@@ -166,7 +166,7 @@ comick-tools/
 - **The account check** goes through Python because Cloudflare turns away Node's own requests. The answer is cached for five minutes per cookie, and calls arriving together share one process.
 - **The homepage's git data** costs one `git show-ref` per visit while nothing has changed, and is rebuilt when a ref moves or the day changes.
 - **Updates**: `/api/update` pulls, runs `npm ci` if the lockfile changed, builds, then exits with code 75. `scripts/serve.mjs` sees that code and starts the server again. `/api/restart` uses the same code for network mode.
-- **Guarding**: `lib/server/guard.ts` is called by every API route and by `proxy.ts` for every page. It allows `localhost`, `127.0.0.1` and `::1`, plus this machine's own hostname and interface addresses when network mode is on. Writes also need a matching `Origin`.
+- **Guarding** happens in two layers. `scripts/server.mjs` runs Next inside its own HTTP server, for `npm start` and `npm run dev` alike, so `scripts/gate.mjs` sees every request and WebSocket upgrade first, including Next's own dev endpoints. It refuses connections from other devices unless network mode is on (by the socket's address, which can't be faked), any `Host` that isn't this machine, and cross-site requests to `/api`, `/_next` and `/__nextjs`. Then `lib/server/guard.ts`, called by every API route and by `proxy.ts` for every page, allows `localhost`, `127.0.0.1` and `::1`, plus this machine's own hostname and interface addresses when network mode is on. Writes also need a matching `Origin`. Pages send `X-Frame-Options: DENY` so no other site can frame them.
 
 ### Data flow of one run
 
