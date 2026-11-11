@@ -136,6 +136,7 @@ The full details are in the [Privacy Policy](legal/privacy.txt) and [Terms of Se
 
 | Guide | What's in it |
 | --- | --- |
+| [**Wiki**](https://github.com/Russhvith/comick-tools/wiki) | Step by step guides for every tool, settings and troubleshooting, for everyone. |
 | [Starting it](run/README.md) | The launchers for each system, and what they check. |
 | [Setup](docs/setup.md) | Installing by hand, and every setting in `.env`. |
 | [Auth](docs/auth.md) | Copying your ComicK session cookie. |
