@@ -19,13 +19,14 @@ npm install
 npm start
 ```
 
-Then open http://127.0.0.1:4321. The first `npm start` builds the app, which takes a few seconds.
+Then open http://localhost:4321. The first `npm start` builds the app, which takes a few seconds.
 
 `npm start` runs the production server under `scripts/serve.mjs`, which is what lets the in-app update restart it. `npm run dev` is the hot reloading dev server for working on the UI itself.
 
 | Variable | Default | Notes |
 | --- | --- | --- |
 | `COMICK_TOOLS_PORT` | `4321` | Port for `npm start` |
+| `COMICK_TOOLS_NETWORK` | off | `true` lets other devices on the network open the UI. No login, see Security below |
 | `COMICK_TOOLS_PYTHON` | `python` / `python3` | Python used to run the scripts |
 | `COMICK_TOOLS_REPO` | `Russhvith/comick-tools` | GitHub repo the update check looks at |
 
@@ -111,7 +112,7 @@ Under `npm run dev` there's no restart step. The dev server picks up the new cod
 
 The server can run scripts that delete things and run git, so:
 
-- It listens on `127.0.0.1` only.
-- Every API route refuses requests whose `Host` isn't localhost (stops DNS rebinding) and writes whose `Origin` is another site (stops a page in the same browser posting to it). `proxy.ts` runs the same check in front of every page too.
+- It listens on this computer only, unless `COMICK_TOOLS_NETWORK=true` is set in `.env`. Then it listens on every interface, `npm start` prints the network address, and other devices on the network can use it. There's no login, so anyone who can reach it can run the tools with the saved cookie. Only turn it on for a network you trust.
+- Every API route refuses requests whose `Host` isn't localhost, or in network mode one of this computer's own names or addresses (stops DNS rebinding), and writes whose `Origin` is another site (stops a page in the same browser posting to it). `proxy.ts` runs the same check in front of every page too.
 - Only scripts and flags listed in a `tool.json` can run. Values go to the script as single `--flag=value` arguments, never through a shell.
 - Only files a `tool.json` lists can be opened or saved, and only inside that tool's folder.

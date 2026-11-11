@@ -1,8 +1,8 @@
 ComicK Tools
 Privacy Policy
 
-Release date: November 10, 2026
-Effective date: November 10, 2026
+Release date: November 11, 2026
+Effective date: November 11, 2026
 
 1. About this policy
 
@@ -159,6 +159,14 @@ The web interface only listens on your own computer and refuses requests
 that come from other websites or addresses. Its server checks every request
 before it reads or changes anything, and it only runs the scripts and
 changes the files the tools declare.
+
+If you set COMICK_TOOLS_NETWORK=true in the .env file, the web interface
+also accepts requests addressed to your computer's own network names and
+addresses, so other devices on your network can open it. It has no login.
+Anyone who can reach it can see your run history and account details, change
+your settings and run the tools with your ComicK cookie, including deleting
+content. Only turn it on for a network where you trust everyone, and turn it
+off again with COMICK_TOOLS_NETWORK=false. It is off unless you turn it on.
 
 No software is completely secure, so we cannot guarantee absolute security.
 The most important protection is your own: keep your computer, your user

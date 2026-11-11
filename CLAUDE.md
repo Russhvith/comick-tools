@@ -9,7 +9,7 @@ Monorepo of Python tools for ComicK users (not just staff). Each tool lives in i
 - Visual design copies comick.dev: tokens in `ui/app/globals.css`, Inter, Lucide icons. Monospace only for the console, key hints and file paths.
 - The Windows 7 rule below covers the Python tools, not `ui/`. The UI is optional and every tool must keep working from the command line.
 - Every script prompt needs a matching flag that skips it, since the UI turns filled fields into flags.
-- The server listens on 127.0.0.1 only and checks Host and Origin on every route. Keep it that way.
+- The server listens on this computer only and checks Host and Origin on every route. Keep it that way. The one exception is `COMICK_TOOLS_NETWORK=true` in `.env`, which the user turns on themselves: then it listens on every interface and the guard also accepts this machine's own names and addresses, never arbitrary hosts.
 - Releases: bump `VERSION`, tag `vX.Y.Z`, publish a GitHub release. The UI's update check reads the latest release.
 
 ## Compatibility
