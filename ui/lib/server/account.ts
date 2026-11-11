@@ -58,8 +58,9 @@ function shape(raw: Raw, now: number): Account {
     username: str(raw.username) ?? "Unknown",
     role: toRole(raw.role),
     // The same picture comick.dev shows. The hash is all that leaves the
-    // server, never the email it came from.
-    avatar: `https://secure.gravatar.com/avatar/${raw.email_hash ?? ""}?s=160&d=identicon`,
+    // server, never the email it came from. The card shows it at 56px, so
+    // asking for twice that stays sharp on high density screens.
+    avatar: `https://secure.gravatar.com/avatar/${raw.email_hash ?? ""}?s=112&d=identicon`,
     profileUrl: id ? `https://comick.dev/user/${id}` : "https://comick.dev",
     karma: num(raw.karma),
     uploads: num(raw.uploads),
