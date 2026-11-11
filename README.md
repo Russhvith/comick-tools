@@ -16,6 +16,10 @@ Tools are split by who can run them:
 
 ## Quick start
 
+The easiest way is a launcher from [run/](run/README.md): it checks that Python, Node and git are installed in versions that work, links to whatever is missing, and starts the web UI (or, on Windows 7, a menu of the tools). Double click `run\windows\start.bat` on Windows 11, or the one for your system.
+
+By hand:
+
 ```bash
 git clone https://github.com/Russhvith/comick-tools.git
 cd comick-tools
@@ -58,6 +62,7 @@ comick-tools/
     public/             any account
       crunchyroll-importer/
   ui/                   Next.js web UI for running the tools
+  run/                  launchers that check dependencies and start it, per OS
 ```
 
 ## Legal

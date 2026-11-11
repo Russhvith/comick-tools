@@ -1,2 +1,9 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+
+# cmd misreads labels and goto in batch files saved with bare LF, which is
+# how a zip download from GitHub would hand them out without this.
+*.bat text eol=crlf
+# And sh refuses CRLF, so the macOS and Linux launchers stay LF everywhere.
+*.sh text eol=lf
+*.command text eol=lf
