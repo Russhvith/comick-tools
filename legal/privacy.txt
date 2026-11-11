@@ -74,8 +74,8 @@ your computer and that file to yourself.
 
 The Tools keep the following on your computer, in the ComicK Tools folder:
 
-- Settings: the .env file, with your cookie, any limits you set, and whether
-  you have accepted the Terms of Service.
+- Settings: the .env file, with your cookie, any limits you set, whether you
+  have accepted the Terms of Service, and whether network mode is on.
 - Tool data: each tool's data folder, such as the Crunchyroll Importer's
   input.json, output.txt and downloaded preview images. Start over in the
   web interface deletes these for that tool.
@@ -160,13 +160,16 @@ that come from other websites or addresses. Its server checks every request
 before it reads or changes anything, and it only runs the scripts and
 changes the files the tools declare.
 
-If you set COMICK_TOOLS_NETWORK=true in the .env file, the web interface
-also accepts requests addressed to your computer's own network names and
-addresses, so other devices on your network can open it. It has no login.
-Anyone who can reach it can see your run history and account details, change
-your settings and run the tools with your ComicK cookie, including deleting
-content. Only turn it on for a network where you trust everyone, and turn it
-off again with COMICK_TOOLS_NETWORK=false. It is off unless you turn it on.
+Network mode is off unless you turn it on, with the switch under Network
+access in Settings or with COMICK_TOOLS_NETWORK=true in the .env file. While
+it is on, the web interface also accepts requests addressed to your
+computer's own network names and addresses, so other devices on your network
+can open it. It has no login. Anyone who can reach it can see your run
+history and account details, change your settings and run the tools with
+your ComicK cookie, including deleting content. Only turn it on for a
+network where you trust everyone. Turning it off refuses other devices
+straight away, and a restart stops the web interface listening on the
+network at all.
 
 No software is completely secure, so we cannot guarantee absolute security.
 The most important protection is your own: keep your computer, your user

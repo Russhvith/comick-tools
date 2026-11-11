@@ -26,7 +26,13 @@ export async function PUT(req: Request) {
   try {
     const raw = await req.json();
     const pick = (k: keyof SettingsUpdate) => (typeof raw?.[k] === "string" ? (raw[k] as string) : undefined);
-    body = { cookie: pick("cookie"), uploadsPerSecond: pick("uploadsPerSecond"), requestsPerMinute: pick("requestsPerMinute"), apiBase: pick("apiBase") };
+    body = {
+      cookie: pick("cookie"),
+      uploadsPerSecond: pick("uploadsPerSecond"),
+      requestsPerMinute: pick("requestsPerMinute"),
+      apiBase: pick("apiBase"),
+      network: typeof raw?.network === "boolean" ? raw.network : undefined,
+    };
   } catch {
     return NextResponse.json({ error: "Expected a JSON body" }, { status: 400 });
   }

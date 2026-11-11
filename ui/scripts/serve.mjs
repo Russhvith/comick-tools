@@ -47,8 +47,8 @@ function networkMode() {
 // do that too. Network mode leaves the hostname out: Next then listens on
 // every interface and prints this machine's real address, where passing
 // 0.0.0.0 would print that instead.
-const network = networkMode();
-const hostArgs = network ? [] : ["--hostname", "localhost"];
+// Read again on every start, so a restart from Settings picks up a change.
+let network = networkMode();
 
 if (!existsSync(path.join(uiDir, ".next", "BUILD_ID"))) {
   console.log("No production build yet, building first...");
@@ -59,14 +59,17 @@ if (!existsSync(path.join(uiDir, ".next", "BUILD_ID"))) {
 let child;
 
 function start() {
+  network = networkMode();
+  const hostArgs = network ? [] : ["--hostname", "localhost"];
   child = spawn(process.execPath, [nextBin, "start", ...hostArgs, "--port", port], {
     cwd: uiDir,
     stdio: "inherit",
-    env: { ...process.env, COMICK_TOOLS_SUPERVISED: "1" },
+    // Settings compares this with .env to say when a restart is needed.
+    env: { ...process.env, COMICK_TOOLS_SUPERVISED: "1", COMICK_TOOLS_LISTENING: network ? "network" : "local" },
   });
   child.on("exit", (code, signal) => {
     if (code === RESTART_EXIT_CODE) {
-      console.log("\nRestarting on the updated build...\n");
+      console.log("\nRestarting...\n");
       start();
       return;
     }

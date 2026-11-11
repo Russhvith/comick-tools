@@ -13,6 +13,18 @@ export type Settings = {
   requestsPerMinute: string;
   apiBase: string;
   defaults: { uploadsPerSecond: string; requestsPerMinute: string; apiBase: string };
+  network: {
+    /** COMICK_TOOLS_NETWORK in .env. */
+    enabled: boolean;
+    /**
+     * What the running server was started with: "network" when it listens
+     * on every interface, "local" when only on this computer, null when it
+     * can't tell (the dev server, which always listens everywhere).
+     */
+    listening: "network" | "local" | null;
+    /** Addresses other devices would open it at, like http://192.168.1.20:4321. */
+    urls: string[];
+  };
 };
 
 /** A change to .env. A field left out stays as it is. */
@@ -22,4 +34,6 @@ export type SettingsUpdate = {
   uploadsPerSecond?: string;
   requestsPerMinute?: string;
   apiBase?: string;
+  /** Turn network mode on or off. */
+  network?: boolean;
 };

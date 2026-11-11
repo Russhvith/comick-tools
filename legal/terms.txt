@@ -49,6 +49,11 @@ Anyone who has your cookie can act as you on ComicK until it expires. If you
 think it has leaked, sign out of ComicK, which ends that session, and put a
 fresh cookie in .env.
 
+If you turn on network mode, anyone who can reach the web interface over
+your network can use the Tools as you, with your cookie. You are responsible
+for what they do with it, the same as if you had done it yourself. We are
+not responsible for anything that happens because network mode was on.
+
 4. Using the Tools
 
 You may use the Tools only in ways that ComicK's terms and these Terms

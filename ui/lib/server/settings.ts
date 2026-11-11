@@ -4,6 +4,7 @@
 import type { Settings, SettingsUpdate } from "@/types/settings";
 import { forgetAccount } from "./account";
 import { envExists, readEnv, termsAccepted, writeEnv } from "./env";
+import { networkMode, networkUrls } from "./guard";
 
 // Same defaults as lib/comick_tools/env.py.
 const DEFAULTS = { uploadsPerSecond: "5", requestsPerMinute: "200", apiBase: "https://api.comick.dev" };
@@ -11,6 +12,7 @@ const COOKIE_NAME = "__Secure-comick-auth.session_token";
 
 export function readSettings(): Settings {
   const env = readEnv();
+  const listening = process.env.COMICK_TOOLS_LISTENING;
   const cookie = env.COMICK_SESSION_TOKEN?.trim() ?? "";
   return {
     envExists: envExists(),
@@ -20,6 +22,13 @@ export function readSettings(): Settings {
     requestsPerMinute: env.COMICK_REQUESTS_PER_MINUTE ?? "",
     apiBase: env.COMICK_API_BASE ?? "",
     defaults: DEFAULTS,
+    network: {
+      enabled: networkMode(),
+      // serve.mjs says how it started Next. The dev server doesn't go
+      // through it, so there it's unknown.
+      listening: listening === "network" || listening === "local" ? listening : null,
+      urls: networkUrls(process.env.PORT || process.env.COMICK_TOOLS_PORT || "4321"),
+    },
   };
 }
 
@@ -66,6 +75,7 @@ export function saveSettings(update: SettingsUpdate) {
   if (update.uploadsPerSecond !== undefined) changes.COMICK_UPLOADS_PER_SECOND = update.uploadsPerSecond.trim();
   if (update.requestsPerMinute !== undefined) changes.COMICK_REQUESTS_PER_MINUTE = update.requestsPerMinute.trim();
   if (update.apiBase !== undefined) changes.COMICK_API_BASE = update.apiBase.trim().replace(/\/+$/, "");
+  if (update.network !== undefined) changes.COMICK_TOOLS_NETWORK = update.network ? "true" : "false";
   if (Object.keys(changes).length) writeEnv(changes);
   // A different cookie or address can mean a different account.
   forgetAccount();

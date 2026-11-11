@@ -4,12 +4,15 @@
 "use client";
 
 import { useState } from "react";
-import { CircleCheck, KeyRound, Trash2 } from "lucide-react";
+import { CircleCheck, KeyRound, RotateCw, Trash2, TriangleAlert, Wifi } from "lucide-react";
 import { Button } from "@/components/atoms/Button";
 import { TextInput } from "@/components/atoms/TextInput";
 import { Field } from "@/components/molecules/Field";
+import { SwitchField } from "@/components/molecules/SwitchField";
 import { site } from "@/config/site";
-import { HttpError } from "@/lib/http";
+import { HttpError, request } from "@/lib/http";
+import { RestartOverlay } from "@/features/updates/components/RestartOverlay";
+import { waitForRestart } from "@/features/updates/useVersion";
 import type { Settings, SettingsUpdate } from "@/types/settings";
 import { useSettings } from "./useSettings";
 import styles from "./SettingsForm.module.css";
@@ -33,6 +36,9 @@ export function SettingsForm({ settings, onSaved, saveLabel = "Save", extra }: P
   const [uploads, setUploads] = useState(settings.uploadsPerSecond);
   const [requests, setRequests] = useState(settings.requestsPerMinute);
   const [apiBase, setApiBase] = useState(settings.apiBase);
+  const [network, setNetwork] = useState(settings.network.enabled);
+  const [restarting, setRestarting] = useState(false);
+  const [restartError, setRestartError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [problems, setProblems] = useState<Record<string, string>>({});
   const [error, setError] = useState<string | null>(null);
@@ -58,9 +64,25 @@ export function SettingsForm({ settings, onSaved, saveLabel = "Save", extra }: P
 
   function saveAll(event: React.FormEvent) {
     event.preventDefault();
-    const update: SettingsUpdate = { uploadsPerSecond: uploads, requestsPerMinute: requests, apiBase };
+    const update: SettingsUpdate = { uploadsPerSecond: uploads, requestsPerMinute: requests, apiBase, network };
     if (cookie.trim()) update.cookie = cookie;
     void submit(update);
+  }
+
+  // The server picks where to listen when it starts, so a saved change
+  // waits for a restart. Unknown (the dev server) never asks for one.
+  const live = settings.network.listening;
+  const needsRestart = live !== null && (settings.network.enabled ? live === "local" : live === "network");
+  const reachable = settings.network.enabled && live !== "local";
+
+  async function restart() {
+    setRestartError(null);
+    try {
+      const { startedAt } = await request<{ startedAt: number }>("/api/restart", { method: "POST" });
+      void waitForRestart(startedAt, setRestarting);
+    } catch (e) {
+      setRestartError((e as Error).message);
+    }
   }
 
   return (
@@ -144,6 +166,66 @@ export function SettingsForm({ settings, onSaved, saveLabel = "Save", extra }: P
         </div>
       </section>
 
+      <section className={styles.group}>
+        <div className={styles.groupHead}>
+          <Wifi size={16} aria-hidden />
+          <h3>Network access</h3>
+          {settings.network.enabled ? (
+            <span className={styles.status}>Open to your network</span>
+          ) : (
+            <span className={styles.status} data-ok="true">
+              <CircleCheck size={13} aria-hidden /> This computer only
+            </span>
+          )}
+        </div>
+        <SwitchField
+          label="Let other devices on this network open it"
+          hint="Phones and other computers on the same Wi-Fi or network, at this computer's address."
+          checked={network}
+          onChange={setNetwork}
+        />
+        {network && (
+          <p className={styles.warning}>
+            <TriangleAlert size={15} aria-hidden />
+            <span>
+              There&apos;s no login. Anyone on the network can see your account and runs, change these settings and run the tools with your
+              cookie, including the Mass Deleter. Only turn it on for a network where you trust everyone.
+            </span>
+          </p>
+        )}
+        {reachable && settings.network.urls.length > 0 && (
+          <p className={styles.help}>
+            Other devices can open it at{" "}
+            {settings.network.urls.map((url, i) => (
+              <span key={url}>
+                {i > 0 && ", "}
+                <a href={url} target="_blank" rel="noreferrer">
+                  {url.replace(/^http:\/\//, "")}
+                </a>
+              </span>
+            ))}
+            .
+          </p>
+        )}
+        {needsRestart && (
+          <div className={styles.restart}>
+            <p className={styles.help}>
+              {settings.network.enabled
+                ? "Saved. The UI is still only listening on this computer until it restarts."
+                : "Saved. Other devices are refused already, and a restart stops it listening on the network at all."}
+            </p>
+            <Button size="sm" onClick={() => void restart()}>
+              <RotateCw size={14} aria-hidden /> Restart now
+            </Button>
+            {restartError && (
+              <span className={styles.error} role="alert">
+                {restartError}
+              </span>
+            )}
+          </div>
+        )}
+      </section>
+
       <details className={styles.advanced} open={!!settings.apiBase || !!problems.apiBase}>
         <summary>Advanced</summary>
         <Field
@@ -176,6 +258,7 @@ export function SettingsForm({ settings, onSaved, saveLabel = "Save", extra }: P
           {saveLabel}
         </Button>
       </footer>
+      {restarting && <RestartOverlay title="Restarting the UI" />}
     </form>
   );
 }

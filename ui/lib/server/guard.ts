@@ -32,6 +32,21 @@ function ownHosts(): Set<string> {
   return hosts;
 }
 
+/**
+ * Where other devices on the network would reach this server: one address
+ * per IPv4 interface that isn't loopback. IPv6 is left out, phones and
+ * browsers type those far less happily.
+ */
+export function networkUrls(port: string): string[] {
+  const urls: string[] = [];
+  for (const list of Object.values(os.networkInterfaces())) {
+    for (const entry of list ?? []) {
+      if (entry.family === "IPv4" && !entry.internal) urls.push(`http://${entry.address}:${port}`);
+    }
+  }
+  return urls;
+}
+
 function allowed(host: string): boolean {
   if (LOCAL_HOSTS.has(host)) return true;
   // Interfaces come and go (Wi-Fi, VPN), so they're read per request. It's a
