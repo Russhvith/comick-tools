@@ -116,6 +116,14 @@
   gap: 0.375rem;
 }
 
+/* The keys themselves are hidden on touch screens, which would leave
+   "runs the form" with nothing in front of it. */
+@media (hover: none) and (pointer: coarse) {
+  .hints {
+    display: none;
+  }
+}
+
 @media (max-width: 760px) {
   .terminal,
   .empty {

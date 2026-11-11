@@ -3,6 +3,7 @@
 
 import type { ReactNode } from "react";
 import styles from "./AppShell.module.css";
+import { ShellSidebar } from "./ShellSidebar";
 
 type Props = {
   header: ReactNode;
@@ -17,7 +18,7 @@ export function AppShell({ header, sidebar, aside, children }: Props) {
     <div className={styles.shell}>
       {header}
       <div className={styles.body} data-aside={aside ? "true" : "false"}>
-        <div className={styles.sidebar}>{sidebar}</div>
+        <ShellSidebar>{sidebar}</ShellSidebar>
         <main className={styles.main}>{children}</main>
         {aside && <aside className={styles.aside}>{aside}</aside>}
       </div>

@@ -9,6 +9,8 @@
   display: grid;
   grid-template-columns: var(--sidebar-width) minmax(0, 1fr) var(--aside-width);
   align-items: start;
+  max-width: var(--shell-max);
+  margin-inline: auto;
 }
 
 /* Pages without a right column (the homepage) give its width to the main
@@ -23,6 +25,15 @@
   height: calc(100vh - var(--header-height));
   overflow-y: auto;
   border-right: 1px solid var(--border);
+}
+
+/* Only phones get the Menu button, everything wider shows the sidebar. */
+.menuButton {
+  display: none;
+}
+
+.sidebarPanel {
+  display: contents;
 }
 
 .main {
@@ -58,8 +69,43 @@
   .sidebar {
     position: static;
     height: auto;
+    overflow: visible;
     border-right: 0;
     border-bottom: 1px solid var(--border);
+  }
+  .menuButton {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+    min-height: 2.75rem;
+    padding: 0.5rem 1rem;
+    border: 0;
+    background: transparent;
+    color: var(--foreground-strong);
+    font: inherit;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .menuButton:focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: -2px;
+  }
+  .menuChevron {
+    margin-left: auto;
+    color: var(--muted-foreground);
+    transition: transform 160ms var(--ease-out);
+  }
+  .sidebar[data-open="true"] .menuChevron {
+    transform: rotate(180deg);
+  }
+  .sidebarPanel {
+    display: none;
+  }
+  .sidebar[data-open="true"] .sidebarPanel {
+    display: block;
+    border-top: 1px solid var(--border);
   }
   .main {
     padding: 1.25rem 1rem 2rem;

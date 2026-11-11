@@ -12,7 +12,10 @@
   align-items: center;
   gap: 1rem;
   height: var(--header-height);
-  padding: 0 max(1rem, env(safe-area-inset-right)) 0 max(1rem, env(safe-area-inset-left));
+  /* Lines its edges up with the centred page below once the screen is
+     wider than --shell-max. */
+  --edge: max(1rem, calc((100% - var(--shell-max)) / 2 + 1rem));
+  padding: 0 max(var(--edge), env(safe-area-inset-right)) 0 max(var(--edge), env(safe-area-inset-left));
   border-bottom: 1px solid var(--border);
   background: var(--surface);
 }
@@ -37,6 +40,14 @@
   align-items: center;
   gap: 0.25rem;
   min-width: 0;
+  /* Page links that don't fit a narrow phone slide sideways instead of
+     being cut off. */
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.middle::-webkit-scrollbar {
+  display: none;
 }
 
 .logo {
@@ -128,7 +139,13 @@
 
 /* Phones: the logo alone says which app this is. */
 @media (max-width: 420px) {
+  .bar {
+    gap: 0.5rem;
+  }
   .names {
     display: none;
+  }
+  .middle {
+    justify-content: flex-start;
   }
 }

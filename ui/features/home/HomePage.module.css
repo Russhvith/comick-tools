@@ -276,6 +276,9 @@
 
 .panel {
   display: grid;
+  /* One track that can shrink, so a chart wider than a phone scrolls
+     inside its card instead of widening the page. */
+  grid-template-columns: minmax(0, 1fr);
   gap: 0.875rem;
   padding: 1.25rem;
   border: 1px solid var(--border);

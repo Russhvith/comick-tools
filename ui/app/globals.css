@@ -40,7 +40,10 @@
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
 
-  --header-height: 57px;
+  --header-height: 3.5625rem;
+  /* Past this the layout stops widening and centres, so a 4K screen gets
+     a readable page instead of two strips at its far edges. */
+  --shell-max: 120rem;
   --sidebar-width: 15.5rem;
   --aside-width: 19rem;
 
@@ -54,6 +57,13 @@
   box-sizing: border-box;
 }
 
+/* 16px up to about 2048px wide, then growing to 20px by 4K. Almost every
+   size is in rem, so the whole interface scales with it instead of
+   shrinking to a corner of a large monitor at 100% scaling. */
+html {
+  font-size: clamp(16px, 0.25vw + 10.9px, 20px);
+}
+
 html,
 body {
   margin: 0;
@@ -61,7 +71,7 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans);
-  font-size: 16px;
+  font-size: 1rem;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
 }

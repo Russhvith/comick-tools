@@ -70,6 +70,9 @@ export function ContributionCalendar({ days, today }: Props) {
           viewBox={`0 0 ${width} ${height}`}
           width={width}
           height={height}
+          // In rem rather than px so the year grows with the rest of the page
+          // on a large screen. 16 is the base size the drawing was laid out at.
+          style={{ width: `${width / 16}rem`, height: `${height / 16}rem` }}
           className={styles.svg}
           role="img"
           aria-label={`${total} commits in the last year${total ? `, at most ${max} in a day` : ""}`}
