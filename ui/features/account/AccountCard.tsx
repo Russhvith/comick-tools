@@ -95,7 +95,17 @@ function Body({ account, onAccept }: { account: Account; onAccept: () => void })
   return (
     <>
       <div className={styles.who}>
-        <img src={account.avatar} alt="" width={56} height={56} className={styles.avatar} referrerPolicy="no-referrer" />
+        {/* Anonymous CORS keeps the request cookie free, so Gravatar's own cookies
+            are neither sent nor set. Gravatar answers with Allow-Origin *. */}
+        <img
+          src={account.avatar}
+          alt=""
+          width={56}
+          height={56}
+          className={styles.avatar}
+          referrerPolicy="no-referrer"
+          crossOrigin="anonymous"
+        />
         <div className={styles.names}>
           <span className={styles.kicker}>Logged in to ComicK as</span>
           <span className={styles.username}>{account.username}</span>
