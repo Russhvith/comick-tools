@@ -82,10 +82,48 @@ export async function changelog(): Promise<ChangelogSection[] | null> {
     if (all.length) sections.push({ tag, date, entries: all.slice(0, PER_SECTION), more: Math.max(0, all.length - PER_SECTION) });
   };
 
-  cut(null, null, await commitsIn(tags[0] ? `${tags[0].tag}..HEAD` : "HEAD"));
-  for (let i = 0; i < tags.length && sections.length < SECTIONS; i++) {
-    const range = tags[i + 1] ? `${tags[i + 1].tag}..${tags[i].tag}` : tags[i].tag;
-    cut(tags[i].tag, tags[i].date, await commitsIn(range));
+  // Each range is its own git process, so ask for a batch at once instead
+  // of one after another. Results are still applied in tag order, and an
+  // empty range is skipped just as before, so the sections come out the same.
+  const ranges = [
+    { tag: null as string | null, date: null as string | null, range: tags[0] ? `${tags[0].tag}..HEAD` : "HEAD" },
+    ...tags.map((t, i) => ({ tag: t.tag as string | null, date: t.date as string | null, range: tags[i + 1] ? `${tags[i + 1].tag}..${t.tag}` : t.tag })),
+  ];
+  for (let start = 0; start < ranges.length && sections.length < SECTIONS; start += SECTIONS) {
+    const batch = ranges.slice(start, start + SECTIONS);
+    const found = await Promise.all(batch.map((r) => commitsIn(r.range)));
+    for (let i = 0; i < batch.length; i++) {
+      // The unreleased block always counts, tags only until the list is full.
+      if (batch[i].tag !== null && sections.length >= SECTIONS) break;
+      cut(batch[i].tag, batch[i].date, found[i]);
+    }
   }
   return sections;
+}
+
+export type RepoSnapshot = {
+  days: Record<string, number> | null;
+  count: number | null;
+  changelog: ChangelogSection[] | null;
+};
+
+// Survives dev reloads the same way the run registry does.
+const memo = globalThis as unknown as { __comickRepo?: { key: string; value: RepoSnapshot } };
+
+/**
+ * Everything the homepage shows about the repo. Building it takes around
+ * ten git processes, which is slow to spawn on Windows, so it's kept until
+ * a ref moves (a commit, pull, tag or branch switch) or the day changes,
+ * since the calendar counts back a year from today. Checking that costs a
+ * single git call.
+ */
+export async function repoSnapshot(today: string): Promise<RepoSnapshot> {
+  const refs = await git("show-ref", "--head");
+  const key = refs === null ? null : `${today}\n${refs}`;
+  const cached = memo.__comickRepo;
+  if (key !== null && cached?.key === key) return cached.value;
+  const [days, count, log] = await Promise.all([commitsByDay(), commitCount(), changelog()]);
+  const value = { days, count, changelog: log };
+  if (key !== null) memo.__comickRepo = { key, value };
+  return value;
 }

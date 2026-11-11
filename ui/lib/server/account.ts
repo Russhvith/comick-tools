@@ -19,7 +19,12 @@ const SCRIPT = path.join(REPO_ROOT, "lib", "comick_tools", "whoami.py");
 // ComicK in a normal session while still noticing a role change soon.
 const CACHE_MS = 5 * 60 * 1000;
 
-const store = globalThis as unknown as { __comickAccount?: { at: number; token: string; account: Account } };
+const store = globalThis as unknown as {
+  __comickAccount?: { at: number; token: string; account: Account };
+  // A check already on its way, so callers arriving together share one
+  // Python process instead of starting one each.
+  __comickAccountPending?: { token: string; force: boolean; promise: Promise<Account> };
+};
 
 type Raw = {
   state: "ok" | "not-agreed" | "no-cookie" | "rejected" | "error";
@@ -75,6 +80,7 @@ function shape(raw: Raw, now: number): Account {
 /** Drop the cached answer, after the cookie or the terms change. */
 export function forgetAccount() {
   store.__comickAccount = undefined;
+  store.__comickAccountPending = undefined;
 }
 
 /** Who the cookie in .env belongs to. Never throws, failures come back as a state. */
@@ -90,6 +96,20 @@ export async function currentAccount(force = false): Promise<Account> {
   const cached = store.__comickAccount;
   if (!force && cached && cached.token === token && now - cached.at < CACHE_MS) return cached.account;
 
+  const pending = store.__comickAccountPending;
+  // A forced check can ride on another forced one, never on a plain one
+  // that may have started before whatever prompted the force.
+  if (pending && pending.token === token && (pending.force || !force)) return pending.promise;
+  const promise = checkAccount(token, now);
+  store.__comickAccountPending = { token, force, promise };
+  try {
+    return await promise;
+  } finally {
+    if (store.__comickAccountPending?.promise === promise) store.__comickAccountPending = undefined;
+  }
+}
+
+async function checkAccount(token: string, now: number): Promise<Account> {
   let account: Account;
   try {
     const { stdout } = await run(pythonCommand, [SCRIPT], {
