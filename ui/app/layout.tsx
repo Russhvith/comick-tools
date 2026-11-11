@@ -4,6 +4,7 @@
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import { CopyrightNotice } from "@/components/atoms/CopyrightNotice";
+import { SmoothScroll } from "@/components/atoms/SmoothScroll";
 import { Toaster } from "@/components/organisms/Toaster";
 import { site } from "@/config/site";
 import "./globals.css";
@@ -31,6 +32,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" className={inter.variable}>
       <body>
         <CopyrightNotice />
+        <SmoothScroll />
         <Toaster>{children}</Toaster>
       </body>
     </html>

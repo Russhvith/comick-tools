@@ -14,6 +14,7 @@ dependency. The web interface shows the same list, always current.
 
 - @xterm/addon-fit 0.11.0 (MIT)
 - @xterm/xterm 6.0.0 (MIT)
+- lenis 1.3.27 (MIT)
 - lucide-react 1.70.0 (ISC)
 - next 16.4.5 (MIT)
 - react 19.3.1 (MIT)
