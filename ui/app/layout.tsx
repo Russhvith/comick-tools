@@ -3,6 +3,7 @@
 
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
+import { CopyrightNotice } from "@/components/atoms/CopyrightNotice";
 import { Toaster } from "@/components/organisms/Toaster";
 import { site } from "@/config/site";
 import "./globals.css";
@@ -29,6 +30,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className={inter.variable}>
       <body>
+        <CopyrightNotice />
         <Toaster>{children}</Toaster>
       </body>
     </html>
