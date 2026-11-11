@@ -1,8 +1,8 @@
 ComicK Tools
 Terms of Service
 
-Release date: November 10, 2026
-Effective date: November 10, 2026
+Release date: November 11, 2026
+Effective date: November 11, 2026
 
 1. About these Terms
 
@@ -143,6 +143,14 @@ liable for any indirect, incidental, special, consequential or punitive
 damages, or for any loss of data, content, account access, profits or
 goodwill, arising from or related to the Tools, your Content or these Terms,
 even if we were told such damages were possible.
+
+The browser console in the web interface, and the terminal the scripts run
+in, run whatever code you paste into them. Code from someone else can read
+your cookie, take over your ComicK account or delete your content. Only
+paste code you understand, from a source you trust. We are not responsible
+for anything that happens because you ran code that is not part of the Tools
+as we publish them, or the Tools after someone else changed them, including
+any loss of your account, cookie, content or data.
 
 Some laws do not allow these exclusions or limits. Nothing in these Terms
 limits any right you have under the Consumer Protection Act, 2019, the
