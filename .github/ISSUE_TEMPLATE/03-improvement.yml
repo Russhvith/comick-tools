@@ -1,0 +1,82 @@
+name: Improvement Request
+description: Suggest a change to something that already exists.
+title: "[Improvement]: "
+labels: ["Enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping make ComicK Tools better!
+
+  - type: checkboxes
+    id: duplicate-check
+    attributes:
+      label: Duplicate check
+      description: Please look through the existing issues first.
+      options:
+        - label: I have searched the existing issues and couldn't find this one.
+          required: true
+
+  - type: dropdown
+    id: feature
+    attributes:
+      label: Which part should change?
+      options:
+        - Crunchyroll Importer
+        - Mass Deleter
+        - Homepage
+        - Settings
+        - The console and recent runs
+        - Menus and search
+        - Look and layout
+        - Starting it (the run folder)
+        - Command line
+        - Docs
+        - Legal pages
+        - Something else
+      default: 0
+    validations:
+      required: true
+
+  - type: dropdown
+    id: system
+    attributes:
+      label: Where do you use it?
+      options:
+        - Windows 11
+        - Windows 10
+        - Windows 7 or 8
+        - macOS
+        - Linux
+        - Phone or tablet (through network mode)
+        - Doesn't matter for this
+      default: 0
+    validations:
+      required: true
+
+  - type: textarea
+    id: what-and-why
+    attributes:
+      label: What should change, and why?
+      description: How does it work today, how should it work, and what would that make easier?
+      placeholder: Today the episode list... It would be easier if...
+    validations:
+      required: true
+
+  - type: textarea
+    id: media
+    attributes:
+      label: Screenshots or videos (optional)
+      description: Drag them in here. Check they don't show your cookie.
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Anything else? (optional)
+
+  - type: input
+    id: discord
+    attributes:
+      label: Discord username (optional)
+      description: Add it if you're happy to be contacted about this.
+      placeholder: "@username"

@@ -1,0 +1,13 @@
+Follow AGENTS.md at the repository root. It holds every rule for this project, and Cursor also reads it on its own.
+
+The ones that matter most:
+
+- Python tools must run on Python 3.8 (Windows 7). Nothing newer in syntax or stdlib. Check with `vermin -t=3.8- --violations <file>`.
+- Every tool keeps working from the command line. Every script prompt has a flag that skips it.
+- The UI server stays local only and checks Host and Origin on every route. Network mode (COMICK_TOOLS_NETWORK=true) is the user's opt-in exception.
+- The ComicK session cookie is never logged and never sent to the browser.
+- Write .env only through set_env_values (Python) or writeEnv (UI). A new .env variable also goes into .env.example, the Settings page and the docs.
+- New network calls or stored data mean updating legal/privacy.txt and its dates in the same change.
+- New .py, .ts, .tsx, .js, .mjs and .css files start with the two SPDX license header lines.
+- Writing style: no "I" or "me", comments explain why, no em-dashes, no HTML comments, no AI sounding filler.
+- Commits: short imperative subject, no Co-Authored-By trailer for AI tools. Never push unless asked.

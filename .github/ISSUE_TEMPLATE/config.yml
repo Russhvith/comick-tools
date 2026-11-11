@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Ask a question
+    url: https://github.com/Russhvith/comick-tools/blob/main/SUPPORT.md
+    about: Discord, email and the guides that answer most questions.
+  - name: Report a security problem
+    url: https://github.com/Russhvith/comick-tools/blob/main/SECURITY.md
+    about: Please report these privately, not in a public issue.

@@ -1,0 +1,120 @@
+name: Bug Report
+description: Something isn't working the way it should.
+title: "[Bug]: "
+labels: ["Bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report this! The more detail you give, the faster it can be fixed.
+
+        **Please don't include your session cookie or the contents of your `.env` file anywhere below.** Anyone with your cookie can act as you on ComicK.
+
+  - type: checkboxes
+    id: duplicate-check
+    attributes:
+      label: Duplicate check
+      description: Please look through the existing issues first.
+      options:
+        - label: I have searched the existing issues and couldn't find this one.
+          required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Which part is it?
+      options:
+        - Crunchyroll Importer
+        - Mass Deleter
+        - Web page (menus, settings, console, homepage)
+        - Starting it (the run folder)
+        - Command line
+        - Not sure, or something else
+      default: 0
+    validations:
+      required: true
+
+  - type: dropdown
+    id: how
+    attributes:
+      label: How were you running it?
+      options:
+        - In the web page
+        - From the command line
+        - Both
+      default: 0
+    validations:
+      required: true
+
+  - type: dropdown
+    id: system
+    attributes:
+      label: Your computer
+      options:
+        - Windows 11
+        - Windows 10
+        - Windows 7 or 8
+        - macOS
+        - Linux
+        - Phone or tablet (through network mode)
+        - Other (please say which below)
+      default: 0
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: Shown at the top right of the web page, or in the VERSION file.
+      placeholder: "0.2.0"
+    validations:
+      required: true
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: What did you expect to happen, and what happened instead?
+      placeholder: I clicked Upload and expected the episodes to be added, but...
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to make it happen again
+      description: Describe each step, as if to someone who has never used it.
+      placeholder: |
+        1. Open the Crunchyroll Importer
+        2. Paste the response for ...
+        3. Click Format
+        4. See the error
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Console output (optional)
+      description: Copy anything relevant from the console on the page or your terminal. It's formatted automatically. Check there's no cookie in it.
+      render: shell
+
+  - type: textarea
+    id: media
+    attributes:
+      label: Screenshots or videos (optional)
+      description: Drag them in here. Check they don't show your cookie.
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Anything else? (optional)
+      placeholder: For example, it started after updating, or it only happens with one anime.
+
+  - type: input
+    id: discord
+    attributes:
+      label: Discord username (optional)
+      description: Add it if you're happy to be contacted about this.
+      placeholder: "@username"
