@@ -7,7 +7,10 @@ import { Toaster } from "@/components/organisms/Toaster";
 import { site } from "@/config/site";
 import "./globals.css";
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
+// The server only runs on this machine, so the font arrives about as fast as
+// the CSS does. A preload buys nothing and makes Chrome warn about an unused
+// preload whenever the page loads in a background tab.
+const inter = Inter({ subsets: ["latin"], variable: "--font-inter", preload: false });
 
 export const metadata: Metadata = {
   title: site.name,
