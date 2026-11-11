@@ -44,9 +44,11 @@ function networkMode() {
 
 // This computer only, unless network mode is on. The server can run scripts
 // that delete things with the saved cookie, so anyone who can reach it can
-// do that too. 0.0.0.0 also makes Next print the network address.
+// do that too. Network mode leaves the hostname out: Next then listens on
+// every interface and prints this machine's real address, where passing
+// 0.0.0.0 would print that instead.
 const network = networkMode();
-const host = network ? "0.0.0.0" : "localhost";
+const hostArgs = network ? [] : ["--hostname", "localhost"];
 
 if (!existsSync(path.join(uiDir, ".next", "BUILD_ID"))) {
   console.log("No production build yet, building first...");
@@ -57,7 +59,7 @@ if (!existsSync(path.join(uiDir, ".next", "BUILD_ID"))) {
 let child;
 
 function start() {
-  child = spawn(process.execPath, [nextBin, "start", "--hostname", host, "--port", port], {
+  child = spawn(process.execPath, [nextBin, "start", ...hostArgs, "--port", port], {
     cwd: uiDir,
     stdio: "inherit",
     env: { ...process.env, COMICK_TOOLS_SUPERVISED: "1" },
