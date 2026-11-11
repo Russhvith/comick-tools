@@ -28,7 +28,7 @@ from urllib.parse import quote, urlparse, urlunparse
 # import path until we put it there.
 sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "lib"))
 
-from comick_tools.api import ApiError, comic_hid, connect, https_opener, list_entries, normalize_number, slug_from  # noqa: E402
+from comick_tools.api import ApiError, comic_hid, connect, https_opener, list_entries, normalize_number, slug_from, worker_count  # noqa: E402
 from comick_tools.console import clean, err, human_size, human_time, out, plural, short  # noqa: E402
 from comick_tools.terms import require_terms  # noqa: E402
 from comick_tools.env import SettingsError, comick_settings  # noqa: E402
@@ -567,7 +567,7 @@ def main():
         out.say()
         stop = threading.Event()
         stop_reason = []
-        workers = max(1, min(4, int(settings["per_second"]), len(pending)))
+        workers = worker_count(settings["per_second"], len(pending))
 
         def run(job):
             if stop.is_set():

@@ -6,6 +6,10 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ## [Unreleased]
 
+### Changed
+
+- **Uploads and deletes keep up with your rate limit.** The Crunchyroll Importer and the Mass Deleter used to send at most four requests at once, so a higher **Requests a second** setting made no difference. They now run as many in parallel as that setting allows (twice the rate, up to 32), and the rate limit still holds.
+
 ### Security
 
 - **Other devices are refused by their real address**, not by what they claim. Before, a device on your network could still get in after network mode was turned off, until the next restart.

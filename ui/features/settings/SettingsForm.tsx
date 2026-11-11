@@ -137,7 +137,7 @@ export function SettingsForm({ settings, onSaved, saveLabel = "Save", extra }: P
           <h3>Speed limits</h3>
         </div>
         <div className={styles.grid}>
-          <Field label="Requests a second" hint={`Empty uses ${settings.defaults.uploadsPerSecond}.`} error={problems.uploadsPerSecond}>
+          <Field label="Requests a second" hint={`Empty uses ${settings.defaults.uploadsPerSecond}. Uploads and deletes run in parallel up to this rate.`} error={problems.uploadsPerSecond}>
             {(id, note) => (
               <TextInput
                 id={id}

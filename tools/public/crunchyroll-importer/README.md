@@ -18,7 +18,7 @@ Read from the root `.env`. Real environment variables win over the file.
 | Variable | Default | Notes |
 | --- | --- | --- |
 | `COMICK_SESSION_TOKEN` | none, required for uploads | See [auth.md](../../../docs/auth.md). |
-| `COMICK_UPLOADS_PER_SECOND` | `5` | Cap on requests to the ComicK API. Decimals work, e.g. `0.5`. |
+| `COMICK_UPLOADS_PER_SECOND` | `5` | Cap on requests to the ComicK API. Episodes upload several at once to use all of it. Decimals work, e.g. `0.5`. |
 | `COMICK_REQUESTS_PER_MINUTE` | `200` | Cap on requests per rolling minute. The API allows 200 per IP. |
 | `COMICK_API_BASE` | `https://api.comick.dev` | Only worth changing for testing against a local server. |
 

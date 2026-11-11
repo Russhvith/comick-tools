@@ -9,6 +9,7 @@ chapter and episode lists).
 """
 
 import json
+import math
 import re
 import threading
 import time
@@ -28,6 +29,9 @@ LIMIT_WORDS_RE = re.compile(r"limit|too many|slow down|try again later", re.IGNO
 # mark can land a few ms early on the server's clock and get counted in
 # the window we were trying to leave.
 MINUTE_WINDOW = 61
+# Upper bound on threads for one batch, whatever the rate says. Past this
+# the threads only wait on the limiter.
+MAX_WORKERS = 32
 
 
 class ApiError(Exception):
@@ -134,6 +138,7 @@ class Comick:
 
     def __init__(self, base, token, per_second, per_minute, user_agent=USER_AGENT, on_wait=None):
         self.base = base.rstrip("/")
+        self.per_second = per_second
         self.cookie = f"{COOKIE_NAME}={token}"
         self.user_agent = user_agent
         # 5% over the exact spacing. Requests arrive with a few tens of ms
@@ -233,6 +238,17 @@ class Comick:
                 raise ApiError(status, error_text(parsed, status))
             return parsed
         raise AssertionError("unreachable")
+
+
+def worker_count(per_second, jobs):
+    """How many requests of a batch to keep in flight at once.
+
+    The client already spaces request starts to per_second, so this only
+    decides how many can be waiting on ComicK at the same time. A request
+    takes about a second, so twice the rate keeps the full rate in use
+    even when ComicK is slow, and the limiter stops it going any faster.
+    """
+    return max(1, min(MAX_WORKERS, math.ceil(per_second * 2), jobs))
 
 
 def connect(settings, user_agent=USER_AGENT, on_wait=None):

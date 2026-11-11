@@ -26,7 +26,7 @@ from urllib.parse import quote
 # import path until we put it there.
 sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "lib"))
 
-from comick_tools.api import ApiError, comic_hid, connect, list_entries, normalize_number, number_key, slug_from  # noqa: E402
+from comick_tools.api import ApiError, comic_hid, connect, list_entries, normalize_number, number_key, slug_from, worker_count  # noqa: E402
 from comick_tools.console import clean, err, human_time, out, plural  # noqa: E402
 from comick_tools.terms import require_terms  # noqa: E402
 from comick_tools.env import SettingsError, comick_settings  # noqa: E402
@@ -39,7 +39,6 @@ ALLOWED_ROLES = ("trusted", "moderator", "admin")
 REASON_SUFFIX = "Mass deleted by ComicK MassDeleter. (https://github.com/Russhvith/comick-tools)"
 MAX_REASON = 500
 CONFIRM_WORD = "DELETE"
-WORKERS = 4
 
 
 def parse_args():
@@ -255,7 +254,8 @@ def print_table(rows, header):
 
 
 def check_permissions(api, kind, entries):
-    """Ask manage_permissions about every entry, a few at a time."""
+    """Ask manage_permissions about every entry, as many at once as
+    COMICK_UPLOADS_PER_SECOND allows."""
     allowed, refused, failed = [], [], []
 
     def check(entry):
@@ -265,7 +265,7 @@ def check_permissions(api, kind, entries):
         except ApiError as e:
             return entry, False, e
 
-    with ThreadPoolExecutor(max_workers=WORKERS) as pool:
+    with ThreadPoolExecutor(max_workers=worker_count(api.per_second, len(entries))) as pool:
         futures = [pool.submit(check, e) for e in entries]
         for count, future in enumerate(as_completed(futures), start=1):
             entry, ok, problem = future.result()
@@ -310,7 +310,7 @@ def delete_all(api, kind, entries, reason, mode):
             return entry, e, time.perf_counter() - t
 
     done, gone, failed, skipped = [], [], [], []
-    with ThreadPoolExecutor(max_workers=WORKERS) as pool:
+    with ThreadPoolExecutor(max_workers=worker_count(api.per_second, len(entries))) as pool:
         futures = [pool.submit(run, e) for e in entries]
         for count, future in enumerate(as_completed(futures), start=1):
             entry, problem, took = future.result()
