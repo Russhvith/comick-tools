@@ -130,6 +130,7 @@ export function requestFacts(req, uiDir, upgrade = false) {
     const value = req.headers[name];
     return Array.isArray(value) ? value[0] : value;
   };
+  const network = networkMode(uiDir);
   return {
     peer: req.socket?.remoteAddress,
     host: header("host"),
@@ -139,7 +140,9 @@ export function requestFacts(req, uiDir, upgrade = false) {
     mode: header("sec-fetch-mode"),
     origin: header("origin"),
     upgrade,
-    network: networkMode(uiDir),
-    hosts: ownHosts(),
+    network,
+    // Only consulted in network mode, and asking the OS on every request
+    // (static files included) would be wasted work otherwise.
+    hosts: network ? ownHosts() : new Set(),
   };
 }

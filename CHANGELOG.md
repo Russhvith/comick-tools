@@ -16,6 +16,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - **Text from ComicK can't move the cursor** or repaint the Mass Deleter's table before you type DELETE.
 - **Account checks are limited** to one every 15 seconds, so another site can't use up your ComicK request allowance mid upload.
 
+If you update from inside the web page, close the starter and open it again once afterwards. The page restarts itself after an update, but the new checks only take over after a fresh start.
+
 ## [1.0.0] - 2026-11-11
 
 The first stable release. Everything needed to install, use, get help with and contribute to ComicK Tools is in place, on every system.
