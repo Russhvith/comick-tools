@@ -2,14 +2,26 @@
    Copyright (C) 2026 Russhvith */
 
 .skeleton {
+  position: relative;
   display: block;
+  overflow: hidden;
   border-radius: var(--radius-sm);
-  background: linear-gradient(90deg, var(--surface-raised) 0%, #4b5563 50%, var(--surface-raised) 100%) 0 0 / 200% 100%;
+  background: var(--surface-raised);
+}
+
+/* The highlight slides across on a transform rather than by moving the
+   background, so the compositor runs it and nothing repaints per frame. */
+.skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent 0%, #4b5563 50%, transparent 100%);
+  transform: translateX(-100%);
   animation: shimmer 1.3s ease-in-out infinite;
 }
 
 @keyframes shimmer {
   to {
-    background-position: -200% 0;
+    transform: translateX(100%);
   }
 }
